@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.5
+
+- Added protected language discovery without breaking existing custom transports.
+- Added bounded HTTP retries with stable per-call idempotency and complete structured errors.
+- Preserved and validated composed attachment batches in normalized message state.
+
 ## 0.5.4
 
 - Added verified public source, package ownership, support contact, and npm provenance metadata.

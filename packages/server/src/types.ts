@@ -348,12 +348,19 @@ export interface MediaInput extends JsonObject {
   waveform?: number[];
 }
 
+export interface AttachmentBatch {
+  id: string;
+  index: number;
+  count: number;
+}
+
 export type MessageContent =
   | { message_kind: "text"; text_body: string }
   | {
     message_kind: "voice" | "image" | "video" | "document";
     media: MediaInput;
     text_body?: string;
+    attachment_batch?: AttachmentBatch;
   };
 
 export type SendBridgeMessageInput = MessageContent & {
@@ -410,6 +417,7 @@ export interface BridgeMessageRecord extends JsonObject {
   failed_at: string | null;
   failure_code: string | null;
   created_at: string;
+  attachment_batch?: AttachmentBatch;
 }
 
 export interface BridgeMessageListResponse {
@@ -465,6 +473,7 @@ export interface RobonoMessageRecord extends JsonObject {
   failed_at: string | null;
   failure_code: string | null;
   created_at: string;
+  attachment_batch?: AttachmentBatch;
 }
 
 export interface RobonoMessageListResponse {
@@ -516,6 +525,7 @@ export interface EndpointMessageRecord {
   failed_at: string | null;
   failure_code: string | null;
   created_at: string;
+  attachment_batch?: AttachmentBatch;
   raw: BridgeMessageRecord | RobonoMessageRecord;
 }
 
@@ -760,12 +770,6 @@ export interface RobonoWebhookSender {
   phone_masked: string | null;
 }
 
-export interface AttachmentBatch {
-  id: string;
-  index: number;
-  count: number;
-}
-
 export interface MessageCreatedWebhookEvent extends RobonoWebhookEventBase {
   event: "message.created";
   connection_id: string;
@@ -847,6 +851,7 @@ export interface BridgeMessageCreatedWebhookEvent
     message_kind: MessageKind;
     text_body?: string;
     media?: MediaInput | JsonObject;
+    attachment_batch?: AttachmentBatch;
     speech?: JsonObject;
     created_at: string;
   };

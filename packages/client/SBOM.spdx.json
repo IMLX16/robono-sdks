@@ -2,22 +2,22 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "@robono/client@0.5.4",
-  "documentNamespace": "http://spdx.org/spdxdocs/@robono%2fclient-0.5.4-***",
+  "name": "@robono/client@0.5.5",
+  "documentNamespace": "http://spdx.org/spdxdocs/@robono%2fclient-0.5.5-***",
   "creationInfo": {
-    "created": "2026-07-28T02:04:55.780Z",
+    "created": "2026-07-28T05:16:46.750Z",
     "creators": [
       "Tool: npm/cli-11.6.2"
     ]
   },
   "documentDescribes": [
-    "SPDXRef-Package-robono.client-0.5.4"
+    "SPDXRef-Package-robono.client-0.5.5"
   ],
   "packages": [
     {
       "name": "@robono/client",
-      "SPDXID": "SPDXRef-Package-robono.client-0.5.4",
-      "versionInfo": "0.5.4",
+      "SPDXID": "SPDXRef-Package-robono.client-0.5.5",
+      "versionInfo": "0.5.5",
       "packageFileName": "",
       "description": "Headless client core for Robono-connected web and mobile apps.",
       "primaryPackagePurpose": "LIBRARY",
@@ -29,7 +29,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40robono/client@0.5.4"
+          "referenceLocator": "pkg:npm/%40robono/client@0.5.5"
         }
       ]
     }
@@ -37,7 +37,7 @@
   "relationships": [
     {
       "spdxElementId": "SPDXRef-DOCUMENT",
-      "relatedSpdxElement": "SPDXRef-Package-robono.client-0.5.4",
+      "relatedSpdxElement": "SPDXRef-Package-robono.client-0.5.5",
       "relationshipType": "DESCRIBES"
     }
   ]

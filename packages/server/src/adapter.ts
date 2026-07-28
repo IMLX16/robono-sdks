@@ -4,6 +4,7 @@ import type { JsonObject } from "./types.js";
 
 export type RobonoAuthorizationAction =
   | "networks.list"
+  | "languages.list"
   | "network_connections.request"
   | "network_connections.respond"
   | "network_connections.list"
@@ -46,6 +47,7 @@ export interface RobonoBackendAdapterOptions {
 
 const authorizationActions: Record<string, RobonoAuthorizationAction> = {
   "/networks": "networks.list",
+  "/languages": "languages.list",
   "/network-connections": "network_connections.request",
   "/network-connections/respond": "network_connections.respond",
   "/network-connections/list": "network_connections.list",
@@ -76,7 +78,7 @@ export function createRobonoBackendAdapter(
 
   return async function handle(request: Request): Promise<Response> {
     const requestId = request.headers.get("x-request-id") ??
-      `child_req_${crypto.randomUUID()}`;
+      `child_req_${portableRequestId()}`;
     try {
       if (request.method !== "POST") {
         return responseError(
@@ -136,6 +138,11 @@ export function createRobonoBackendAdapter(
       if (path === "/networks") {
         return responseJson(
           await options.robono.directory.list({}, requestOptions),
+        );
+      }
+      if (path === "/languages") {
+        return responseJson(
+          await options.robono.languages(requestOptions),
         );
       }
       if (path === "/network-connections") {
@@ -510,6 +517,17 @@ export function createRobonoBackendAdapter(
       );
     }
   };
+}
+
+function portableRequestId(): string {
+  const randomUuid = globalThis.crypto?.randomUUID;
+  if (typeof randomUuid === "function") {
+    return randomUuid.call(globalThis.crypto);
+  }
+
+  // The identifier is for tracing, not authentication. This fallback keeps the
+  // adapter compatible with Node 18 builds that do not expose Web Crypto.
+  return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 14)}`;
 }
 
 function inputWithAuthenticatedUser(

@@ -101,6 +101,12 @@ function fakeTransport() {
   };
   return {
     listNetworks: async () => ({ directory }),
+    listLanguages: async () => ({
+      languages: [
+        { code: "en", name: "English" },
+        { code: "es", name: "Spanish" },
+      ],
+    }),
     requestNetworkConnection: async () => connection,
     respondNetworkConnection: async () => connection,
     listNetworkConnections: async () => ({ connections: [connection], has_more: false, next_before: null }),
@@ -321,6 +327,7 @@ test("HTTP transport exposes list routes for every endpoint type", async () => {
     message_kind: "text",
     text_body: "Network",
   });
+  await transport.listLanguages();
   await transport.sendRobonoMessage({
     connection_id: "phone-1",
     external_user_id: "user-1",
@@ -343,6 +350,7 @@ test("HTTP transport exposes list routes for every endpoint type", async () => {
   });
   assert.deepEqual(urls, [
     "https://child.example/robono/network-messages",
+    "https://child.example/robono/languages",
     "https://child.example/robono/messages",
     "https://child.example/robono/connections/list",
     "https://child.example/robono/messages/list",
@@ -713,11 +721,87 @@ test("HTTP transport exposes retry guidance from an API response", async () => {
       external_user_id: "user-1",
       source_display_name: "Jordan",
       target_identifier: "BLUE-STAR",
-    }),
+    }, { retries: 0 }),
     (error) =>
       error?.code === "rate_limited" &&
       error?.retryable === true &&
       error?.retryAfterMs === 3_000,
+  );
+});
+
+test("HTTP transport retries a transient write with one stable idempotency key", async () => {
+  const idempotencyKeys = [];
+  let calls = 0;
+  const transport = createRobonoHttpTransport({
+    baseUrl: "https://child.example",
+    getAccessToken: () => "child-session",
+    retries: 1,
+    fetch: async (_url, init) => {
+      calls += 1;
+      idempotencyKeys.push(init.headers["idempotency-key"]);
+      if (calls === 1) {
+        return Response.json(
+          {
+            error: {
+              code: "temporarily_unavailable",
+              message: "Try again.",
+              retryable: true,
+            },
+          },
+          { status: 503, headers: { "retry-after": "0" } },
+        );
+      }
+      return Response.json({
+        bridge_connection_id: "connection-1",
+        status: "pending_target_approval",
+      });
+    },
+  });
+
+  await transport.requestNetworkConnection({
+    external_user_id: "user-1",
+    source_display_name: "Jordan",
+    target_identifier: "BLUE-STAR",
+  });
+
+  assert.equal(calls, 2);
+  assert.ok(idempotencyKeys[0]?.startsWith("client_"));
+  assert.equal(idempotencyKeys[1], idempotencyKeys[0]);
+});
+
+test("HTTP transport preserves validation fields and details", async () => {
+  const fields = [{
+    path: "target_identifier",
+    code: "identifier_invalid",
+    message: "Use the endpoint's identifier format.",
+  }];
+  const transport = createRobonoHttpTransport({
+    baseUrl: "https://child.example",
+    getAccessToken: () => "child-session",
+    fetch: async () =>
+      Response.json(
+        {
+          error: {
+            code: "validation_failed",
+            message: "The request is invalid.",
+          },
+          fields,
+          details: { endpoint_slug: "network-b" },
+        },
+        { status: 422 },
+      ),
+  });
+
+  await assert.rejects(
+    transport.requestNetworkConnection({
+      external_user_id: "user-1",
+      source_display_name: "Jordan",
+      target_identifier: "bad",
+    }),
+    (error) =>
+      error?.code === "validation_failed" &&
+      error?.fields?.[0]?.path === "target_identifier" &&
+      error?.details?.endpoint_slug === "network-b",
   );
 });
 
@@ -936,6 +1020,57 @@ test("unified send returns the write response without a follow-up list", async (
   assert.equal(sent.message_id, "message-2");
   assert.equal(sent.status, "accepted");
   assert.equal(lists, 0);
+});
+
+test("unified send preserves attachment grouping and enforces its negotiated limit", async () => {
+  const transport = fakeTransport();
+  let captured;
+  transport.sendNetworkMessage = async (input) => {
+    captured = input;
+    return { bridge_message_id: "message-batch-1", status: "accepted" };
+  };
+  const client = new RobonoClient({
+    externalUserId: "user-1",
+    transport,
+    pollingEnabled: false,
+  });
+  const connection = normalizeTestConnection();
+  connection.capabilities = {
+    from_source_to_target: {
+      allowed_message_kinds: ["image"],
+      photo: { max_items_per_message: 3 },
+    },
+  };
+  connection.raw.capabilities = connection.capabilities;
+  const media = {
+    source_url: "https://media.example/photo.jpg",
+    mime_type: "image/jpeg",
+    byte_size: 1200,
+  };
+
+  await client.messages.send({
+    connection,
+    external_message_id: "outbound-batch-1",
+    message_kind: "image",
+    media,
+    attachment_batch: { id: "gallery-1", index: 0, count: 3 },
+  });
+
+  assert.deepEqual(captured.attachment_batch, {
+    id: "gallery-1",
+    index: 0,
+    count: 3,
+  });
+  await assert.rejects(
+    client.messages.send({
+      connection,
+      external_message_id: "outbound-batch-too-large",
+      message_kind: "image",
+      media,
+      attachment_batch: { id: "gallery-2", index: 0, count: 4 },
+    }),
+    /limited to 3 items/,
+  );
 });
 
 test("unified send rejects incompatible media before transport work", async () => {

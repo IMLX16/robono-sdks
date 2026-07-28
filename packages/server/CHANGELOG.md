@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.6
+
+- Added protected language discovery and documented the canonical endpoint-neutral namespaces.
+- Preserved composed attachment batches through direct and connected-app messages, lists, and signed webhooks.
+- Strengthened attachment webhook validation and exported complete typed-reference dependencies.
+
 ## 0.7.5
 
 - Defined concrete reaction, identifier, guardian, and status webhook types and runtime validation.

@@ -29,7 +29,7 @@ const { RobonoServer } = await import("@robono/server");
 import {
   createRobonoBackendAdapter,
   RobonoServer,
-} from "npm:@robono/server@0.7.5";
+} from "npm:@robono/server@0.7.6";
 ```
 
 ## Discover endpoints
@@ -67,7 +67,7 @@ if (!endpoint) throw new Error("Endpoint is unavailable");
 // Persist these IDs before the first network attempt. Reuse them after a
 // timeout, worker retry, or application restart.
 const connectionOperationId = connectionDraft.operationId;
-const connection = await robono.connections.connect({
+const connection = await robono.endpointConnections.connect({
   endpoint,
   external_user_id: user.id,
   external_display_name: user.displayName,
@@ -80,7 +80,7 @@ const connection = await robono.connections.connect({
 }, { idempotencyKey: connectionOperationId });
 
 const messageOperationId = outgoingMessage.operationId;
-const result = await robono.messages.send({
+const result = await robono.endpointMessages.send({
   connection,
   external_user_id: user.id,
   external_message_id: outgoingMessage.id,
@@ -91,7 +91,7 @@ const result = await robono.messages.send({
 
 The normalized `connection.connection_id` is valid for SDK state and subsequent unified calls. Endpoint-specific methods remain available for integrations that need lower-level control.
 
-The unified send validates negotiated message type, text length, media size, duration, and MIME type before making the API request. Validate capabilities before uploading media so unsupported work fails early.
+The unified send validates negotiated message type, text length, media size, duration, MIME type, and attachment count before making the API request. For media composed as one message, give every item the same `attachment_batch.id`, its zero-based `index`, and the common `count`.
 
 New server-only integrations can use the normalized namespaces for the rest of the lifecycle without branching on endpoint type:
 
@@ -182,6 +182,9 @@ The adapter uses standard Web `Request` and `Response` objects, so it can be mou
 The typed transform methods cover transcription, translation, TTS, translated voice, and existing-message transforms:
 
 ```ts
+const { languages } = await robono.languages();
+showAvailableTransformLanguages(languages);
+
 const result = await robono.transforms.speech({
   input: {
     type: "audio",

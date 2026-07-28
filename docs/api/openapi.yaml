@@ -1550,6 +1550,15 @@ components:
           type: array
           items: { type: number }
       additionalProperties: true
+    AttachmentBatch:
+      type: object
+      additionalProperties: false
+      required: [id, index, count]
+      description: Groups media records composed and displayed as one message.
+      properties:
+        id: { type: string, minLength: 1, maxLength: 100 }
+        index: { type: integer, minimum: 0, maximum: 9 }
+        count: { type: integer, minimum: 2, maximum: 10 }
     SendMessage:
       oneOf:
         - $ref: "#/components/schemas/SendTextMessage"
@@ -1588,6 +1597,7 @@ components:
           enum: [voice, image, video, document]
         text_body: { type: string }
         media: { $ref: "#/components/schemas/Media" }
+        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
         dry_run: { type: boolean, default: false }
     SendRobonoMessage:
       oneOf:
@@ -1629,6 +1639,7 @@ components:
           enum: [voice, image, video, document]
         text_body: { type: string }
         media: { $ref: "#/components/schemas/Media" }
+        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
         send_invite_sms_if_pending: { type: boolean }
         external_profile: { $ref: "#/components/schemas/ExternalProfile" }
         dry_run: { type: boolean, default: false }
@@ -1690,6 +1701,7 @@ components:
         failed_at: { type: [string, "null"], format: date-time }
         failure_code: { type: [string, "null"] }
         created_at: { type: string, format: date-time }
+        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
     RobonoMessage:
       type: object
       required:
@@ -1719,11 +1731,7 @@ components:
         failure_code: { type: [string, "null"] }
         created_at: { type: string, format: date-time }
         attachment_batch:
-          type: object
-          properties:
-            id: { type: string }
-            index: { type: integer, minimum: 0 }
-            count: { type: integer, minimum: 2, maximum: 10 }
+          $ref: "#/components/schemas/AttachmentBatch"
     RobonoMessageListResponse:
       type: object
       required: [ok, request_id, messages, has_more]
@@ -1977,12 +1985,7 @@ components:
                 - { $ref: "#/components/schemas/Media" }
                 - { type: "null" }
             attachment_batch:
-              type: object
-              required: [id, index, count]
-              properties:
-                id: { type: string }
-                index: { type: integer, minimum: 0 }
-                count: { type: integer, minimum: 2, maximum: 10 }
+              $ref: "#/components/schemas/AttachmentBatch"
     MessageReceiptWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2113,6 +2116,7 @@ components:
         message_kind: { $ref: "#/components/schemas/MessageKind" }
         text_body: { type: string }
         media: { $ref: "#/components/schemas/Media" }
+        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
         speech: { type: object, additionalProperties: true }
         created_at: { type: string, format: date-time }
     BridgeGuardianMessageCreatedWebhookEvent:

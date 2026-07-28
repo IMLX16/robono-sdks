@@ -5,6 +5,7 @@ import { createRobonoReactNative } from "../dist/index.js";
 function fakeTransport() {
   return {
     listNetworks: async () => ({ directory: [] }),
+    listLanguages: async () => ({ languages: [] }),
     requestNetworkConnection: async () => ({}),
     respondNetworkConnection: async () => ({}),
     listNetworkConnections: async () => ({ connections: [], has_more: false, next_before: null }),
@@ -37,6 +38,30 @@ test("react native wrapper follows foreground state", async () => {
   await native.start();
   assert.equal(native.client.getState().diagnostics.running, true);
   assert.equal(native.client.getState().lastError, null);
+  listener("background");
+  assert.equal(native.client.getState().diagnostics.running, false);
+  native.dispose();
+});
+
+test("react native wrapper starts while the initial app state is still unknown", async () => {
+  let listener;
+  const appState = {
+    currentState: null,
+    addEventListener: (_name, next) => {
+      listener = next;
+      return { remove() {} };
+    },
+  };
+  const native = createRobonoReactNative({
+    externalUserId: "user-1",
+    transport: fakeTransport(),
+    appState,
+    pollingEnabled: false,
+  });
+
+  await native.start();
+
+  assert.equal(native.client.getState().diagnostics.running, true);
   listener("background");
   assert.equal(native.client.getState().diagnostics.running, false);
   native.dispose();

@@ -22,6 +22,18 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/Directory" }
         default: { $ref: "#/components/responses/Error" }
+  /robono/languages:
+    post:
+      operationId: listAdapterLanguages
+      tags: [Directory]
+      summary: Return languages currently supported by Robono transforms
+      responses:
+        "200":
+          description: Supported languages
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/LanguageResponse" }
+        default: { $ref: "#/components/responses/Error" }
   /robono/network-connections:
     post:
       operationId: requestAdapterNetworkConnection

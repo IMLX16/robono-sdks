@@ -44,6 +44,15 @@ export interface NetworkDirectoryEntry {
   default_capabilities: ConnectionCapabilities;
 }
 
+export interface Language {
+  code: string;
+  name: string;
+}
+
+export interface LanguageResponse extends JsonObject {
+  languages: Language[];
+}
+
 export interface Guardian {
   external_guardian_id: string;
   display_name?: string | null;
@@ -154,6 +163,15 @@ export interface MediaInput extends JsonObject {
   waveform?: number[];
 }
 
+export interface AttachmentBatch {
+  /** Caller-generated identity shared by the media items sent together. */
+  id: string;
+  /** Zero-based order of this item within the batch. */
+  index: number;
+  /** Total number of media items in the batch. */
+  count: number;
+}
+
 export interface NetworkMessage extends JsonObject {
   bridge_message_id: string;
   bridge_connection_id: string;
@@ -172,6 +190,7 @@ export interface NetworkMessage extends JsonObject {
   failed_at: string | null;
   failure_code: string | null;
   created_at: string;
+  attachment_batch?: AttachmentBatch;
 }
 
 export type MessageContent =
@@ -180,6 +199,7 @@ export type MessageContent =
     message_kind: "voice" | "image" | "video" | "document";
     media: MediaInput;
     text_body?: string;
+    attachment_batch?: AttachmentBatch;
   };
 
 export type RequestNetworkConnectionInput = {
@@ -246,6 +266,7 @@ export interface RobonoMessage extends JsonObject {
   failed_at: string | null;
   failure_code: string | null;
   created_at: string;
+  attachment_batch?: AttachmentBatch;
 }
 
 export interface EndpointConnection {
@@ -287,6 +308,7 @@ export interface EndpointMessage {
   failed_at: string | null;
   failure_code: string | null;
   created_at: string;
+  attachment_batch?: AttachmentBatch;
   raw: NetworkMessage | RobonoMessage;
 }
 
@@ -472,6 +494,8 @@ export interface ClientRequestOptions {
   idempotencyKey?: string;
   requestId?: string;
   signal?: AbortSignal;
+  /** Override the transport's bounded retry count for this request. */
+  retries?: number;
 }
 
 export interface TransformRequestOptions extends ClientRequestOptions {
@@ -632,6 +656,8 @@ export interface PushDiagnosticResponse extends JsonObject {
 
 export interface RobonoClientTransport {
   listNetworks(): Promise<{ directory: NetworkDirectoryEntry[] }>;
+  /** Added in 0.5.5. Optional so existing custom transports remain source-compatible. */
+  listLanguages?(): Promise<LanguageResponse>;
   requestNetworkConnection(
     input: RequestNetworkConnectionInput & { external_user_id: string },
     options?: ClientRequestOptions,

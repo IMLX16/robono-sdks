@@ -276,7 +276,7 @@ test("directory request authenticates and normalizes options", async () => {
   assert.equal(captured.url, "https://sandbox.example/v1/networks");
   assert.equal(captured.init.headers.authorization, "Bearer rbn_test_example");
   assert.equal(captured.init.headers["robono-api-version"], "2026-07-25");
-  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.7.5");
+  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.7.6");
   assert.deepEqual(JSON.parse(captured.init.body), {
     include_phone_robono: false,
     include_self: true,
@@ -424,6 +424,7 @@ test("backend adapter denies operations when authorization is missing at runtime
 test("backend adapter requests authorization for every exposed operation", async () => {
   const expected = new Map([
     ["/networks", "networks.list"],
+    ["/languages", "languages.list"],
     ["/network-connections", "network_connections.request"],
     ["/network-connections/respond", "network_connections.respond"],
     ["/network-connections/list", "network_connections.list"],
@@ -1436,6 +1437,31 @@ test("webhook verifier rejects malformed nested contract objects", async () => {
       field: "attachment_batch.count",
     },
     {
+      label: "attachment batch order",
+      event: "message.created",
+      mutate(payload) {
+        payload.attachment_batch = { id: "batch-1", index: 2, count: 2 };
+      },
+      field: "attachment_batch.index",
+    },
+    {
+      label: "bridge attachment batch order",
+      event: "bridge.message_created",
+      mutate(payload) {
+        payload.message.message_kind = "image";
+        payload.message.media = {
+          source_url: "https://cdn.example.test/photo.jpg",
+          mime_type: "image/jpeg",
+        };
+        payload.message.attachment_batch = {
+          id: "batch-bridge-1",
+          index: 3,
+          count: 3,
+        };
+      },
+      field: "message.attachment_batch.index",
+    },
+    {
       label: "guardian identity",
       event: "bridge.connection_requested",
       mutate(payload) {
@@ -1635,6 +1661,7 @@ test("adapter OpenAPI documents every protected client route", () => {
   );
   const routes = [
     "/networks",
+    "/languages",
     "/network-connections",
     "/network-connections/respond",
     "/network-connections/list",

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.5
+
+- Starts synchronization while React Native is still resolving its initial app state.
+- Updated to client 0.5.5 language discovery, retry, error, and attachment-grouping behavior.
+- Declared the supported Node 18+ build and test range.
+
 ## 0.5.4
 
 - Updated to the client 0.5.4 package identity and verified public source metadata.

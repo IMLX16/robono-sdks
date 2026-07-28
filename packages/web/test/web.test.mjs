@@ -11,6 +11,7 @@ test("web wrapper pauses polling when the page is hidden", async () => {
   };
   const transport = {
     listNetworks: async () => ({ directory: [] }),
+    listLanguages: async () => ({ languages: [] }),
     requestNetworkConnection: async () => ({}),
     respondNetworkConnection: async () => ({}),
     listNetworkConnections: async () => ({ connections: [], has_more: false, next_before: null }),

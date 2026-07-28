@@ -52,10 +52,14 @@ directory after its five-minute TTL and when it receives
 
 Pass verified Robono push data to `client.receivePush(data)` for immediate synchronization. Recovery polling defaults to about 60 seconds with jitter, backs off after failures, and can be disabled with `pollingEnabled: false` when another reliable recovery signal exists. Call `client.stop()` and `unsubscribe()` when the owning lifecycle ends.
 
-Language tools are typed. Create and persist the operation ID before the first
-attempt, then reload the same value for any later retry:
+Language tools are typed. Load the currently available choices through the
+protected adapter, then create and persist the operation ID before the first
+transform attempt:
 
 ```ts
+const { languages } = await client.languages.list();
+showAvailableTransformLanguages(languages);
+
 const transformOperationId = transformJob.operationId;
 const result = await client.transforms.speech({
   input: { type: "text", text: "Hello", language: "en" },
@@ -73,9 +77,14 @@ Use `connections.listPage({ limit, cursor })` when rendering one page. Use
 check its `truncated` result before treating it as complete. `connections.list()`
 is retained as the convenience full-list form.
 
-Every client write accepts `{ idempotencyKey, requestId, signal }` as its final
-argument. Generate one stable idempotency key for an operation and reuse it when
-retrying that same operation.
+Every client write accepts `{ idempotencyKey, requestId, signal, retries }` as
+its final argument. The HTTP transport retries transient failures at most twice
+by default and reuses one key within that call. Persist your own stable key and
+reuse it across later retries, jobs, restarts, or devices.
+
+For media composed as one message, give each item the same
+`attachment_batch.id`, its zero-based `index`, and the common `count`. The
+negotiated attachment limit is validated before the request.
 
 Guardian users can use the same protected adapter:
 

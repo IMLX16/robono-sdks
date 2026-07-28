@@ -14,8 +14,8 @@ package directory also contains its own installation and API documentation.
 
 ## Development
 
-Node.js 18 or newer is required by the server and client packages. From this
-repository:
+Node.js 18 or newer is supported across all four packages. Pull requests and
+releases are tested on Node 18, 20, 22, and 24. From this repository:
 
 ```sh
 npm test

@@ -315,7 +315,7 @@ export class RobonoServer {
         code: "fetch_required",
       });
     }
-    this.userAgent = options.userAgent ?? "@robono/server/0.7.5";
+    this.userAgent = options.userAgent ?? "@robono/server/0.7.6";
     this.apiVersion = options.apiVersion?.trim() || DEFAULT_API_VERSION;
 
     this.directory = {
@@ -1178,6 +1178,9 @@ function normalizeEndpointMessageRecord(
     failed_at: raw.failed_at,
     failure_code: raw.failure_code,
     created_at: raw.created_at,
+    ...(raw.attachment_batch
+      ? { attachment_batch: raw.attachment_batch }
+      : {}),
     raw,
   };
 }
@@ -1193,27 +1196,30 @@ function assertEndpointMessageAllowed(
       raw.source.external_user_id === externalUserId
         ? "source_to_target"
         : "target_to_source";
-    assertMessageAllowed(restrictionsFor(raw, direction), {
+    const limits = restrictionsFor(raw, direction);
+    assertMessageAllowed(limits, {
       messageKind: input.message_kind,
       ...(input.message_kind === "text"
         ? { textBody: input.text_body }
         : { media: input.media }),
     });
+    assertAttachmentBatchAllowed(input, limits);
     return;
   }
 
   const capabilities = connection.capabilities;
+  const limits = {
+    allowed_message_kinds:
+      capabilities.allowed_outbound_message_kinds ??
+        ["text", "voice", "image", "video", "document"],
+    ...(capabilities.text ? { text: capabilities.text } : {}),
+    ...(capabilities.voice ? { voice: capabilities.voice } : {}),
+    ...(capabilities.photo ? { photo: capabilities.photo } : {}),
+    ...(capabilities.video ? { video: capabilities.video } : {}),
+    ...(capabilities.document ? { document: capabilities.document } : {}),
+  };
   assertMessageAllowed(
-    {
-      allowed_message_kinds:
-        capabilities.allowed_outbound_message_kinds ??
-          ["text", "voice", "image", "video", "document"],
-      ...(capabilities.text ? { text: capabilities.text } : {}),
-      ...(capabilities.voice ? { voice: capabilities.voice } : {}),
-      ...(capabilities.photo ? { photo: capabilities.photo } : {}),
-      ...(capabilities.video ? { video: capabilities.video } : {}),
-      ...(capabilities.document ? { document: capabilities.document } : {}),
-    },
+    limits,
     {
       messageKind: input.message_kind,
       ...(input.message_kind === "text"
@@ -1221,4 +1227,56 @@ function assertEndpointMessageAllowed(
         : { media: input.media }),
     },
   );
+  assertAttachmentBatchAllowed(input, limits);
+}
+
+function assertAttachmentBatchAllowed(
+  input: MessageContent,
+  limits: unknown,
+) {
+  if (input.message_kind === "text") {
+    if ("attachment_batch" in input && input.attachment_batch !== undefined) {
+      throw new Error(
+        "Only media messages can belong to an attachment batch.",
+      );
+    }
+    return;
+  }
+  const batch = input.attachment_batch;
+  if (!batch) return;
+  const capabilityKey = input.message_kind === "image"
+    ? "photo"
+    : input.message_kind;
+  const mediaLimits = record(record(limits)[capabilityKey]);
+  const configuredMaximum = mediaLimits.max_items_per_message;
+  const maximumItems = Math.min(
+    10,
+    typeof configuredMaximum === "number" &&
+        Number.isFinite(configuredMaximum) && configuredMaximum > 0
+      ? Math.floor(configuredMaximum)
+      : 10,
+  );
+  if (!batch.id.trim() || batch.id.trim().length > 100) {
+    throw new Error(
+      "Attachment batch id must contain 1 to 100 characters.",
+    );
+  }
+  if (
+    maximumItems < 2 || !Number.isInteger(batch.count) ||
+    batch.count < 2 || batch.count > maximumItems
+  ) {
+    throw new Error(
+      maximumItems < 2
+        ? "This connection does not allow grouped attachments."
+        : `Attachment batches are limited to ${maximumItems} items.`,
+    );
+  }
+  if (
+    !Number.isInteger(batch.index) || batch.index < 0 ||
+    batch.index >= batch.count
+  ) {
+    throw new Error(
+      "Attachment batch index must be zero-based and smaller than count.",
+    );
+  }
 }

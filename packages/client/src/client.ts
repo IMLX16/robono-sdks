@@ -17,6 +17,7 @@ import type {
   Guardian,
   MarkEndpointMessageInput,
   MarkRobonoMessageInput,
+  LanguageResponse,
   MessageTransformInput,
   NetworkConnection,
   NetworkDirectoryEntry,
@@ -66,6 +67,9 @@ export class RobonoClient {
   readonly networks: {
     list: () => ReturnType<RobonoClientTransport["listNetworks"]>;
     refresh: () => ReturnType<RobonoClientTransport["listNetworks"]>;
+  };
+  readonly languages: {
+    list: () => Promise<LanguageResponse>;
   };
   readonly networkConnections: {
     request: (input: RequestNetworkConnectionInput, options?: ClientRequestOptions) => Promise<NetworkConnection>;
@@ -216,6 +220,16 @@ export class RobonoClient {
     this.networks = {
       list: refreshNetworks,
       refresh: refreshNetworks,
+    };
+    this.languages = {
+      list: async () => {
+        if (!this.transport.listLanguages) {
+          throw new Error(
+            "This Robono transport does not support language discovery. Update the transport or use createRobonoHttpTransport().",
+          );
+        }
+        return await this.transport.listLanguages();
+      },
     };
     this.networkConnections = {
       request: async (input, options) => {
@@ -1328,6 +1342,9 @@ function assertMessageAllowed(
   }
 
   if (kind === "text") {
+    if (input.attachment_batch !== undefined) {
+      throw new Error("Only media messages can belong to an attachment batch.");
+    }
     const text = record(directional.text) ?? record(capabilities.text) ?? {};
     const maximum = number(text.max_characters);
     const body = string(input.text_body);
@@ -1361,6 +1378,40 @@ function assertMessageAllowed(
     !allowedMimeTypes.includes(mimeType)
   ) {
     throw new Error(`${mimeType} is not allowed for ${kind} messages.`);
+  }
+  if (input.attachment_batch !== undefined) {
+    const batch = record(input.attachment_batch);
+    if (!batch) throw new Error("attachment_batch must be an object.");
+    const id = string(batch.id).trim();
+    const index = batch.index;
+    const count = batch.count;
+    const maximumItems = Math.min(
+      10,
+      Math.floor(number(mediaLimits.max_items_per_message) ?? 10),
+    );
+    if (!id || id.length > 100) {
+      throw new Error(
+        "Attachment batch id must contain 1 to 100 characters.",
+      );
+    }
+    if (
+      maximumItems < 2 || !Number.isInteger(count) ||
+      (count as number) < 2 || (count as number) > maximumItems
+    ) {
+      throw new Error(
+        maximumItems < 2
+          ? "This connection does not allow grouped attachments."
+          : `Attachment batches are limited to ${maximumItems} items.`,
+      );
+    }
+    if (
+      !Number.isInteger(index) || (index as number) < 0 ||
+      (index as number) >= (count as number)
+    ) {
+      throw new Error(
+        "Attachment batch index must be zero-based and smaller than count.",
+      );
+    }
   }
 }
 
@@ -1489,6 +1540,9 @@ function normalizeNetworkMessage(raw: NetworkMessage): EndpointMessage {
     failed_at: raw.failed_at,
     failure_code: raw.failure_code,
     created_at: raw.created_at,
+    ...(raw.attachment_batch
+      ? { attachment_batch: raw.attachment_batch }
+      : {}),
     raw,
   };
 }
@@ -1512,6 +1566,9 @@ function normalizeRobonoMessage(raw: RobonoMessage): EndpointMessage {
     failed_at: raw.failed_at,
     failure_code: raw.failure_code,
     created_at: raw.created_at,
+    ...(raw.attachment_batch
+      ? { attachment_batch: raw.attachment_batch }
+      : {}),
     raw,
   };
 }

@@ -170,8 +170,14 @@ function assertWebhookEvent(
       if (event.attachment_batch !== undefined) {
         const batch = record(event.attachment_batch, "attachment_batch");
         string(batch, "id");
-        integer(batch, "index", "attachment_batch.index", 0);
-        integer(batch, "count", "attachment_batch.count", 2, 10);
+        const index = integer(batch, "index", "attachment_batch.index", 0, 9);
+        const count = integer(batch, "count", "attachment_batch.count", 2, 10);
+        if (index >= count) {
+          throw new RobonoWebhookError(
+            "attachment_batch.index must be smaller than count.",
+            "invalid_webhook_payload",
+          );
+        }
       }
       return;
     case "message.delivered":
@@ -223,6 +229,33 @@ function assertWebhookEvent(
       optionalString(message, "text_body", "message.text_body");
       if (message.media !== undefined) {
         assertMedia(record(message.media, "message.media"), "message.media");
+      }
+      if (message.attachment_batch !== undefined) {
+        const batch = record(
+          message.attachment_batch,
+          "message.attachment_batch",
+        );
+        string(batch, "id", "message.attachment_batch.id");
+        const index = integer(
+          batch,
+          "index",
+          "message.attachment_batch.index",
+          0,
+          9,
+        );
+        const count = integer(
+          batch,
+          "count",
+          "message.attachment_batch.count",
+          2,
+          10,
+        );
+        if (index >= count) {
+          throw new RobonoWebhookError(
+            "message.attachment_batch.index must be smaller than count.",
+            "invalid_webhook_payload",
+          );
+        }
       }
       optionalRecord(message, "speech", "message.speech");
       timestamp(message, "created_at", "message.created_at");
@@ -839,6 +872,7 @@ function integer(
   if (maximum !== undefined && value > maximum) {
     invalid(path, `an integer less than or equal to ${maximum}`);
   }
+  return value;
 }
 
 function nullableInteger(

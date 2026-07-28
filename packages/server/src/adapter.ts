@@ -4,6 +4,7 @@ import type { JsonObject } from "./types.js";
 
 export type RobonoAuthorizationAction =
   | "networks.list"
+  | "languages.list"
   | "network_connections.request"
   | "network_connections.respond"
   | "network_connections.list"
@@ -46,6 +47,7 @@ export interface RobonoBackendAdapterOptions {
 
 const authorizationActions: Record<string, RobonoAuthorizationAction> = {
   "/networks": "networks.list",
+  "/languages": "languages.list",
   "/network-connections": "network_connections.request",
   "/network-connections/respond": "network_connections.respond",
   "/network-connections/list": "network_connections.list",
@@ -136,6 +138,11 @@ export function createRobonoBackendAdapter(
       if (path === "/networks") {
         return responseJson(
           await options.robono.directory.list({}, requestOptions),
+        );
+      }
+      if (path === "/languages") {
+        return responseJson(
+          await options.robono.languages(requestOptions),
         );
       }
       if (path === "/network-connections") {

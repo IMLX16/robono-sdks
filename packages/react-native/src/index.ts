@@ -50,7 +50,14 @@ export class RobonoReactNative {
         ? subscription
         : () => subscription.remove();
     }
-    if (!this.appState || this.appState.currentState === "active") {
+    // React Native can report null during startup while it retrieves the
+    // initial state over the bridge. Start immediately in that case so the
+    // first synchronization cannot be skipped. A later background event will
+    // still stop polling through onAppStateChange.
+    if (
+      !this.appState || this.appState.currentState === null ||
+      this.appState.currentState === "active"
+    ) {
       return this.client.start();
     }
     return undefined;

@@ -1,0 +1,64 @@
+{
+  "name": "@robono/client",
+  "version": "0.5.4",
+  "description": "Headless client core for Robono-connected web and mobile apps.",
+  "keywords": [
+    "robono",
+    "messaging",
+    "bridge",
+    "sdk",
+    "typescript"
+  ],
+  "homepage": "https://robono.com/docs#start",
+  "bugs": {
+    "url": "https://robono.com/contact?topic=sdk",
+    "email": "support@robono.com"
+  },
+  "support": "https://robono.com/contact?topic=sdk",
+  "author": {
+    "name": "Add to Loop LLC",
+    "email": "support@robono.com",
+    "url": "https://robono.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IMLX16/robono-sdks.git",
+    "directory": "packages/client"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "SBOM.spdx.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepack": "node ../../scripts/generate-package-sbom.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^6.0.3"
+  }
+}

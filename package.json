@@ -1,0 +1,17 @@
+{
+  "name": "robono-sdks",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Official Robono SDK source repository.",
+  "scripts": {
+    "test": "npm run test:client && npm run test:server && npm run test:web && npm run test:react-native && npm run test:packages",
+    "test:client": "npm ci --ignore-scripts --prefix packages/client && npm test --prefix packages/client",
+    "test:server": "npm ci --ignore-scripts --prefix packages/server && npm test --prefix packages/server",
+    "test:web": "npm ci --ignore-scripts --prefix packages/web && npm test --prefix packages/web",
+    "test:react-native": "npm ci --ignore-scripts --prefix packages/react-native && npm test --prefix packages/react-native",
+    "test:packages": "node scripts/tests/assert-sdk-packages.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

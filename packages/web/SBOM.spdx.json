@@ -1,0 +1,67 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "@robono/web@0.5.4",
+  "documentNamespace": "http://spdx.org/spdxdocs/@robono%2fweb-0.5.4-***",
+  "creationInfo": {
+    "created": "2026-07-28T02:05:00.978Z",
+    "creators": [
+      "Tool: npm/cli-11.6.2"
+    ]
+  },
+  "documentDescribes": [
+    "SPDXRef-Package-robono.web-0.5.4"
+  ],
+  "packages": [
+    {
+      "name": "@robono/web",
+      "SPDXID": "SPDXRef-Package-robono.web-0.5.4",
+      "versionInfo": "0.5.4",
+      "packageFileName": "",
+      "description": "Headless Robono SDK for browser applications.",
+      "primaryPackagePurpose": "LIBRARY",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "https://robono.com/docs#start",
+      "licenseDeclared": "SEE LICENSE IN LICENSE",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40robono/web@0.5.4"
+        }
+      ]
+    },
+    {
+      "name": "@robono/client",
+      "SPDXID": "SPDXRef-Package-robono.client-0.5.4",
+      "versionInfo": "0.5.4",
+      "packageFileName": "../client",
+      "description": "Headless client core for Robono-connected web and mobile apps.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "https://robono.com/docs#start",
+      "licenseDeclared": "SEE LICENSE IN LICENSE",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40robono/client@0.5.4"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relatedSpdxElement": "SPDXRef-Package-robono.web-0.5.4",
+      "relationshipType": "DESCRIBES"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-robono.client-0.5.4",
+      "relatedSpdxElement": "SPDXRef-Package-robono.web-0.5.4",
+      "relationshipType": "DEPENDENCY_OF"
+    }
+  ]
+}

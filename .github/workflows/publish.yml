@@ -1,0 +1,78 @@
+name: Verify or stage Robono SDKs
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Verify only or stage new versions for npm approval
+        required: true
+        default: verify
+        type: choice
+        options:
+          - verify
+          - stage
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - client
+          - server
+          - web
+          - react-native
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+        working-directory: packages/${{ matrix.package }}
+      - name: Build the shared client first
+        if: matrix.package == 'web' || matrix.package == 'react-native'
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+        working-directory: packages/client
+      - run: npm test
+        working-directory: packages/${{ matrix.package }}
+      - run: npm pack --dry-run
+        working-directory: packages/${{ matrix.package }}
+
+  stage:
+    needs: verify
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'stage'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global npm@latest
+      - name: Stage new package versions
+        shell: bash
+        run: |
+          for package in client server web react-native; do
+            cd "$GITHUB_WORKSPACE/packages/$package"
+            npm ci --ignore-scripts
+            package_name=$(node -p "require('./package.json').name")
+            package_version=$(node -p "require('./package.json').version")
+            if npm view "$package_name@$package_version" version >/dev/null 2>&1; then
+              echo "$package_name@$package_version is already published; skipping."
+            else
+              npm stage publish
+            fi
+          done

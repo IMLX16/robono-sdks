@@ -1,0 +1,71 @@
+{
+  "name": "@robono/server",
+  "version": "0.7.5",
+  "description": "Provider-neutral server SDK for the Robono Bridge API.",
+  "keywords": [
+    "robono",
+    "messaging",
+    "bridge",
+    "sdk",
+    "webhooks",
+    "typescript"
+  ],
+  "homepage": "https://robono.com/docs#start",
+  "bugs": {
+    "url": "https://robono.com/contact?topic=sdk",
+    "email": "support@robono.com"
+  },
+  "support": "https://robono.com/contact?topic=sdk",
+  "author": {
+    "name": "Add to Loop LLC",
+    "email": "support@robono.com",
+    "url": "https://robono.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IMLX16/robono-sdks.git",
+    "directory": "packages/server"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "robono-sandbox-test": "dist/sandbox-test.js",
+    "robono-adapter-test": "dist/adapter-smoke-test.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "SBOM.spdx.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "test:deno": "npm run build && deno test test/deno_compat_test.ts",
+    "test:sandbox": "npm run build && node dist/sandbox-test.js",
+    "prepack": "node ../../scripts/generate-package-sbom.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^6.0.3"
+  }
+}

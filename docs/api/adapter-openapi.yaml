@@ -1,0 +1,551 @@
+openapi: 3.1.0
+info:
+  title: Robono Child-App Adapter
+  version: 1.0.0
+  description: |
+    Contract between a child app's authenticated client and its own protected
+    backend. Mount these routes at /robono/*. The backend authenticates its
+    user, authorizes each operation, replaces any submitted user identifier
+    with the authenticated identity, and calls the upstream Robono Bridge API.
+    A Robono API key is never sent to a phone or browser.
+servers:
+  - url: https://your-backend.example
+    description: The integrating app's backend
+security:
+  - childSession: []
+paths:
+  /robono/networks:
+    post:
+      operationId: listAdapterNetworks
+      tags: [Directory]
+      summary: Return the current endpoint directory
+      responses:
+        "200": { $ref: "#/components/responses/Directory" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-connections:
+    post:
+      operationId: requestAdapterNetworkConnection
+      tags: [Connections]
+      summary: Request a relationship with a user in another connected app
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        $ref: "#/components/requestBodies/NetworkConnectionRequest"
+      responses:
+        "200": { $ref: "#/components/responses/NetworkConnection" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-connections/respond:
+    post:
+      operationId: respondAdapterNetworkConnection
+      tags: [Connections]
+      summary: Respond to an incoming relationship request
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./openapi.yaml#/components/schemas/RespondConnection"
+      responses:
+        "200": { $ref: "#/components/responses/NetworkConnection" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-connections/list:
+    post:
+      operationId: listAdapterNetworkConnections
+      tags: [Connections]
+      summary: Synchronize connected-app relationships for the signed-in user
+      requestBody: { $ref: "#/components/requestBodies/ConnectionList" }
+      responses:
+        "200":
+          description: Visible connected-app relationships
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [connections, has_more]
+                properties:
+                  connections:
+                    type: array
+                    items: { $ref: "./openapi.yaml#/components/schemas/Connection" }
+                  has_more: { type: boolean }
+                  next_before: { type: [string, "null"], format: date-time }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-connections/disconnect:
+    post:
+      operationId: disconnectAdapterNetworkConnection
+      tags: [Connections]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/NetworkConnectionIdentity" }
+      responses:
+        "200": { $ref: "#/components/responses/NetworkConnection" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-connections/update:
+    post:
+      operationId: updateAdapterNetworkConnection
+      tags: [Connections]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bridge_connection_id]
+              properties:
+                bridge_connection_id: { type: string, format: uuid }
+                display_name: { type: string, maxLength: 160 }
+                external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
+                capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
+                guardians:
+                  type: array
+                  items: { $ref: "./openapi.yaml#/components/schemas/Guardian" }
+      responses:
+        "200": { $ref: "#/components/responses/NetworkConnection" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/connections:
+    post:
+      operationId: createAdapterRobonoConnection
+      tags: [Connections]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_phone_e164, external_display_name]
+              properties:
+                target_phone_e164: { type: string, pattern: "^\\+[1-9][0-9]{7,14}$" }
+                external_display_name: { type: string, maxLength: 160 }
+                external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
+                target_contact_label: { type: string, maxLength: 160 }
+                monitoring_disclosure: { type: string }
+                external_approval: { type: object, additionalProperties: true }
+                capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
+      responses:
+        "200": { $ref: "#/components/responses/RobonoConnection" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/connections/list:
+    post:
+      operationId: listAdapterRobonoConnections
+      tags: [Connections]
+      requestBody: { $ref: "#/components/requestBodies/ConnectionList" }
+      responses:
+        "200":
+          description: Visible Robono-endpoint relationships
+          content:
+            application/json:
+              schema:
+                $ref: "./openapi.yaml#/components/schemas/RobonoConnectionListResponse"
+        default: { $ref: "#/components/responses/Error" }
+  /robono/connections/profile:
+    post:
+      operationId: updateAdapterRobonoConnection
+      tags: [Connections]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [connection_id]
+              properties:
+                connection_id: { type: string, format: uuid }
+                external_display_name: { type: string, maxLength: 160 }
+                external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
+                capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
+      responses:
+        "200": { $ref: "#/components/responses/RobonoConnection" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/connections/disconnect:
+    post:
+      operationId: disconnectAdapterRobonoConnection
+      tags: [Connections]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/RobonoConnectionIdentity" }
+      responses:
+        "200": { $ref: "#/components/responses/RobonoConnection" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-messages:
+    post:
+      operationId: sendAdapterNetworkMessage
+      tags: [Messages]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - allOf:
+                    - $ref: "#/components/schemas/AdapterUserContext"
+                    - $ref: "./openapi.yaml#/components/schemas/SendTextMessage"
+                - allOf:
+                    - $ref: "#/components/schemas/AdapterUserContext"
+                    - $ref: "./openapi.yaml#/components/schemas/SendMediaMessage"
+      responses:
+        "200":
+          description: Message result
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/SendMessageResponse" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-messages/list:
+    post:
+      operationId: listAdapterNetworkMessages
+      tags: [Messages]
+      requestBody: { $ref: "#/components/requestBodies/NetworkMessageList" }
+      responses:
+        "200":
+          description: Current messages and synchronization cursor
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [messages, has_more]
+                properties:
+                  messages:
+                    type: array
+                    items: { $ref: "./openapi.yaml#/components/schemas/Message" }
+                  has_more: { type: boolean }
+                  next_before: { type: [string, "null"], format: date-time }
+                  next_after: { type: [string, "null"], format: date-time }
+                  sync_cursor: { type: [string, "null"], format: date-time }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/network-messages/events:
+    post:
+      operationId: markAdapterNetworkMessage
+      tags: [Messages]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/NetworkMessageEvent" }
+      responses:
+        "200": { $ref: "#/components/responses/GenericJson" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/messages:
+    post:
+      operationId: sendAdapterRobonoMessage
+      tags: [Messages]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./openapi.yaml#/components/schemas/SendRobonoMessage"
+      responses:
+        "200":
+          description: Message result
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/SendRobonoMessageResponse" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/messages/list:
+    post:
+      operationId: listAdapterRobonoMessages
+      tags: [Messages]
+      requestBody: { $ref: "#/components/requestBodies/RobonoMessageList" }
+      responses:
+        "200":
+          description: Current messages and synchronization cursor
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/RobonoMessageListResponse" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/message-events:
+    post:
+      operationId: markAdapterRobonoMessage
+      tags: [Messages]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./openapi.yaml#/components/schemas/RobonoMessageEventRequest"
+      responses:
+        "200":
+          description: Updated message state
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/RobonoMessageEventResponse" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/guardian-messages:
+    post:
+      operationId: sendAdapterGuardianMessage
+      tags: [Guardian messaging]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/GuardianMessage" }
+      responses:
+        "200": { $ref: "#/components/responses/GenericJson" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/guardian-messages/list:
+    post:
+      operationId: listAdapterGuardianMessages
+      tags: [Guardian messaging]
+      requestBody: { $ref: "#/components/requestBodies/GuardianMessageList" }
+      responses:
+        "200": { $ref: "#/components/responses/GenericJson" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/guardian-messages/events:
+    post:
+      operationId: markAdapterGuardianMessage
+      tags: [Guardian messaging]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { $ref: "#/components/requestBodies/GuardianMessageEvent" }
+      responses:
+        "200": { $ref: "#/components/responses/GenericJson" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/transforms/message:
+    post:
+      operationId: createAdapterMessageTransform
+      tags: [Transforms]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "./openapi.yaml#/components/schemas/MessageTransformRequest" }
+      responses:
+        "200":
+          description: Transform result
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/TransformResponse" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/transforms/speech:
+    post:
+      operationId: createAdapterSpeechTransform
+      tags: [Transforms]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "./openapi.yaml#/components/schemas/SpeechTransformRequest" }
+      responses:
+        "200":
+          description: Transform result
+          content:
+            application/json:
+              schema: { $ref: "./openapi.yaml#/components/schemas/TransformResponse" }
+        default: { $ref: "#/components/responses/Error" }
+  /robono/push-diagnostics/events:
+    post:
+      operationId: reportAdapterPushDiagnostic
+      tags: [Diagnostics]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [diagnostic_id, diagnostic_token, stage]
+              properties:
+                diagnostic_id: { type: string, format: uuid }
+                diagnostic_token: { type: string }
+                stage:
+                  type: string
+                  enum: [provider_accepted, device_received, content_fetched, rendered, polling_recovered, failed]
+                failure_stage: { type: string }
+                failure_reason: { type: string }
+                platform: { type: string }
+                provider: { type: string }
+                app_version: { type: string }
+                detail: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/GenericJson" }
+        default: { $ref: "#/components/responses/Error" }
+components:
+  securitySchemes:
+    childSession:
+      type: http
+      scheme: bearer
+      bearerFormat: Child-app session or JWT
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Stable caller-generated operation key reused across every retry.
+      schema: { type: string, minLength: 8, maxLength: 200 }
+  schemas:
+    AdapterUserContext:
+      type: object
+      description: User identity is derived from the authenticated session. Any submitted external_user_id is ignored and replaced.
+      properties:
+        external_user_id: { type: string, deprecated: true }
+    Page:
+      type: object
+      properties:
+        limit: { type: integer, minimum: 1, maximum: 100 }
+        before: { type: string, format: date-time }
+        after: { type: string, format: date-time }
+    AdapterError:
+      type: object
+      required: [error, request_id]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            retryable: { type: boolean }
+        request_id: { type: string }
+        fields:
+          type: array
+          items: { type: object, additionalProperties: true }
+  requestBodies:
+    NetworkConnectionRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [source_display_name, target_identifier]
+            properties:
+              target_app_id: { type: string, format: uuid }
+              target_app_slug: { type: string }
+              source_display_name: { type: string, maxLength: 160 }
+              target_identifier: { type: string, maxLength: 240 }
+              target_contact_label: { type: string, maxLength: 160 }
+              external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
+              capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
+              guardian_messaging_enabled: { type: boolean }
+              source_guardians:
+                type: array
+                items: { $ref: "./openapi.yaml#/components/schemas/Guardian" }
+              monitoring_disclosure: { type: string }
+              external_approval: { type: object, additionalProperties: true }
+    ConnectionList:
+      required: false
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Page"
+              - type: object
+                properties:
+                  status: { type: string }
+                  bridge_connection_id: { type: string, format: uuid }
+                  connection_id: { type: string, format: uuid }
+    NetworkConnectionIdentity:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [bridge_connection_id]
+            properties:
+              bridge_connection_id: { type: string, format: uuid }
+              reason: { type: string, maxLength: 240 }
+    RobonoConnectionIdentity:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [connection_id]
+            properties:
+              connection_id: { type: string, format: uuid }
+              reason: { type: string, maxLength: 240 }
+    NetworkMessageList:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Page"
+              - type: object
+                required: [bridge_connection_id]
+                properties:
+                  bridge_connection_id: { type: string, format: uuid }
+    RobonoMessageList:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Page"
+              - type: object
+                required: [connection_id]
+                properties:
+                  connection_id: { type: string, format: uuid }
+    NetworkMessageEvent:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [bridge_connection_id, bridge_message_id, event]
+            properties:
+              bridge_connection_id: { type: string, format: uuid }
+              bridge_message_id: { type: string, format: uuid }
+              event: { type: string, enum: [delivered, read, heard] }
+              occurred_at: { type: string, format: date-time }
+    GuardianMessage:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [bridge_connection_id, external_message_id, text_body]
+            properties:
+              bridge_connection_id: { type: string, format: uuid }
+              external_message_id: { type: string, maxLength: 160 }
+              text_body: { type: string, minLength: 1 }
+    GuardianMessageList:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Page"
+              - type: object
+                required: [bridge_connection_id]
+                properties:
+                  bridge_connection_id: { type: string, format: uuid }
+    GuardianMessageEvent:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [bridge_connection_id, guardian_message_id, event]
+            properties:
+              bridge_connection_id: { type: string, format: uuid }
+              guardian_message_id: { type: string, format: uuid }
+              event: { type: string, enum: [delivered, read] }
+              occurred_at: { type: string, format: date-time }
+  responses:
+    Directory:
+      description: Current endpoint directory
+      content:
+        application/json:
+          schema:
+            $ref: "./openapi.yaml#/components/schemas/NetworkDirectoryResponse"
+    NetworkConnection:
+      description: Connected-app relationship
+      content:
+        application/json:
+          schema: { $ref: "./openapi.yaml#/components/schemas/ConnectionResponse" }
+    RobonoConnection:
+      description: Robono-endpoint relationship
+      content:
+        application/json:
+          schema: { $ref: "./openapi.yaml#/components/schemas/RobonoConnectionResponse" }
+    GenericJson:
+      description: Successful operation
+      content:
+        application/json:
+          schema: { type: object, additionalProperties: true }
+    Error:
+      description: Authentication, authorization, validation, rate-limit, or upstream service error
+      headers:
+        Retry-After:
+          description: Delay before retrying a retryable request.
+          schema: { type: string }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/AdapterError" }

@@ -29,7 +29,7 @@ const { RobonoServer } = await import("@robono/server");
 import {
   createRobonoBackendAdapter,
   RobonoServer,
-} from "npm:@robono/server@0.7.6";
+} from "npm:@robono/server@0.7.8";
 ```
 
 ## Discover endpoints
@@ -189,7 +189,7 @@ const result = await robono.transforms.speech({
   input: {
     type: "audio",
     source_url: audioUrl,
-    mime_type: "audio/m4a",
+    mime_type: "audio/mp4",
     language: "en",
   },
   outputs: ["transcript", "translated_voice"],

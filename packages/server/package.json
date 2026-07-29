@@ -1,6 +1,6 @@
 {
   "name": "@robono/server",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "Provider-neutral server SDK for the Robono Bridge API.",
   "keywords": [
     "robono",
@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "yaml": "^2.9.0"
   }
 }

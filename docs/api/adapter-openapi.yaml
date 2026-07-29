@@ -8,6 +8,9 @@ info:
     user, authorizes each operation, replaces any submitted user identifier
     with the authenticated identity, and calls the upstream Robono Bridge API.
     A Robono API key is never sent to a phone or browser.
+  license:
+    name: Robono Developer Terms
+    url: https://robono.com/terms
 servers:
   - url: https://your-backend.example
     description: The integrating app's backend
@@ -21,6 +24,7 @@ paths:
       summary: Return the current endpoint directory
       responses:
         "200": { $ref: "#/components/responses/Directory" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/languages:
     post:
@@ -33,6 +37,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "./openapi.yaml#/components/schemas/LanguageResponse" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-connections:
     post:
@@ -44,6 +49,7 @@ paths:
         $ref: "#/components/requestBodies/NetworkConnectionRequest"
       responses:
         "200": { $ref: "#/components/responses/NetworkConnection" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-connections/respond:
     post:
@@ -59,6 +65,7 @@ paths:
               $ref: "./openapi.yaml#/components/schemas/RespondConnection"
       responses:
         "200": { $ref: "#/components/responses/NetworkConnection" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-connections/list:
     post:
@@ -80,20 +87,24 @@ paths:
                     items: { $ref: "./openapi.yaml#/components/schemas/Connection" }
                   has_more: { type: boolean }
                   next_before: { type: [string, "null"], format: date-time }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-connections/disconnect:
     post:
       operationId: disconnectAdapterNetworkConnection
       tags: [Connections]
+      summary: End a relationship with a user in another connected app
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody: { $ref: "#/components/requestBodies/NetworkConnectionIdentity" }
       responses:
         "200": { $ref: "#/components/responses/NetworkConnection" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-connections/update:
     post:
       operationId: updateAdapterNetworkConnection
       tags: [Connections]
+      summary: Update the signed-in user's connected-app profile or capabilities
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -112,11 +123,13 @@ paths:
                   items: { $ref: "./openapi.yaml#/components/schemas/Guardian" }
       responses:
         "200": { $ref: "#/components/responses/NetworkConnection" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/connections:
     post:
       operationId: createAdapterRobonoConnection
       tags: [Connections]
+      summary: Request a relationship with a user at a Robono endpoint
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -135,11 +148,13 @@ paths:
                 capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
       responses:
         "200": { $ref: "#/components/responses/RobonoConnection" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/connections/list:
     post:
       operationId: listAdapterRobonoConnections
       tags: [Connections]
+      summary: Synchronize Robono phone-endpoint relationships for the signed-in user
       requestBody: { $ref: "#/components/requestBodies/ConnectionList" }
       responses:
         "200":
@@ -148,11 +163,13 @@ paths:
             application/json:
               schema:
                 $ref: "./openapi.yaml#/components/schemas/RobonoConnectionListResponse"
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/connections/profile:
     post:
       operationId: updateAdapterRobonoConnection
       tags: [Connections]
+      summary: Update the signed-in user's Robono-endpoint profile or capabilities
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -168,20 +185,24 @@ paths:
                 capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
       responses:
         "200": { $ref: "#/components/responses/RobonoConnection" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/connections/disconnect:
     post:
       operationId: disconnectAdapterRobonoConnection
       tags: [Connections]
+      summary: End a relationship with a user at a Robono endpoint
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody: { $ref: "#/components/requestBodies/RobonoConnectionIdentity" }
       responses:
         "200": { $ref: "#/components/responses/RobonoConnection" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-messages:
     post:
       operationId: sendAdapterNetworkMessage
       tags: [Messages]
+      summary: Send a message across a connected-app relationship
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -201,11 +222,13 @@ paths:
           content:
             application/json:
               schema: { $ref: "./openapi.yaml#/components/schemas/SendMessageResponse" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-messages/list:
     post:
       operationId: listAdapterNetworkMessages
       tags: [Messages]
+      summary: Synchronize messages in a connected-app relationship
       requestBody: { $ref: "#/components/requestBodies/NetworkMessageList" }
       responses:
         "200":
@@ -223,20 +246,24 @@ paths:
                   next_before: { type: [string, "null"], format: date-time }
                   next_after: { type: [string, "null"], format: date-time }
                   sync_cursor: { type: [string, "null"], format: date-time }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/network-messages/events:
     post:
       operationId: markAdapterNetworkMessage
       tags: [Messages]
+      summary: Report delivery, read, or heard state for a connected-app message
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody: { $ref: "#/components/requestBodies/NetworkMessageEvent" }
       responses:
         "200": { $ref: "#/components/responses/GenericJson" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/messages:
     post:
       operationId: sendAdapterRobonoMessage
       tags: [Messages]
+      summary: Send a message across a Robono phone-endpoint relationship
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -250,11 +277,13 @@ paths:
           content:
             application/json:
               schema: { $ref: "./openapi.yaml#/components/schemas/SendRobonoMessageResponse" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/messages/list:
     post:
       operationId: listAdapterRobonoMessages
       tags: [Messages]
+      summary: Synchronize messages in a Robono phone-endpoint relationship
       requestBody: { $ref: "#/components/requestBodies/RobonoMessageList" }
       responses:
         "200":
@@ -262,11 +291,13 @@ paths:
           content:
             application/json:
               schema: { $ref: "./openapi.yaml#/components/schemas/RobonoMessageListResponse" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/message-events:
     post:
       operationId: markAdapterRobonoMessage
       tags: [Messages]
+      summary: Report delivery, read, or heard state for a Robono-endpoint message
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -280,37 +311,45 @@ paths:
           content:
             application/json:
               schema: { $ref: "./openapi.yaml#/components/schemas/RobonoMessageEventResponse" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/guardian-messages:
     post:
       operationId: sendAdapterGuardianMessage
       tags: [Guardian messaging]
+      summary: Send an approved guardian-to-guardian message
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody: { $ref: "#/components/requestBodies/GuardianMessage" }
       responses:
         "200": { $ref: "#/components/responses/GenericJson" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/guardian-messages/list:
     post:
       operationId: listAdapterGuardianMessages
       tags: [Guardian messaging]
+      summary: Synchronize guardian messages for an approved relationship
       requestBody: { $ref: "#/components/requestBodies/GuardianMessageList" }
       responses:
         "200": { $ref: "#/components/responses/GenericJson" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/guardian-messages/events:
     post:
       operationId: markAdapterGuardianMessage
       tags: [Guardian messaging]
+      summary: Report delivery or read state for a guardian message
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody: { $ref: "#/components/requestBodies/GuardianMessageEvent" }
       responses:
         "200": { $ref: "#/components/responses/GenericJson" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/transforms/message:
     post:
       operationId: createAdapterMessageTransform
       tags: [Transforms]
+      summary: Request permitted translation or transcription for a message
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -323,11 +362,13 @@ paths:
           content:
             application/json:
               schema: { $ref: "./openapi.yaml#/components/schemas/TransformResponse" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/transforms/speech:
     post:
       operationId: createAdapterSpeechTransform
       tags: [Transforms]
+      summary: Request a permitted speech transform
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -340,11 +381,13 @@ paths:
           content:
             application/json:
               schema: { $ref: "./openapi.yaml#/components/schemas/TransformResponse" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /robono/push-diagnostics/events:
     post:
       operationId: reportAdapterPushDiagnostic
       tags: [Diagnostics]
+      summary: Report a push-delivery diagnostic milestone or failure
       parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
       requestBody:
         required: true
@@ -367,6 +410,7 @@ paths:
                 detail: { type: string }
       responses:
         "200": { $ref: "#/components/responses/GenericJson" }
+        "4XX": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
 components:
   securitySchemes:

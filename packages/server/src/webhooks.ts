@@ -420,7 +420,7 @@ function assertBridgeConnection(connection: Record<string, unknown>) {
     "responded_at",
     "created_at",
   ]) {
-    nullableTimestamp(connection, key, `connection.${key}`);
+    optionalNullableTimestamp(connection, key, `connection.${key}`);
   }
 }
 
@@ -909,6 +909,16 @@ function nullableTimestamp(
 ) {
   if (!(key in parent)) invalid(path, "an ISO timestamp or null");
   if (parent[key] !== null) timestamp(parent, key, path);
+}
+
+function optionalNullableTimestamp(
+  parent: Record<string, unknown>,
+  key: string,
+  path = key,
+) {
+  if (parent[key] !== undefined && parent[key] !== null) {
+    timestamp(parent, key, path);
+  }
 }
 
 function uri(

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.7
+
+- Accepts webhook fields that the public contract marks optional while continuing to validate them when supplied.
+- Verifies every official OpenAPI webhook example through the published runtime verifier during tests.
+- Completes the child-app adapter API description with operation summaries and explicit error responses.
+- Improves sandbox diagnostics and avoids disconnecting a deliberately non-persistent Robono-endpoint dry run.
+
 ## 0.7.6
 
 - Added protected language discovery and documented the canonical endpoint-neutral namespaces.

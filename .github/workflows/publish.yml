@@ -53,6 +53,9 @@ jobs:
         working-directory: packages/client
       - run: npm test
         working-directory: packages/${{ matrix.package }}
+      - name: Lint public OpenAPI contracts
+        if: matrix.node == '24' && matrix.package == 'server'
+        run: npx --yes @redocly/cli@2.41.1 lint docs/api/openapi.yaml docs/api/adapter-openapi.yaml
       - name: Inspect publishable package contents
         if: matrix.node == '24'
         run: npm pack --dry-run

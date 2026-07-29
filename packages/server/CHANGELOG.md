@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.8
+
+- Corrects the SDK version reported in authenticated request metadata.
+- Uses the canonical `audio/mp4` MIME type in public speech-transform examples.
+- Keeps the website, npm package, downloadable starter, and public source repository on one documented release.
+
 ## 0.7.7
 
 - Accepts webhook fields that the public contract marks optional while continuing to validate them when supplied.

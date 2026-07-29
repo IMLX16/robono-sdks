@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.6
+
+- Publishes the tested July 2026 compatibility set with provenance, SBOM, and public license-review guidance.
+
 ## 0.5.5
 
 - Added protected language discovery without breaking existing custom transports.

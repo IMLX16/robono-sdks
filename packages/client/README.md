@@ -6,6 +6,8 @@ Headless client core shared by the Robono Web and React Native SDKs. It keeps Ro
 
 You may use this SDK to build, test, and ship an authorized application that connects to Robono, including its compiled or bundled SDK code. You may not redistribute it as a standalone SDK, use it to bypass Robono, or use it to build a competing bridge service. Service access, pricing, and support are separate. If you and Robono sign a written agreement that expressly replaces this SDK license, that agreement controls to the extent it says so. The included `LICENSE` is the complete, controlling text.
 
+See the [SDK license FAQ](https://robono.com/sdk-license) for procurement guidance and the route for organization terms.
+
 Most applications should install `@robono/web` or `@robono/react-native`. Install this package directly only when building another platform wrapper:
 
 This package is ESM-only. CommonJS applications must load it with

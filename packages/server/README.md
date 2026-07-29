@@ -6,6 +6,8 @@ Headless Node/TypeScript SDK for connecting an existing app or closed ecosystem 
 
 You may use this SDK to build, test, and operate an authorized application that connects to Robono. You may not redistribute it as a standalone SDK, use it to bypass Robono, or use it to build a competing bridge service. Service access, pricing, maintenance, and support are separate. If you and Robono sign a written agreement that expressly replaces this SDK license, that agreement controls to the extent it says so. The included `LICENSE` is the complete, controlling text.
 
+See the [SDK license FAQ](https://robono.com/sdk-license) for procurement guidance and the route for organization terms.
+
 Robono's own app and third-party connected apps appear as endpoints in the same directory. Your product keeps its existing accounts, screens, storage, safety rules, and notifications.
 
 ## Install
@@ -29,7 +31,7 @@ const { RobonoServer } = await import("@robono/server");
 import {
   createRobonoBackendAdapter,
   RobonoServer,
-} from "npm:@robono/server@0.7.8";
+} from "npm:@robono/server@0.8.0";
 ```
 
 ## Discover endpoints
@@ -275,6 +277,33 @@ backend, store the request pending any required guardian approval, and call
 generic requester-facing result for `not_found`, rejection, and unauthorized
 lookups so account existence cannot be tested.
 
+## Automate user data requests
+
+Create exports and deletions only after your backend authenticates and
+authorizes the privacy request:
+
+```ts
+const request = await robono.dataRequests.deleteUser({
+  external_user_id: user.id,
+  external_request_id: privacyCase.id,
+}, { idempotencyKey: privacyCase.operationId });
+
+const status = await robono.dataRequests.status({
+  data_request_id: request.data_request.id,
+});
+
+if (status.export) {
+  await yourPrivacySystem.storeCompletedExport(status.export);
+}
+```
+
+Deletion requires a stable idempotency key. Signed `data.export_*` and
+`data.deletion_*` events report completion or failure; status lookup remains
+available if a webhook is delayed. A completed JSON export remains available
+from status responses until `result_expires_at`. Use a `data:read` or
+`data:write` API key when the operation should not share the integration's
+broader credential.
+
 ## Run the sandbox lifecycle
 
 ```bash
@@ -302,6 +331,12 @@ compatible fixes. Before `1.0`, a minor release may contain a breaking change;
 read the packaged `CHANGELOG.md` before upgrading. The latest minor line is the
 supported line, and public API versions receive at least 90 days' notice before
 retirement.
+
+The exact package and API compatibility matrix is published at
+[robono.com/docs#test](https://robono.com/docs#test). Production credentials
+start at 300 requests per rolling minute; Sandbox credentials start at 600.
+There is no separate published concurrency quota. Honor `Retry-After` on rate
+limits and retryable temporary failures.
 
 Report SDK problems at [robono.com/contact?topic=sdk](https://robono.com/contact?topic=sdk).
 Include the package version, runtime, safe reproduction steps, and request ID;

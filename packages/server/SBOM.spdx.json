@@ -2,22 +2,22 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "@robono/server@0.7.8",
-  "documentNamespace": "http://spdx.org/spdxdocs/@robono%2fserver-0.7.8-***",
+  "name": "@robono/server@0.8.0",
+  "documentNamespace": "http://spdx.org/spdxdocs/@robono%2fserver-0.8.0-***",
   "creationInfo": {
-    "created": "2026-07-29T03:01:41.026Z",
+    "created": "2026-07-29T22:21:34.416Z",
     "creators": [
       "Tool: npm/cli-11.6.2"
     ]
   },
   "documentDescribes": [
-    "SPDXRef-Package-robono.server-0.7.8"
+    "SPDXRef-Package-robono.server-0.8.0"
   ],
   "packages": [
     {
       "name": "@robono/server",
-      "SPDXID": "SPDXRef-Package-robono.server-0.7.8",
-      "versionInfo": "0.7.8",
+      "SPDXID": "SPDXRef-Package-robono.server-0.8.0",
+      "versionInfo": "0.8.0",
       "packageFileName": "",
       "description": "Provider-neutral server SDK for the Robono Bridge API.",
       "primaryPackagePurpose": "LIBRARY",
@@ -29,7 +29,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40robono/server@0.7.8"
+          "referenceLocator": "pkg:npm/%40robono/server@0.8.0"
         }
       ]
     }
@@ -37,7 +37,7 @@
   "relationships": [
     {
       "spdxElementId": "SPDXRef-DOCUMENT",
-      "relatedSpdxElement": "SPDXRef-Package-robono.server-0.7.8",
+      "relatedSpdxElement": "SPDXRef-Package-robono.server-0.8.0",
       "relationshipType": "DESCRIBES"
     }
   ]

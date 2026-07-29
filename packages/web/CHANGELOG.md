@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.6
+
+- Updated to the tested client 0.5.6 release set and added public license-review guidance.
+
 ## 0.5.5
 
 - Updated to client 0.5.5 language discovery, retry, error, and attachment-grouping behavior.

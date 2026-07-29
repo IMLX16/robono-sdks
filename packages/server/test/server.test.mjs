@@ -256,6 +256,15 @@ function webhookEvents(timestamp) {
       diagnostic_token: "diagnostic-token",
       external_user_id: "user-a",
     }, "diagnostic_token"],
+    [{
+      ...base("data.deletion_completed"),
+      data_request_id: "data-request-1",
+      request_type: "deletion",
+      status: "completed",
+      external_request_id: "privacy-request-1",
+      result_summary: { network_connections_deleted: 1 },
+      failure_code: null,
+    }, "result_summary"],
   ];
 }
 
@@ -277,7 +286,7 @@ test("directory request authenticates and normalizes options", async () => {
   assert.equal(captured.url, "https://sandbox.example/v1/networks");
   assert.equal(captured.init.headers.authorization, "Bearer rbn_test_example");
   assert.equal(captured.init.headers["robono-api-version"], "2026-07-25");
-  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.7.8");
+  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.0");
   assert.deepEqual(JSON.parse(captured.init.body), {
     include_phone_robono: false,
     include_self: true,
@@ -1204,6 +1213,63 @@ test("push diagnostic reports use the dedicated authenticated route", async () =
   });
 });
 
+test("data request helpers create exports, create deletions, and read status", async () => {
+  const captured = [];
+  const client = new RobonoServer({
+    apiKey: "rbn_test_example",
+    baseUrl: "https://sandbox.example/v1",
+    fetch: async (url, init) => {
+      captured.push({
+        url,
+        body: JSON.parse(init.body),
+        headers: init.headers,
+      });
+      return Response.json({
+        ok: true,
+        request_id: "req_data",
+        data_request: {
+          id: "data-request-1",
+          request_type: "export",
+          external_request_id: "privacy-1",
+          status: "completed",
+          result_summary: {},
+          requested_at: "2026-07-29T12:00:00.000Z",
+          completed_at: "2026-07-29T12:00:01.000Z",
+          result_expires_at: "2026-08-28T12:00:01.000Z",
+        },
+      });
+    },
+  });
+
+  await client.dataRequests.export({
+    external_user_id: "user-1",
+    external_request_id: "privacy-1",
+  });
+  await client.dataRequests.deleteUser({
+    external_user_id: "user-1",
+    external_request_id: "privacy-2",
+  }, { idempotencyKey: "delete-user-1" });
+  await client.dataRequests.status("data-request-1");
+
+  assert.deepEqual(captured.map((item) => item.body), [{
+    action: "create",
+    request_type: "export",
+    format: "json",
+    external_user_id: "user-1",
+    external_request_id: "privacy-1",
+  }, {
+    action: "create",
+    request_type: "deletion",
+    external_user_id: "user-1",
+    external_request_id: "privacy-2",
+  }, {
+    action: "status",
+    data_request_id: "data-request-1",
+  }]);
+  assert.equal(captured[1].headers["idempotency-key"], "delete-user-1");
+  assert.equal(captured[2].headers["idempotency-key"], undefined);
+});
+
 test("webhook events convert to content-free client push signals", () => {
   const payload = toClientPushPayload({
     event: "bridge.message_created",
@@ -1310,6 +1376,40 @@ test("webhook verifier accepts directory-change synchronization signals", async 
     "robono-webhook-id": "evt_directory",
   }, secret, { now: new Date(timestamp) });
   assert.equal(verified.event.event, "bridge.directory_changed");
+});
+
+test("webhook verifier accepts either signature during secret rotation", async () => {
+  const oldSecret = "whsec_old";
+  const newSecret = "whsec_new";
+  const timestamp = "2026-07-26T12:00:00.000Z";
+  const body = JSON.stringify({
+    event: "bridge.directory_changed",
+    event_id: "evt_rotation",
+    request_id: "req_rotation",
+    created_at: timestamp,
+    endpoint_id: "endpoint-1",
+    change: "updated",
+  });
+  const newSignature = createHmac("sha256", newSecret)
+    .update(`${timestamp}.${body}`)
+    .digest("hex");
+  const oldSignature = createHmac("sha256", oldSecret)
+    .update(`${timestamp}.${body}`)
+    .digest("hex");
+  const headers = {
+    "robono-webhook-timestamp": timestamp,
+    "robono-webhook-signature": `v1=${newSignature},v1=${oldSignature}`,
+    "robono-webhook-id": "evt_rotation",
+  };
+
+  assert.equal(
+    (await verifyRobonoWebhook(body, headers, oldSecret, { now: new Date(timestamp) })).event.event,
+    "bridge.directory_changed",
+  );
+  assert.equal(
+    (await verifyRobonoWebhook(body, headers, newSecret, { now: new Date(timestamp) })).event.event,
+    "bridge.directory_changed",
+  );
 });
 
 test("every official OpenAPI webhook example passes the published verifier", async () => {

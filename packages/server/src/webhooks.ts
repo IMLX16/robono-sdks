@@ -26,6 +26,12 @@ const webhookEventNames = new Set<RobonoWebhookEventName>([
   "transform.completed",
   "transform.failed",
   "diagnostic.push_requested",
+  "data.export_completed",
+  "data.export_failed",
+  "data.export_rejected",
+  "data.deletion_completed",
+  "data.deletion_failed",
+  "data.deletion_rejected",
 ]);
 
 export async function verifyRobonoWebhook<
@@ -72,11 +78,15 @@ export async function verifyRobonoWebhook<
   const body = typeof rawBody === "string"
     ? rawBody
     : new TextDecoder().decode(rawBody);
-  const received = signatureHeader.replace(/^v1=/i, "").trim().toLowerCase();
   const expected = createHmac("sha256", webhookSecret).update(
     `${timestamp}.${body}`,
   ).digest("hex");
-  if (!safeEqual(received, expected)) {
+  const receivedSignatures = signatureHeader
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => /^v1=[a-f0-9]{64}$/i.test(value))
+    .map((value) => value.slice(3).toLowerCase());
+  if (!receivedSignatures.some((received) => safeEqual(received, expected))) {
     throw new RobonoWebhookError(
       "The Robono webhook signature does not match.",
       "webhook_signature_mismatch",
@@ -338,6 +348,19 @@ function assertWebhookEvent(
       string(event, "push_diagnostic_id");
       string(event, "diagnostic_token");
       string(event, "external_user_id");
+      return;
+    case "data.export_completed":
+    case "data.export_failed":
+    case "data.export_rejected":
+    case "data.deletion_completed":
+    case "data.deletion_failed":
+    case "data.deletion_rejected":
+      string(event, "data_request_id");
+      oneOf(event, "request_type", ["export", "deletion"]);
+      oneOf(event, "status", ["completed", "failed", "rejected"]);
+      nullableString(event, "external_request_id");
+      record(event.result_summary, "result_summary");
+      nullableString(event, "failure_code");
       return;
   }
 }

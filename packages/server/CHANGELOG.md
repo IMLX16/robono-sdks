@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- Added typed external-user export and deletion operations with status lookup.
+- Added runtime-validated data-request completion and failure webhooks.
+- Accepts both webhook signatures during the 24-hour zero-downtime secret-rotation window.
+- Documents production limits, privacy automation, service objectives, and SDK license review.
+
 ## 0.7.8
 
 - Corrects the SDK version reported in authenticated request metadata.

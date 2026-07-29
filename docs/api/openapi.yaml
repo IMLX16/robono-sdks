@@ -17,6 +17,11 @@ security:
 x-robono-api-version-policy:
   current: "2026-07-25"
   minimum-deprecation-notice-days: 90
+x-robono-default-limits:
+  production_requests_per_rolling_minute: 300
+  sandbox_requests_per_rolling_minute: 600
+  separate_concurrency_quota: false
+  retry_contract: Honor Retry-After on HTTP 429 and retryable 5XX responses
 webhooks:
   robonoEvent:
     post:
@@ -39,7 +44,13 @@ webhooks:
         - name: Robono-Webhook-Signature
           in: header
           required: true
-          schema: { type: string, pattern: "^v1=[a-f0-9]{64}$" }
+          description: |
+            One v1 signature, or two comma-separated v1 signatures during the
+            24-hour zero-downtime rotation window. Accept the signature that
+            matches the secret currently deployed in your webhook receiver.
+          schema:
+            type: string
+            pattern: "^v1=[a-f0-9]{64}(,v1=[a-f0-9]{64})?$"
       requestBody:
         required: true
         content:
@@ -361,6 +372,84 @@ webhooks:
                   push_diagnostic_id: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
                   diagnostic_token: diagnostic-token-42
                   external_user_id: child-user-42
+              dataExportCompleted:
+                summary: User data export completed
+                value:
+                  event: data.export_completed
+                  event_id: evt_01J00000000000000000000022
+                  request_id: req_01J00000000000000000000022
+                  created_at: "2026-07-25T12:00:22Z"
+                  data_request_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                  request_type: export
+                  status: completed
+                  external_request_id: privacy-request-42
+                  result_summary: { record_count: 12, content_included: false }
+                  failure_code: null
+              dataExportFailed:
+                summary: User data export failed
+                value:
+                  event: data.export_failed
+                  event_id: evt_01J00000000000000000000023
+                  request_id: req_01J00000000000000000000023
+                  created_at: "2026-07-25T12:00:23Z"
+                  data_request_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                  request_type: export
+                  status: failed
+                  external_request_id: privacy-request-42
+                  result_summary: {}
+                  failure_code: export_failed
+              dataExportRejected:
+                summary: User data export rejected
+                value:
+                  event: data.export_rejected
+                  event_id: evt_01J00000000000000000000024
+                  request_id: req_01J00000000000000000000024
+                  created_at: "2026-07-25T12:00:24Z"
+                  data_request_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                  request_type: export
+                  status: rejected
+                  external_request_id: privacy-request-42
+                  result_summary: {}
+                  failure_code: request_rejected
+              dataDeletionCompleted:
+                summary: User deletion completed
+                value:
+                  event: data.deletion_completed
+                  event_id: evt_01J00000000000000000000025
+                  request_id: req_01J00000000000000000000025
+                  created_at: "2026-07-25T12:00:25Z"
+                  data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
+                  request_type: deletion
+                  status: completed
+                  external_request_id: deletion-request-42
+                  result_summary: { direct_connections_deleted: 1, network_connections_deleted: 2 }
+                  failure_code: null
+              dataDeletionFailed:
+                summary: User deletion failed
+                value:
+                  event: data.deletion_failed
+                  event_id: evt_01J00000000000000000000026
+                  request_id: req_01J00000000000000000000026
+                  created_at: "2026-07-25T12:00:26Z"
+                  data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
+                  request_type: deletion
+                  status: failed
+                  external_request_id: deletion-request-42
+                  result_summary: {}
+                  failure_code: deletion_processing_failed
+              dataDeletionRejected:
+                summary: User deletion rejected
+                value:
+                  event: data.deletion_rejected
+                  event_id: evt_01J00000000000000000000027
+                  request_id: req_01J00000000000000000000027
+                  created_at: "2026-07-25T12:00:27Z"
+                  data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
+                  request_type: deletion
+                  status: rejected
+                  external_request_id: deletion-request-42
+                  result_summary: {}
+                  failure_code: request_rejected
       responses:
         "2XX":
           description: |
@@ -1128,6 +1217,55 @@ paths:
           $ref: "#/components/responses/RateLimit"
         "5XX":
           $ref: "#/components/responses/ServiceError"
+  /data-requests:
+    parameters:
+      - $ref: "#/components/parameters/ApiVersion"
+    post:
+      operationId: manageDataRequest
+      summary: Export or delete one connected-app user's Robono bridge data
+      description: |
+        Use this server-side route after your own application authenticates and
+        authorizes the user or privacy request. Deletion requires an
+        Idempotency-Key. Completion is returned immediately when possible and
+        is also delivered by signed webhook; status can always be read by ID.
+      tags: [Data rights]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DataRequestOperation" }
+            examples:
+              export:
+                value:
+                  action: create
+                  request_type: export
+                  external_user_id: child-user-42
+                  external_request_id: privacy-request-42
+                  format: json
+              deletion:
+                value:
+                  action: create
+                  request_type: deletion
+                  external_user_id: child-user-42
+                  external_request_id: deletion-request-42
+              status:
+                value:
+                  action: status
+                  data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
+      responses:
+        "200":
+          description: Data request accepted, completed, or retrieved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DataRequestResponse" }
+        "4XX":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/RateLimit"
+        "5XX":
+          $ref: "#/components/responses/ServiceError"
 components:
   securitySchemes:
     apiKey:
@@ -1149,7 +1287,8 @@ components:
         A stable operation value that makes retries safe. Official SDKs create
         one for retries performed within a single method call. Persist and
         reuse your own value when retrying the operation in a later call,
-        process, job, or device session.
+        process, job, or device session. Robono retains idempotency responses
+        for at least 24 hours.
       schema: { type: string, minLength: 8, maxLength: 200 }
   requestBodies:
     JsonBody:
@@ -2250,6 +2389,88 @@ components:
             push_diagnostic_id: { type: string, format: uuid }
             diagnostic_token: { type: string }
             external_user_id: { type: string }
+    DataRequestOperation:
+      oneOf:
+        - type: object
+          required: [action, request_type, external_user_id]
+          properties:
+            action: { const: create }
+            request_type: { const: export }
+            external_user_id: { type: string, minLength: 1, maxLength: 200 }
+            external_request_id: { type: string, maxLength: 160 }
+            format: { const: json }
+        - type: object
+          required: [action, request_type, external_user_id]
+          properties:
+            action: { const: create }
+            request_type: { const: deletion }
+            external_user_id: { type: string, minLength: 1, maxLength: 200 }
+            external_request_id: { type: string, maxLength: 160 }
+        - type: object
+          required: [action, data_request_id]
+          properties:
+            action: { const: status }
+            data_request_id: { type: string, format: uuid }
+    DataRequest:
+      type: object
+      required:
+        - id
+        - request_type
+        - status
+        - result_summary
+        - requested_at
+      properties:
+        id: { type: string, format: uuid }
+        request_type: { type: string, enum: [export, deletion] }
+        external_request_id: { type: [string, "null"] }
+        status: { type: string, enum: [pending, processing, completed, rejected, failed] }
+        result_summary: { type: object, additionalProperties: true }
+        failure_code: { type: [string, "null"] }
+        requested_at: { type: string, format: date-time }
+        completed_at: { type: [string, "null"], format: date-time }
+        result_expires_at: { type: [string, "null"], format: date-time }
+    DataRequestResponse:
+      type: object
+      required: [ok, request_id, data_request]
+      properties:
+        ok: { const: true }
+        request_id: { type: string }
+        data_request: { $ref: "#/components/schemas/DataRequest" }
+        duplicate: { type: boolean }
+        export:
+          type: object
+          additionalProperties: true
+          description: |
+            Present for a completed export in both the create response and
+            status responses until result_expires_at.
+    DataRequestWebhookEvent:
+      allOf:
+        - $ref: "#/components/schemas/WebhookEventBase"
+        - type: object
+          required:
+            - event
+            - data_request_id
+            - request_type
+            - status
+            - external_request_id
+            - result_summary
+            - failure_code
+          properties:
+            event:
+              type: string
+              enum:
+                - data.export_completed
+                - data.export_failed
+                - data.export_rejected
+                - data.deletion_completed
+                - data.deletion_failed
+                - data.deletion_rejected
+            data_request_id: { type: string, format: uuid }
+            request_type: { type: string, enum: [export, deletion] }
+            status: { type: string, enum: [completed, failed, rejected] }
+            external_request_id: { type: [string, "null"] }
+            result_summary: { type: object, additionalProperties: true }
+            failure_code: { type: [string, "null"] }
     WebhookEvent:
       oneOf:
         - $ref: "#/components/schemas/ConnectionWebhookEvent"
@@ -2266,6 +2487,7 @@ components:
         - $ref: "#/components/schemas/TransformCompletedWebhookEvent"
         - $ref: "#/components/schemas/TransformFailedWebhookEvent"
         - $ref: "#/components/schemas/DiagnosticPushWebhookEvent"
+        - $ref: "#/components/schemas/DataRequestWebhookEvent"
     GuardianMessage:
       type: object
       required: [guardian_message_id, bridge_connection_id, direction, sender_external_guardian_id, external_message_id, message_kind, text_body, status, created_at]

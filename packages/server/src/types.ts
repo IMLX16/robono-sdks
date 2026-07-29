@@ -727,6 +727,46 @@ export interface PushDiagnosticResponse extends JsonObject {
   diagnostic: JsonObject;
 }
 
+export type DataRequestType = "export" | "deletion";
+export type DataRequestStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "rejected"
+  | "failed";
+
+export interface DataRequestRecord extends JsonObject {
+  id: string;
+  request_type: DataRequestType;
+  external_request_id: string | null;
+  status: DataRequestStatus;
+  result_summary: JsonObject;
+  failure_code?: string | null;
+  requested_at: string;
+  completed_at: string | null;
+  result_expires_at: string | null;
+}
+
+export interface CreateDataRequestInput {
+  external_user_id: string;
+  external_request_id?: string;
+}
+
+export interface DataRequestResponse extends JsonObject {
+  ok: true;
+  request_id: string;
+  data_request: DataRequestRecord;
+  duplicate?: boolean;
+  export?: JsonObject;
+}
+
+export interface DataRequestStatusResponse extends JsonObject {
+  ok: true;
+  request_id: string;
+  data_request: DataRequestRecord;
+  export?: JsonObject;
+}
+
 export type RobonoWebhookEventName =
   | "connection.status_changed"
   | "connection.profile_updated"
@@ -744,7 +784,13 @@ export type RobonoWebhookEventName =
   | "bridge.guardian_message_status_changed"
   | "transform.completed"
   | "transform.failed"
-  | "diagnostic.push_requested";
+  | "diagnostic.push_requested"
+  | "data.export_completed"
+  | "data.export_failed"
+  | "data.export_rejected"
+  | "data.deletion_completed"
+  | "data.deletion_failed"
+  | "data.deletion_rejected";
 
 export interface RobonoWebhookEventBase extends JsonObject {
   event: RobonoWebhookEventName;
@@ -936,6 +982,22 @@ export interface DiagnosticPushWebhookEvent extends RobonoWebhookEventBase {
   external_user_id: string;
 }
 
+export interface DataRequestWebhookEvent extends RobonoWebhookEventBase {
+  event:
+    | "data.export_completed"
+    | "data.export_failed"
+    | "data.export_rejected"
+    | "data.deletion_completed"
+    | "data.deletion_failed"
+    | "data.deletion_rejected";
+  data_request_id: string;
+  request_type: DataRequestType;
+  status: Extract<DataRequestStatus, "completed" | "failed" | "rejected">;
+  external_request_id: string | null;
+  result_summary: JsonObject;
+  failure_code: string | null;
+}
+
 export type RobonoWebhookEvent =
   | ConnectionWebhookEvent
   | MessageCreatedWebhookEvent
@@ -948,7 +1010,8 @@ export type RobonoWebhookEvent =
   | BridgeGuardianMessageWebhookEvent
   | TransformCompletedWebhookEvent
   | TransformFailedWebhookEvent
-  | DiagnosticPushWebhookEvent;
+  | DiagnosticPushWebhookEvent
+  | DataRequestWebhookEvent;
 
 /**
  * Provider-neutral data delivered to a client SDK. The payload contains

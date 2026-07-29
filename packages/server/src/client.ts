@@ -14,9 +14,12 @@ import type {
   BridgeMessageListResponse,
   ConnectionCapabilities,
   ConnectEndpointInput,
+  CreateDataRequestInput,
   CreateRobonoConnectionInput,
   DirectoryEntry,
   DirectoryResponse,
+  DataRequestResponse,
+  DataRequestStatusResponse,
   DisconnectEndpointConnectionInput,
   EndpointConnection,
   EndpointConnectionCursor,
@@ -290,6 +293,20 @@ export class RobonoServer {
       options?: RobonoRequestOptions,
     ) => Promise<PushDiagnosticResponse>;
   };
+  readonly dataRequests: {
+    export: (
+      input: CreateDataRequestInput,
+      options?: RobonoRequestOptions,
+    ) => Promise<DataRequestResponse>;
+    deleteUser: (
+      input: CreateDataRequestInput,
+      options?: RobonoRequestOptions,
+    ) => Promise<DataRequestResponse>;
+    status: (
+      dataRequestId: string,
+      options?: RobonoRequestOptions,
+    ) => Promise<DataRequestStatusResponse>;
+  };
 
   private readonly apiKey: string;
   private readonly baseUrl: string;
@@ -315,7 +332,7 @@ export class RobonoServer {
         code: "fetch_required",
       });
     }
-    this.userAgent = options.userAgent ?? "@robono/server/0.7.8";
+    this.userAgent = options.userAgent ?? "@robono/server/0.8.0";
     this.apiVersion = options.apiVersion?.trim() || DEFAULT_API_VERSION;
 
     this.directory = {
@@ -736,6 +753,26 @@ export class RobonoServer {
     this.diagnostics = {
       reportPush: (input, requestOptions) =>
         this.request("/push-diagnostics/events", input, requestOptions),
+    };
+    this.dataRequests = {
+      export: (input, requestOptions) =>
+        this.request<DataRequestResponse>("/data-requests", {
+          action: "create",
+          request_type: "export",
+          format: "json",
+          ...input,
+        }, requestOptions),
+      deleteUser: (input, requestOptions) =>
+        this.request<DataRequestResponse>("/data-requests", {
+          action: "create",
+          request_type: "deletion",
+          ...input,
+        }, requestOptions),
+      status: (dataRequestId, requestOptions) =>
+        this.request<DataRequestStatusResponse>("/data-requests", {
+          action: "status",
+          data_request_id: dataRequestId,
+        }, requestOptions, false),
     };
   }
 

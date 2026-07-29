@@ -6,6 +6,8 @@ Headless React Native SDK for Robono Bridge. It keeps your existing authenticati
 
 You may use this SDK to build, test, and ship an authorized application that connects to Robono, including its compiled or bundled SDK code. You may not redistribute it as a standalone SDK, use it to bypass Robono, or use it to build a competing bridge service. Service access, pricing, and support are separate. If you and Robono sign a written agreement that expressly replaces this SDK license, that agreement controls to the extent it says so. The included `LICENSE` is the complete, controlling text.
 
+See the [SDK license FAQ](https://robono.com/sdk-license) for procurement guidance and the route for organization terms.
+
 It is pure JavaScript/TypeScript, works in Expo Go, and does not require CocoaPods or a native rebuild by itself. Your push provider may still require its normal native configuration.
 The package is ESM-only, as expected by current React Native and Expo tooling.
 

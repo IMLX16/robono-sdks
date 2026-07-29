@@ -3,6 +3,7 @@ import type {
   RobonoTransformPushPayload,
   RobonoWebhookEvent,
 } from "./types.js";
+import { RobonoWebhookError } from "./errors.js";
 
 /**
  * Converts a verified Robono webhook into the provider-neutral data expected
@@ -74,5 +75,15 @@ export function toClientPushPayload(
         push_diagnostic_id: event.push_diagnostic_id,
         diagnostic_token: event.diagnostic_token,
       };
+    case "data.export_completed":
+    case "data.export_failed":
+    case "data.export_rejected":
+    case "data.deletion_completed":
+    case "data.deletion_failed":
+    case "data.deletion_rejected":
+      throw new RobonoWebhookError(
+        "Data-rights webhooks are server events and must not be forwarded as client push payloads.",
+        "unsupported_client_push_event",
+      );
   }
 }

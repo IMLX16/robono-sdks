@@ -1,6 +1,6 @@
 {
   "name": "@robono/server",
-  "version": "0.7.8",
+  "version": "0.8.0",
   "description": "Provider-neutral server SDK for the Robono Bridge API.",
   "keywords": [
     "robono",

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { RobonoServer } from "./client.js";
+import { RobonoError } from "./errors.js";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
   console.log(`Usage: robono-sandbox-test
@@ -32,6 +33,7 @@ const userA = `sandbox-a-${runId}`;
 const userB = `sandbox-b-${runId}`;
 let bridgeConnectionId: string | null = null;
 let robonoConnectionId: string | null = null;
+let robonoConnectionNeedsCleanup = false;
 
 try {
   const directory = await networkA.directory.list();
@@ -80,7 +82,33 @@ try {
     accepted.status === "accepted",
     `Network B did not accept the connection; received ${accepted.status}.`,
   );
+  if (process.env.ROBONO_SANDBOX_DEBUG === "1") {
+    const summarizeCapabilities = (value: Record<string, unknown>) => ({
+      allowed_outbound_message_kinds: value.allowed_outbound_message_kinds,
+      allowed_inbound_message_kinds: value.allowed_inbound_message_kinds,
+      from_source_to_target: (
+        value.from_source_to_target as Record<string, unknown> | undefined
+      )?.allowed_message_kinds,
+      from_target_to_source: (
+        value.from_target_to_source as Record<string, unknown> | undefined
+      )?.allowed_message_kinds,
+    });
+    console.error(JSON.stringify({
+      requested_endpoint_type: requested.endpoint_type,
+      requested_capabilities: summarizeCapabilities(requested.capabilities),
+      requested_raw_capabilities: "capabilities" in requested.raw
+        ? summarizeCapabilities(requested.raw.capabilities)
+        : null,
+      requested_raw_type: "bridge_connection_id" in requested.raw
+        ? "connected_app"
+        : "robono_phone",
+      accepted_capabilities: summarizeCapabilities(accepted.capabilities),
+    }, null, 2));
+  }
 
+  if (process.env.ROBONO_SANDBOX_DEBUG === "1") {
+    console.error(JSON.stringify({ stage: "connected_app_message_send" }));
+  }
   const sent = await networkA.messages.send({
     connection: requested,
     external_user_id: userA,
@@ -89,6 +117,9 @@ try {
     text_body: "Hello from the Robono stateful sandbox.",
   });
   assert(sent.message_id, "Robono did not return a bridge message ID.");
+  if (process.env.ROBONO_SANDBOX_DEBUG === "1") {
+    console.error(JSON.stringify({ stage: "connected_app_message_sent" }));
+  }
 
   const received = await networkB.messages.list({
     bridge_connection_id: bridgeConnectionId,
@@ -127,10 +158,20 @@ try {
     target_identifier: "+15550100101",
   });
   robonoConnectionId = robonoConnection.connection_id;
+  robonoConnectionNeedsCleanup =
+    (robonoConnection.raw as { real_delivery?: boolean }).real_delivery !==
+      false;
   assert(
     robonoConnection.endpoint_type === "robono_phone",
     "The unified SDK did not preserve the Robono endpoint type.",
   );
+  if (process.env.ROBONO_SANDBOX_DEBUG === "1") {
+    console.error(JSON.stringify({
+      stage: "robono_endpoint_message_send",
+      allowed_outbound_message_kinds:
+        robonoConnection.capabilities.allowed_outbound_message_kinds,
+    }));
+  }
   const robonoMessage = await networkA.messages.send({
     connection: robonoConnection,
     external_user_id: userA,
@@ -143,12 +184,15 @@ try {
     robonoMessage.status === "validated",
     `Expected Robono endpoint validation; received ${robonoMessage.status}.`,
   );
-  await networkA.connections.disconnect({
-    connection_id: robonoConnectionId,
-    external_user_id: userA,
-    reason: "sandbox_test_complete",
-  });
+  if (robonoConnectionNeedsCleanup) {
+    await networkA.connections.disconnect({
+      connection_id: robonoConnectionId,
+      external_user_id: userA,
+      reason: "sandbox_test_complete",
+    });
+  }
   robonoConnectionId = null;
+  robonoConnectionNeedsCleanup = false;
 
   console.log(JSON.stringify({
     ok: true,
@@ -162,9 +206,18 @@ try {
     },
   }, null, 2));
 } catch (error) {
-  console.error(
-    error instanceof Error ? error.message : "The sandbox test failed.",
-  );
+  console.error(JSON.stringify({
+    ok: false,
+    message: error instanceof Error ? error.message : "The sandbox test failed.",
+    ...(error instanceof RobonoError
+      ? {
+        code: error.code,
+        request_id: error.requestId,
+        fields: error.fields,
+        details: error.details,
+      }
+      : {}),
+  }, null, 2));
   process.exitCode = 1;
 } finally {
   if (bridgeConnectionId) {
@@ -174,7 +227,7 @@ try {
       reason: "sandbox_test_complete",
     }).catch(() => undefined);
   }
-  if (robonoConnectionId) {
+  if (robonoConnectionId && robonoConnectionNeedsCleanup) {
     await networkA.connections.disconnect({
       connection_id: robonoConnectionId,
       external_user_id: userA,

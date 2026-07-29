@@ -3,6 +3,7 @@ import { createHmac } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { parse as parseYaml } from "yaml";
 import {
   restrictionsFor,
   createRobonoBackendAdapter,
@@ -1309,6 +1310,38 @@ test("webhook verifier accepts directory-change synchronization signals", async 
     "robono-webhook-id": "evt_directory",
   }, secret, { now: new Date(timestamp) });
   assert.equal(verified.event.event, "bridge.directory_changed");
+});
+
+test("every official OpenAPI webhook example passes the published verifier", async () => {
+  const secret = "whsec_openapi_contract";
+  const contract = parseYaml(
+    readFileSync(
+      new URL("../../../docs/api/openapi.yaml", import.meta.url),
+      "utf8",
+    ),
+  );
+  const examples =
+    contract.webhooks.robonoEvent.post.requestBody.content["application/json"]
+      .examples;
+
+  for (const [name, example] of Object.entries(examples)) {
+    const timestamp = example.value.created_at;
+    const body = JSON.stringify(example.value);
+    const signature = createHmac("sha256", secret)
+      .update(`${timestamp}.${body}`)
+      .digest("hex");
+    const verified = await verifyRobonoWebhook(body, {
+      "robono-webhook-timestamp": timestamp,
+      "robono-webhook-signature": `v1=${signature}`,
+      "robono-webhook-id": example.value.event_id,
+    }, secret, { now: new Date(timestamp) });
+
+    assert.equal(
+      verified.event.event,
+      example.value.event,
+      `${name} should pass the SDK verifier`,
+    );
+  }
 });
 
 test("webhook verifier atomically claims events and rejects mismatched IDs", async () => {

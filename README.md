@@ -4,7 +4,7 @@ Official headless SDKs for connecting applications to the Robono Bridge.
 
 | Package | Use |
 | --- | --- |
-| [`@robono/server`](./packages/server) | Server authentication, bridge operations, signed webhooks, and adapters |
+| [`@robono/server`](./packages/server) | Server authentication, Bridge operations, signed events, and protected client routes |
 | [`@robono/client`](./packages/client) | Shared headless client state and push handling |
 | [`@robono/react-native`](./packages/react-native) | React Native and Expo integration |
 | [`@robono/web`](./packages/web) | Browser integration |

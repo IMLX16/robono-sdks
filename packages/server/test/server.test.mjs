@@ -286,7 +286,7 @@ test("directory request authenticates and normalizes options", async () => {
   assert.equal(captured.url, "https://sandbox.example/v1/networks");
   assert.equal(captured.init.headers.authorization, "Bearer rbn_test_example");
   assert.equal(captured.init.headers["robono-api-version"], "2026-07-25");
-  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.0");
+  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.1");
   assert.deepEqual(JSON.parse(captured.init.body), {
     include_phone_robono: false,
     include_self: true,

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+
+- Simplifies the public implementation path while retaining the complete endpoint, authorization, event, and testing contracts.
+- Renames the public client-side API reference and removes unnecessary infrastructure terminology.
+
 ## 0.8.0
 
 - Added typed external-user export and deletion operations with status lookup.

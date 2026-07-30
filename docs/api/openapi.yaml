@@ -15,8 +15,8 @@ servers:
 security:
   - apiKey: []
 x-robono-api-version-policy:
-  current: "2026-07-25"
-  minimum-deprecation-notice-days: 90
+  current: 2026-07-25
+  minimum-deprecation-notice-days: 365
 x-robono-default-limits:
   production_requests_per_rolling_minute: 300
   sandbox_requests_per_rolling_minute: 600
@@ -32,15 +32,19 @@ webhooks:
         - name: Robono-Webhook-Id
           in: header
           required: true
-          schema: { type: string }
+          schema:
+            type: string
         - name: Robono-Request-Id
           in: header
           required: true
-          schema: { type: string }
+          schema:
+            type: string
         - name: Robono-Webhook-Timestamp
           in: header
           required: true
-          schema: { type: string, format: date-time }
+          schema:
+            type: string
+            format: date-time
         - name: Robono-Webhook-Signature
           in: header
           required: true
@@ -50,12 +54,13 @@ webhooks:
             matches the secret currently deployed in your webhook receiver.
           schema:
             type: string
-            pattern: "^v1=[a-f0-9]{64}(,v1=[a-f0-9]{64})?$"
+            pattern: ^v1=[a-f0-9]{64}(,v1=[a-f0-9]{64})?$
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/WebhookEvent" }
+            schema:
+              $ref: "#/components/schemas/WebhookEvent"
             examples:
               connectionStatus:
                 summary: Robono-endpoint connection status changed
@@ -63,7 +68,7 @@ webhooks:
                   event: connection.status_changed
                   event_id: evt_01J00000000000000000000010
                   request_id: req_01J00000000000000000000010
-                  created_at: "2026-07-25T12:00:10Z"
+                  created_at: 2026-07-25T12:00:10Z
                   connection_id: 11111111-1111-4111-8111-111111111111
                   status: active
               connectionProfile:
@@ -72,7 +77,7 @@ webhooks:
                   event: connection.profile_updated
                   event_id: evt_01J00000000000000000000011
                   request_id: req_01J00000000000000000000011
-                  created_at: "2026-07-25T12:00:11Z"
+                  created_at: 2026-07-25T12:00:11Z
                   connection_id: 11111111-1111-4111-8111-111111111111
                   status: active
               message:
@@ -81,7 +86,7 @@ webhooks:
                   event: message.created
                   event_id: evt_01J00000000000000000000000
                   request_id: req_01J00000000000000000000000
-                  created_at: "2026-07-25T12:00:00Z"
+                  created_at: 2026-07-25T12:00:00Z
                   connection_id: 11111111-1111-4111-8111-111111111111
                   robono_message_id: 22222222-2222-4222-8222-222222222222
                   external_user_id: child-user-42
@@ -103,7 +108,7 @@ webhooks:
                   event: message.delivered
                   event_id: evt_01J00000000000000000000012
                   request_id: req_01J00000000000000000000012
-                  created_at: "2026-07-25T12:00:12Z"
+                  created_at: 2026-07-25T12:00:12Z
                   connection_id: 11111111-1111-4111-8111-111111111111
                   robono_message_id: 22222222-2222-4222-8222-222222222222
                   external_message_id: external-message-42
@@ -113,7 +118,7 @@ webhooks:
                   event: message.heard
                   event_id: evt_01J00000000000000000000013
                   request_id: req_01J00000000000000000000013
-                  created_at: "2026-07-25T12:00:13Z"
+                  created_at: 2026-07-25T12:00:13Z
                   connection_id: 11111111-1111-4111-8111-111111111111
                   robono_message_id: 22222222-2222-4222-8222-222222222222
                   external_message_id: external-message-42
@@ -123,16 +128,16 @@ webhooks:
                   event: message.reaction_updated
                   event_id: evt_01J00000000000000000000002
                   request_id: req_01J00000000000000000000002
-                  created_at: "2026-07-25T12:00:02Z"
+                  created_at: 2026-07-25T12:00:02Z
                   connection_id: 11111111-1111-4111-8111-111111111111
                   conversation_id: 44444444-4444-4444-8444-444444444444
                   robono_message_id: 22222222-2222-4222-8222-222222222222
                   external_message_id: external-message-42
                   external_user_id: child-user-42
                   reaction:
-                    emoji: "❤️"
+                    emoji: ❤️
                     removed: false
-                    reacted_at: "2026-07-25T12:00:02Z"
+                    reacted_at: 2026-07-25T12:00:02Z
                   reactor:
                     type: robono_user
                     robono_user_id: 33333333-3333-4333-8333-333333333333
@@ -144,7 +149,7 @@ webhooks:
                   event: bridge.connection_requested
                   event_id: evt_01J00000000000000000000003
                   request_id: req_01J00000000000000000000003
-                  created_at: "2026-07-25T12:00:03Z"
+                  created_at: 2026-07-25T12:00:03Z
                   bridge_connection_id: 55555555-5555-4555-8555-555555555555
                   source:
                     app:
@@ -177,17 +182,19 @@ webhooks:
                   event: bridge.connection_status_changed
                   event_id: evt_01J00000000000000000000014
                   request_id: req_01J00000000000000000000014
-                  created_at: "2026-07-25T12:00:14Z"
+                  created_at: 2026-07-25T12:00:14Z
                   bridge_connection_id: 55555555-5555-4555-8555-555555555555
                   connection:
                     bridge_connection_id: 55555555-5555-4555-8555-555555555555
                     status: accepted
                     source:
-                      app: { id: 66666666-6666-4666-8666-666666666666 }
+                      app:
+                        id: 66666666-6666-4666-8666-666666666666
                       external_user_id: source-child-42
                       display_name: Jordan
                     target:
-                      app: { id: 77777777-7777-4777-8777-777777777777 }
+                      app:
+                        id: 77777777-7777-4777-8777-777777777777
                       identifier: FRIEND-42
                       external_user_id: target-child-42
                       display_name: Riley
@@ -199,30 +206,34 @@ webhooks:
                   event: bridge.connection_updated
                   event_id: evt_01J00000000000000000000015
                   request_id: req_01J00000000000000000000015
-                  created_at: "2026-07-25T12:00:15Z"
+                  created_at: 2026-07-25T12:00:15Z
                   bridge_connection_id: 55555555-5555-4555-8555-555555555555
                   connection:
                     bridge_connection_id: 55555555-5555-4555-8555-555555555555
                     status: accepted
                     source:
-                      app: { id: 66666666-6666-4666-8666-666666666666 }
+                      app:
+                        id: 66666666-6666-4666-8666-666666666666
                       external_user_id: source-child-42
                       display_name: Jordan
                     target:
-                      app: { id: 77777777-7777-4777-8777-777777777777 }
+                      app:
+                        id: 77777777-7777-4777-8777-777777777777
                       identifier: FRIEND-42
                       external_user_id: target-child-42
                       display_name: Riley
                     guardian_messaging_enabled: false
                     capabilities:
-                      allowed_outbound_message_kinds: [text, voice]
+                      allowed_outbound_message_kinds:
+                        - text
+                        - voice
               directoryChanged:
                 summary: Directory endpoint changed
                 value:
                   event: bridge.directory_changed
                   event_id: evt_01J00000000000000000000016
                   request_id: req_01J00000000000000000000016
-                  created_at: "2026-07-25T12:00:16Z"
+                  created_at: 2026-07-25T12:00:16Z
                   endpoint_id: 77777777-7777-4777-8777-777777777777
                   change: updated
               bridgeMessage:
@@ -231,18 +242,20 @@ webhooks:
                   event: bridge.message_created
                   event_id: evt_01J00000000000000000000017
                   request_id: req_01J00000000000000000000017
-                  created_at: "2026-07-25T12:00:17Z"
+                  created_at: 2026-07-25T12:00:17Z
                   bridge_connection_id: 55555555-5555-4555-8555-555555555555
                   bridge_message_id: 99999999-9999-4999-8999-999999999999
                   connection:
                     bridge_connection_id: 55555555-5555-4555-8555-555555555555
                     status: accepted
                     source:
-                      app: { id: 66666666-6666-4666-8666-666666666666 }
+                      app:
+                        id: 66666666-6666-4666-8666-666666666666
                       external_user_id: source-child-42
                       display_name: Jordan
                     target:
-                      app: { id: 77777777-7777-4777-8777-777777777777 }
+                      app:
+                        id: 77777777-7777-4777-8777-777777777777
                       identifier: FRIEND-42
                       external_user_id: target-child-42
                       display_name: Riley
@@ -258,14 +271,14 @@ webhooks:
                     external_message_id: external-message-42
                     message_kind: text
                     text_body: Hello
-                    created_at: "2026-07-25T12:00:17Z"
+                    created_at: 2026-07-25T12:00:17Z
               bridgeMessageStatus:
                 summary: Connected-app message status changed
                 value:
                   event: bridge.message_status_changed
                   event_id: evt_01J00000000000000000000018
                   request_id: req_01J00000000000000000000018
-                  created_at: "2026-07-25T12:00:18Z"
+                  created_at: 2026-07-25T12:00:18Z
                   bridge_connection_id: 55555555-5555-4555-8555-555555555555
                   bridge_message_id: 99999999-9999-4999-8999-999999999999
                   status: read
@@ -275,18 +288,20 @@ webhooks:
                   event: bridge.guardian_message_created
                   event_id: evt_01J00000000000000000000004
                   request_id: req_01J00000000000000000000004
-                  created_at: "2026-07-25T12:00:04Z"
+                  created_at: 2026-07-25T12:00:04Z
                   bridge_connection_id: 55555555-5555-4555-8555-555555555555
                   guardian_message_id: 88888888-8888-4888-8888-888888888888
                   connection:
                     bridge_connection_id: 55555555-5555-4555-8555-555555555555
                     status: accepted
                     source:
-                      app: { id: 66666666-6666-4666-8666-666666666666 }
+                      app:
+                        id: 66666666-6666-4666-8666-666666666666
                       external_user_id: source-child-42
                       display_name: Jordan
                     target:
-                      app: { id: 77777777-7777-4777-8777-777777777777 }
+                      app:
+                        id: 77777777-7777-4777-8777-777777777777
                       identifier: FRIEND-42
                       external_user_id: target-child-42
                       display_name: Riley
@@ -314,14 +329,14 @@ webhooks:
                     external_message_id: guardian-message-42
                     message_kind: text
                     text_body: Pickup is at four.
-                    created_at: "2026-07-25T12:00:04Z"
+                    created_at: 2026-07-25T12:00:04Z
               guardianMessageStatus:
                 summary: Guardian message status changed
                 value:
                   event: bridge.guardian_message_status_changed
                   event_id: evt_01J00000000000000000000019
                   request_id: req_01J00000000000000000000019
-                  created_at: "2026-07-25T12:00:19Z"
+                  created_at: 2026-07-25T12:00:19Z
                   bridge_connection_id: 55555555-5555-4555-8555-555555555555
                   guardian_message_id: 88888888-8888-4888-8888-888888888888
                   status: read
@@ -331,7 +346,7 @@ webhooks:
                   event: transform.completed
                   event_id: evt_01J00000000000000000000020
                   request_id: req_01J00000000000000000000020
-                  created_at: "2026-07-25T12:00:20Z"
+                  created_at: 2026-07-25T12:00:20Z
                   transform_kind: message
                   status: completed
                   external_request_id: transform-message-42
@@ -355,7 +370,7 @@ webhooks:
                   event: transform.failed
                   event_id: evt_01J00000000000000000000001
                   request_id: req_01J00000000000000000000001
-                  created_at: "2026-07-25T12:00:01Z"
+                  created_at: 2026-07-25T12:00:01Z
                   transform_kind: speech
                   status: failed
                   external_request_id: translate-message-42
@@ -368,7 +383,7 @@ webhooks:
                   event: diagnostic.push_requested
                   event_id: evt_01J00000000000000000000021
                   request_id: req_01J00000000000000000000021
-                  created_at: "2026-07-25T12:00:21Z"
+                  created_at: 2026-07-25T12:00:21Z
                   push_diagnostic_id: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
                   diagnostic_token: diagnostic-token-42
                   external_user_id: child-user-42
@@ -378,12 +393,14 @@ webhooks:
                   event: data.export_completed
                   event_id: evt_01J00000000000000000000022
                   request_id: req_01J00000000000000000000022
-                  created_at: "2026-07-25T12:00:22Z"
+                  created_at: 2026-07-25T12:00:22Z
                   data_request_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
                   request_type: export
                   status: completed
                   external_request_id: privacy-request-42
-                  result_summary: { record_count: 12, content_included: false }
+                  result_summary:
+                    record_count: 12
+                    content_included: false
                   failure_code: null
               dataExportFailed:
                 summary: User data export failed
@@ -391,7 +408,7 @@ webhooks:
                   event: data.export_failed
                   event_id: evt_01J00000000000000000000023
                   request_id: req_01J00000000000000000000023
-                  created_at: "2026-07-25T12:00:23Z"
+                  created_at: 2026-07-25T12:00:23Z
                   data_request_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
                   request_type: export
                   status: failed
@@ -404,7 +421,7 @@ webhooks:
                   event: data.export_rejected
                   event_id: evt_01J00000000000000000000024
                   request_id: req_01J00000000000000000000024
-                  created_at: "2026-07-25T12:00:24Z"
+                  created_at: 2026-07-25T12:00:24Z
                   data_request_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
                   request_type: export
                   status: rejected
@@ -417,12 +434,14 @@ webhooks:
                   event: data.deletion_completed
                   event_id: evt_01J00000000000000000000025
                   request_id: req_01J00000000000000000000025
-                  created_at: "2026-07-25T12:00:25Z"
+                  created_at: 2026-07-25T12:00:25Z
                   data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
                   request_type: deletion
                   status: completed
                   external_request_id: deletion-request-42
-                  result_summary: { direct_connections_deleted: 1, network_connections_deleted: 2 }
+                  result_summary:
+                    direct_connections_deleted: 1
+                    network_connections_deleted: 2
                   failure_code: null
               dataDeletionFailed:
                 summary: User deletion failed
@@ -430,7 +449,7 @@ webhooks:
                   event: data.deletion_failed
                   event_id: evt_01J00000000000000000000026
                   request_id: req_01J00000000000000000000026
-                  created_at: "2026-07-25T12:00:26Z"
+                  created_at: 2026-07-25T12:00:26Z
                   data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
                   request_type: deletion
                   status: failed
@@ -443,7 +462,7 @@ webhooks:
                   event: data.deletion_rejected
                   event_id: evt_01J00000000000000000000027
                   request_id: req_01J00000000000000000000027
-                  created_at: "2026-07-25T12:00:27Z"
+                  created_at: 2026-07-25T12:00:27Z
                   data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
                   request_type: deletion
                   status: rejected
@@ -451,7 +470,7 @@ webhooks:
                   result_summary: {}
                   failure_code: request_rejected
       responses:
-        "2XX":
+        2XX:
           description: |
             Event durably accepted. Return any 2xx response, including 200 or
             202, within 10 seconds. Duplicate event IDs must also return 2xx.
@@ -464,9 +483,19 @@ paths:
     post:
       operationId: listNetworks
       summary: List networks available for new connections
-      tags: [Networks]
+      tags:
+        - Networks
       requestBody:
-        $ref: "#/components/requestBodies/JsonBody"
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              typical:
+                summary: Typical request
+                value: {}
       responses:
         "200":
           description: Available networks and the identifier required by each network
@@ -474,11 +503,62 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NetworkDirectoryResponse"
-        "4XX":
-          $ref: "#/components/responses/Error"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    directory:
+                      - type: connected_app
+                        id: 77777777-7777-4777-8777-777777777777
+                        slug: friend-app
+                        display_name: Friend App
+                        description: A connected child app.
+                        icon_url: https://cdn.example.com/friend-app.png
+                        accepts_inbound_bridge_requests: true
+                        accepted_identifier:
+                          label: Friend code
+                          description: Enter the code shown in the friend's app.
+                          example: FRIEND-42
+                          format: App-issued friend code
+                          input_type: text
+                          min_length: 6
+                          max_length: 32
+                          normalization: uppercase
+                          case_sensitive: false
+                        default_capabilities: &a1
+                          allowed_outbound_message_kinds:
+                            - text
+                            - voice
+                          allowed_inbound_message_kinds:
+                            - text
+                            - voice
+                          text:
+                            max_characters: 1000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-connections:
     parameters:
@@ -486,7 +566,8 @@ paths:
     post:
       operationId: requestNetworkConnection
       summary: Request a connection to a user in another network
-      tags: [Connections]
+      tags:
+        - Connections
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -495,6 +576,18 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/RequestConnection"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  target_app_id: 77777777-7777-4777-8777-777777777777
+                  source_external_user_id: source-child-42
+                  source_display_name: Jordan
+                  target_identifier: FRIEND-42
+                  monitoring_disclosure: A guardian may review this relationship.
+                  external_approval:
+                    approved: true
+                    source: guardian-consent-42
       responses:
         "200":
           description: Connection request stored
@@ -502,11 +595,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConnectionResponse"
-        "4XX":
-          $ref: "#/components/responses/Error"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: &a2
+                      app:
+                        id: 66666666-6666-4666-8666-666666666666
+                        slug: source-app
+                        display_name: Source App
+                      external_user_id: source-child-42
+                      display_name: Jordan
+                    target: &a3
+                      app:
+                        id: 77777777-7777-4777-8777-777777777777
+                        slug: friend-app
+                        display_name: Friend App
+                      identifier: FRIEND-42
+                      external_user_id: target-child-42
+                      display_name: Riley
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-connections/respond:
     parameters:
@@ -514,7 +652,8 @@ paths:
     post:
       operationId: respondToNetworkConnection
       summary: Accept, reject, or report no match for an incoming request
-      tags: [Connections]
+      tags:
+        - Connections
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -523,6 +662,14 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/RespondConnection"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  status: accepted
+                  target_external_user_id: target-child-42
+                  target_display_name: Riley
       responses:
         "200":
           description: Updated connection
@@ -530,11 +677,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConnectionResponse"
-        "4XX":
-          $ref: "#/components/responses/Error"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: *a2
+                    target: *a3
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-connections/list:
     parameters:
@@ -542,7 +721,8 @@ paths:
     post:
       operationId: listNetworkConnections
       summary: Recover or synchronize connections
-      tags: [Connections]
+      tags:
+        - Connections
       requestBody:
         required: false
         content:
@@ -550,11 +730,29 @@ paths:
             schema:
               type: object
               properties:
-                external_user_id: { type: string, maxLength: 160 }
-                bridge_connection_id: { type: string, format: uuid }
-                status: { $ref: "#/components/schemas/ConnectionStatus" }
-                limit: { type: integer, minimum: 1, maximum: 100, default: 50 }
-                before: { type: string, format: date-time }
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                status:
+                  $ref: "#/components/schemas/ConnectionStatus"
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 50
+                before:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  external_user_id: source-child-42
+                  status: accepted
+                  limit: 50
       responses:
         "200":
           description: Connections visible to this network
@@ -562,20 +760,67 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [ok, request_id, connections, has_more]
+                required:
+                  - ok
+                  - request_id
+                  - connections
+                  - has_more
                 properties:
-                  ok: { const: true }
-                  request_id: { type: string }
+                  ok:
+                    const: true
+                  request_id:
+                    type: string
                   connections:
                     type: array
-                    items: { $ref: "#/components/schemas/Connection" }
-                  has_more: { type: boolean }
-                  next_before: { type: [string, "null"], format: date-time }
-        "4XX":
-          $ref: "#/components/responses/Error"
+                    items:
+                      $ref: "#/components/schemas/Connection"
+                  has_more:
+                    type: boolean
+                  next_before:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    connections:
+                      - bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                        status: accepted
+                        source: *a2
+                        target: *a3
+                        guardian_messaging_enabled: false
+                        capabilities: *a1
+                        accepted_at: 2026-07-25T12:00:00Z
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-connections/disconnect:
     parameters:
@@ -583,7 +828,8 @@ paths:
     post:
       operationId: disconnectNetworkConnection
       summary: Disconnect a network relationship
-      tags: [Connections]
+      tags:
+        - Connections
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -592,12 +838,29 @@ paths:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id, external_user_id]
+              required:
+                - bridge_connection_id
+                - external_user_id
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                external_user_id: { type: string, maxLength: 160 }
-                reason: { type: string, maxLength: 240 }
-                disconnected_at: { type: string, format: date-time }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                reason:
+                  type: string
+                  maxLength: 240
+                disconnected_at:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  external_user_id: source-child-42
+                  reason: User ended the relationship.
       responses:
         "200":
           description: Disconnected connection
@@ -605,11 +868,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConnectionResponse"
-        "4XX":
-          $ref: "#/components/responses/Error"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: *a2
+                    target: *a3
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-connections/update:
     parameters:
@@ -617,7 +912,8 @@ paths:
     post:
       operationId: updateNetworkConnection
       summary: Update a participant display name, language/rules, or guardians
-      tags: [Connections]
+      tags:
+        - Connections
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -626,27 +922,79 @@ paths:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id, external_user_id]
+              required:
+                - bridge_connection_id
+                - external_user_id
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                external_user_id: { type: string, maxLength: 160 }
-                display_name: { type: string, maxLength: 160 }
-                external_profile: { $ref: "#/components/schemas/ExternalProfile" }
-                capabilities: { $ref: "#/components/schemas/Capabilities" }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                display_name:
+                  type: string
+                  maxLength: 160
+                external_profile:
+                  $ref: "#/components/schemas/ExternalProfile"
+                capabilities:
+                  $ref: "#/components/schemas/Capabilities"
                 guardians:
                   type: array
-                  items: { $ref: "#/components/schemas/Guardian" }
+                  items:
+                    $ref: "#/components/schemas/Guardian"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  external_user_id: source-child-42
+                  display_name: Jordan
+                  capabilities: *a1
       responses:
         "200":
           description: Updated connection and newly negotiated limits
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ConnectionResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/ConnectionResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: *a2
+                    target: *a3
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-messages:
     parameters:
@@ -654,7 +1002,8 @@ paths:
     post:
       operationId: sendNetworkMessage
       summary: Send content across an accepted connection
-      tags: [Messages]
+      tags:
+        - Messages
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -663,6 +1012,15 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/SendMessage"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  external_user_id: source-child-42
+                  external_message_id: message-42
+                  message_kind: text
+                  text_body: Want to play after school?
       responses:
         "200":
           description: Message stored or accepted by the destination network
@@ -670,11 +1028,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SendMessageResponse"
-        "4XX":
-          $ref: "#/components/responses/Error"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    bridge_message_id: 88888888-8888-4888-8888-888888888888
+                    status: accepted
+                    duplicate: false
+                    dry_run: false
+                    accepted_at: 2026-07-25T12:00:00Z
+                    accepted_via: push
+                    push_status: accepted
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-messages/list:
     parameters:
@@ -682,23 +1071,44 @@ paths:
     post:
       operationId: listNetworkMessages
       summary: Recover or synchronize messages and delivery states
-      tags: [Messages]
+      tags:
+        - Messages
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id]
+              required:
+                - bridge_connection_id
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                external_user_id: { type: string, maxLength: 160 }
-                limit: { type: integer, minimum: 1, maximum: 100, default: 50 }
-                before: { type: string, format: date-time }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 50
+                before:
+                  type: string
+                  format: date-time
                 after:
                   type: string
                   format: date-time
-                  description: Return only messages created after this synchronization cursor. Do not combine with before.
+                  description: Return only messages created after this synchronization cursor. Do not combine with
+                    before.
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  external_user_id: source-child-42
+                  limit: 50
+                  after: 2026-07-25T11:55:00Z
       responses:
         "200":
           description: Messages visible to this network
@@ -706,22 +1116,88 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [ok, request_id, messages, has_more]
+                required:
+                  - ok
+                  - request_id
+                  - messages
+                  - has_more
                 properties:
-                  ok: { const: true }
-                  request_id: { type: string }
+                  ok:
+                    const: true
+                  request_id:
+                    type: string
                   messages:
                     type: array
-                    items: { $ref: "#/components/schemas/Message" }
-                  has_more: { type: boolean }
-                  next_before: { type: [string, "null"], format: date-time }
-                  next_after: { type: [string, "null"], format: date-time }
-                  sync_cursor: { type: [string, "null"], format: date-time }
-        "4XX":
-          $ref: "#/components/responses/Error"
+                    items:
+                      $ref: "#/components/schemas/Message"
+                  has_more:
+                    type: boolean
+                  next_before:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+                  next_after:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+                  sync_cursor:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    messages:
+                      - bridge_message_id: 88888888-8888-4888-8888-888888888888
+                        bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                        direction: outbound
+                        sender_external_user_id: source-child-42
+                        external_message_id: message-42
+                        message_kind: text
+                        text_body: Want to play after school?
+                        media: {}
+                        status: delivered
+                        accepted_at: 2026-07-25T12:00:00Z
+                        accepted_via: push
+                        delivered_at: 2026-07-25T12:00:00Z
+                        read_at: null
+                        heard_at: null
+                        failed_at: null
+                        failure_code: null
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
+                    next_after: 2026-07-25T12:00:00Z
+                    sync_cursor: 2026-07-25T12:00:00Z
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /network-messages/events:
     parameters:
@@ -729,7 +1205,8 @@ paths:
     post:
       operationId: markNetworkMessage
       summary: Report that a received message was delivered, read, or heard
-      tags: [Messages]
+      tags:
+        - Messages
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -738,14 +1215,34 @@ paths:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id, bridge_message_id, event]
+              required:
+                - bridge_connection_id
+                - bridge_message_id
+                - event
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                bridge_message_id: { type: string, format: uuid }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                bridge_message_id:
+                  type: string
+                  format: uuid
                 event:
                   type: string
-                  enum: [delivered, read, heard]
-                occurred_at: { type: string, format: date-time }
+                  enum:
+                    - delivered
+                    - read
+                    - heard
+                occurred_at:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  bridge_message_id: 88888888-8888-4888-8888-888888888888
+                  event: read
+                  occurred_at: 2026-07-25T12:00:00Z
       responses:
         "200":
           description: Current message state
@@ -753,18 +1250,57 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [ok, request_id, bridge_message_id, status, occurred_at]
+                required:
+                  - ok
+                  - request_id
+                  - bridge_message_id
+                  - status
+                  - occurred_at
                 properties:
-                  ok: { const: true }
-                  request_id: { type: string }
-                  bridge_message_id: { type: string, format: uuid }
-                  status: { $ref: "#/components/schemas/MessageStatus" }
-                  occurred_at: { type: string, format: date-time }
-        "4XX":
-          $ref: "#/components/responses/Error"
+                  ok:
+                    const: true
+                  request_id:
+                    type: string
+                  bridge_message_id:
+                    type: string
+                    format: uuid
+                  status:
+                    $ref: "#/components/schemas/MessageStatus"
+                  occurred_at:
+                    type: string
+                    format: date-time
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    bridge_message_id: 88888888-8888-4888-8888-888888888888
+                    status: read
+                    occurred_at: 2026-07-25T12:00:00Z
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /guardian-messages:
     parameters:
@@ -772,7 +1308,8 @@ paths:
     post:
       operationId: sendGuardianMessage
       summary: Send a guardian message through a guardian-enabled connection
-      tags: [Messages]
+      tags:
+        - Messages
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -781,14 +1318,37 @@ paths:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id, external_guardian_id, external_message_id, text_body]
+              required:
+                - bridge_connection_id
+                - external_guardian_id
+                - external_message_id
+                - text_body
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                external_guardian_id: { type: string, maxLength: 160 }
-                external_message_id: { type: string, maxLength: 160 }
-                message_kind: { const: text }
-                text_body: { type: string, minLength: 1 }
-                dry_run: { type: boolean, default: false }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                external_guardian_id:
+                  type: string
+                  maxLength: 160
+                external_message_id:
+                  type: string
+                  maxLength: 160
+                message_kind:
+                  const: text
+                text_body:
+                  type: string
+                  minLength: 1
+                dry_run:
+                  type: boolean
+                  default: false
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  external_guardian_id: guardian-42
+                  external_message_id: guardian-message-42
+                  text_body: Pickup is at 4:00.
       responses:
         "200":
           description: Guardian message result
@@ -796,11 +1356,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SendMessageResponse"
-        "4XX":
-          $ref: "#/components/responses/Error"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    guardian_message_id: 99999999-9999-4999-8999-999999999999
+                    status: accepted
+                    duplicate: false
+                    dry_run: false
+                    accepted_at: 2026-07-25T12:00:00Z
+                    accepted_via: push
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /guardian-messages/list:
     parameters:
@@ -808,18 +1398,34 @@ paths:
     post:
       operationId: listGuardianMessages
       summary: Recover or synchronize guardian messages and delivery states
-      tags: [Messages]
+      tags:
+        - Messages
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id]
+              required:
+                - bridge_connection_id
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                limit: { type: integer, minimum: 1, maximum: 100, default: 50 }
-                before: { type: string, format: date-time }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 50
+                before:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  limit: 50
       responses:
         "200":
           description: Guardian messages visible to this network
@@ -827,20 +1433,68 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [ok, request_id, messages, has_more]
+                required:
+                  - ok
+                  - request_id
+                  - messages
+                  - has_more
                 properties:
-                  ok: { const: true }
-                  request_id: { type: string }
+                  ok:
+                    const: true
+                  request_id:
+                    type: string
                   messages:
                     type: array
-                    items: { $ref: "#/components/schemas/GuardianMessage" }
-                  has_more: { type: boolean }
-                  next_before: { type: [string, "null"], format: date-time }
-        "4XX":
-          $ref: "#/components/responses/Error"
+                    items:
+                      $ref: "#/components/schemas/GuardianMessage"
+                  has_more:
+                    type: boolean
+                  next_before:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    messages:
+                      - guardian_message_id: 99999999-9999-4999-8999-999999999999
+                        bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                        direction: outbound
+                        sender_external_guardian_id: guardian-42
+                        external_message_id: guardian-message-42
+                        message_kind: text
+                        text_body: Pickup is at 4:00.
+                        status: read
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /guardian-messages/events:
     parameters:
@@ -848,7 +1502,8 @@ paths:
     post:
       operationId: markGuardianMessage
       summary: Report that a guardian message was delivered or read
-      tags: [Messages]
+      tags:
+        - Messages
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -857,23 +1512,73 @@ paths:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id, guardian_message_id, event]
+              required:
+                - bridge_connection_id
+                - guardian_message_id
+                - event
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                guardian_message_id: { type: string, format: uuid }
-                event: { type: string, enum: [delivered, read] }
-                occurred_at: { type: string, format: date-time }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                guardian_message_id:
+                  type: string
+                  format: uuid
+                event:
+                  type: string
+                  enum:
+                    - delivered
+                    - read
+                occurred_at:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  guardian_message_id: 99999999-9999-4999-8999-999999999999
+                  event: read
+                  occurred_at: 2026-07-25T12:00:00Z
       responses:
         "200":
           description: Current guardian message state
           content:
             application/json:
-              schema: { type: object, additionalProperties: true }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    guardian_message_id: 99999999-9999-4999-8999-999999999999
+                    status: read
+                    occurred_at: 2026-07-25T12:00:00Z
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /connections:
     parameters:
@@ -881,7 +1586,8 @@ paths:
     post:
       operationId: connectToRobono
       summary: Connect to a Robono-owned endpoint using its directory identifier
-      tags: [Connections]
+      tags:
+        - Connections
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -890,28 +1596,96 @@ paths:
           application/json:
             schema:
               type: object
-              required: [target_phone_e164, external_user_id, external_display_name]
+              required:
+                - target_phone_e164
+                - external_user_id
+                - external_display_name
               properties:
-                target_phone_e164: { type: string, pattern: '^\\+[1-9][0-9]{7,14}$' }
-                external_user_id: { type: string, maxLength: 160 }
-                connection_id: { type: string, format: uuid }
-                external_display_name: { type: string, maxLength: 160 }
-                external_profile: { $ref: "#/components/schemas/ExternalProfile" }
-                target_contact_label: { type: string, maxLength: 160 }
-                monitoring_disclosure: { type: string }
-                external_approval: { type: object, additionalProperties: true }
-                capabilities: { $ref: "#/components/schemas/Capabilities" }
+                target_phone_e164:
+                  type: string
+                  pattern: ^\+[1-9][0-9]{7,14}$
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                connection_id:
+                  type: string
+                  format: uuid
+                external_display_name:
+                  type: string
+                  maxLength: 160
+                external_profile:
+                  $ref: "#/components/schemas/ExternalProfile"
+                target_contact_label:
+                  type: string
+                  maxLength: 160
+                monitoring_disclosure:
+                  type: string
+                external_approval:
+                  type: object
+                  additionalProperties: true
+                capabilities:
+                  $ref: "#/components/schemas/Capabilities"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  target_phone_e164: "+15550100101"
+                  external_user_id: source-child-42
+                  external_display_name: Jordan
+                  target_contact_label: Riley
+                  external_approval:
+                    approved: true
+                    source: guardian-consent-42
       responses:
         "200":
           description: Robono connection
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/RobonoConnectionResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/RobonoConnectionResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    connection_id: 11111111-1111-4111-8111-111111111111
+                    conversation_id: 44444444-4444-4444-8444-444444444444
+                    status: active
+                    external_user_id: source-child-42
+                    external_display_name: Jordan
+                    target_contact_label: Riley
+                    capabilities: *a1
+                    robono_user: &a4
+                      id: 33333333-3333-4333-8333-333333333333
+                      display_name: Riley
+                      phone_masked: "***-***-0101"
+                    phone_masked: "***-***-0101"
+                    created_at: 2026-07-25T12:00:00Z
+                    updated_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /connections/list:
     parameters:
@@ -919,31 +1693,90 @@ paths:
     post:
       operationId: listRobonoConnections
       summary: Recover or synchronize connections to Robono-owned endpoints
-      tags: [Connections]
+      tags:
+        - Connections
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [external_user_id]
+              required:
+                - external_user_id
               properties:
-                external_user_id: { type: string, maxLength: 160 }
-                connection_id: { type: string, format: uuid }
-                status: { $ref: "#/components/schemas/RobonoConnectionStatus" }
-                limit: { type: integer, minimum: 1, maximum: 100, default: 50 }
-                before: { type: string, format: date-time }
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                connection_id:
+                  type: string
+                  format: uuid
+                status:
+                  $ref: "#/components/schemas/RobonoConnectionStatus"
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 50
+                before:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  external_user_id: source-child-42
+                  status: active
+                  limit: 50
       responses:
         "200":
           description: Connections visible to this network user
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/RobonoConnectionListResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/RobonoConnectionListResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    connections:
+                      - connection_id: 11111111-1111-4111-8111-111111111111
+                        conversation_id: 44444444-4444-4444-8444-444444444444
+                        status: active
+                        external_user_id: source-child-42
+                        external_display_name: Jordan
+                        target_contact_label: Riley
+                        capabilities: *a1
+                        robono_user: *a4
+                        phone_masked: "***-***-0101"
+                        created_at: 2026-07-25T12:00:00Z
+                        updated_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /connections/profile:
     parameters:
@@ -951,7 +1784,8 @@ paths:
     post:
       operationId: updateRobonoConnection
       summary: Update the user profile or rules attached to a connection
-      tags: [Connections]
+      tags:
+        - Connections
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -960,24 +1794,78 @@ paths:
           application/json:
             schema:
               type: object
-              required: [connection_id, external_user_id]
+              required:
+                - connection_id
+                - external_user_id
               properties:
-                connection_id: { type: string, format: uuid }
-                external_user_id: { type: string, maxLength: 160 }
-                external_display_name: { type: string, maxLength: 160 }
-                external_profile: { $ref: "#/components/schemas/ExternalProfile" }
-                capabilities: { $ref: "#/components/schemas/Capabilities" }
+                connection_id:
+                  type: string
+                  format: uuid
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                external_display_name:
+                  type: string
+                  maxLength: 160
+                external_profile:
+                  $ref: "#/components/schemas/ExternalProfile"
+                capabilities:
+                  $ref: "#/components/schemas/Capabilities"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  external_user_id: source-child-42
+                  external_display_name: Jordan
+                  capabilities: *a1
       responses:
         "200":
           description: Updated connection
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/RobonoConnectionResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/RobonoConnectionResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    connection_id: 11111111-1111-4111-8111-111111111111
+                    conversation_id: 44444444-4444-4444-8444-444444444444
+                    status: active
+                    external_user_id: source-child-42
+                    external_display_name: Jordan
+                    target_contact_label: Riley
+                    capabilities: *a1
+                    robono_user: *a4
+                    phone_masked: "***-***-0101"
+                    created_at: 2026-07-25T12:00:00Z
+                    updated_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /connections/disconnect:
     parameters:
@@ -985,7 +1873,8 @@ paths:
     post:
       operationId: disconnectRobonoConnection
       summary: Disconnect from a Robono-owned endpoint
-      tags: [Connections]
+      tags:
+        - Connections
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -994,23 +1883,76 @@ paths:
           application/json:
             schema:
               type: object
-              required: [connection_id, external_user_id]
+              required:
+                - connection_id
+                - external_user_id
               properties:
-                connection_id: { type: string, format: uuid }
-                external_user_id: { type: string, maxLength: 160 }
-                reason: { type: string, maxLength: 240 }
-                disconnected_at: { type: string, format: date-time }
+                connection_id:
+                  type: string
+                  format: uuid
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                reason:
+                  type: string
+                  maxLength: 240
+                disconnected_at:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  external_user_id: source-child-42
+                  reason: User ended the relationship.
       responses:
         "200":
           description: Disconnected connection
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/RobonoConnectionResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/RobonoConnectionResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    connection_id: 11111111-1111-4111-8111-111111111111
+                    conversation_id: 44444444-4444-4444-8444-444444444444
+                    status: active
+                    external_user_id: source-child-42
+                    external_display_name: Jordan
+                    target_contact_label: Riley
+                    capabilities: *a1
+                    robono_user: *a4
+                    phone_masked: "***-***-0101"
+                    created_at: 2026-07-25T12:00:00Z
+                    updated_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /messages:
     parameters:
@@ -1018,25 +1960,66 @@ paths:
     post:
       operationId: sendMessageToRobono
       summary: Send content through a connection to a Robono-owned endpoint
-      tags: [Messages]
+      tags:
+        - Messages
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/SendRobonoMessage" }
+            schema:
+              $ref: "#/components/schemas/SendRobonoMessage"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  external_user_id: source-child-42
+                  external_message_id: message-42
+                  message_kind: text
+                  text_body: Want to play after school?
       responses:
         "200":
           description: Message result
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/SendRobonoMessageResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/SendRobonoMessageResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    robono_message_id: 22222222-2222-4222-8222-222222222222
+                    external_user_id: source-child-42
+                    status: accepted
+                    invite_sms_sent: false
+                    dry_run: false
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /messages/list:
     parameters:
@@ -1044,34 +2027,100 @@ paths:
     post:
       operationId: listRobonoMessages
       summary: Recover or synchronize messages from a Robono-owned endpoint
-      tags: [Messages]
+      tags:
+        - Messages
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [connection_id, external_user_id]
+              required:
+                - connection_id
+                - external_user_id
               properties:
-                connection_id: { type: string, format: uuid }
-                external_user_id: { type: string, maxLength: 160 }
-                limit: { type: integer, minimum: 1, maximum: 100, default: 50 }
-                before: { type: string, format: date-time }
+                connection_id:
+                  type: string
+                  format: uuid
+                external_user_id:
+                  type: string
+                  maxLength: 160
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 50
+                before:
+                  type: string
+                  format: date-time
                 after:
                   type: string
                   format: date-time
-                  description: Return only messages created after this synchronization cursor. Do not combine with before.
+                  description: Return only messages created after this synchronization cursor. Do not combine with
+                    before.
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  external_user_id: source-child-42
+                  limit: 50
+                  after: 2026-07-25T11:55:00Z
       responses:
         "200":
           description: Messages visible to this network user
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/RobonoMessageListResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/RobonoMessageListResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    messages:
+                      - robono_message_id: 22222222-2222-4222-8222-222222222222
+                        connection_id: 11111111-1111-4111-8111-111111111111
+                        direction: outbound
+                        external_message_id: message-42
+                        message_kind: text
+                        text_body: Want to play after school?
+                        media: {}
+                        status: delivered
+                        delivered_at: 2026-07-25T12:00:00Z
+                        read_at: null
+                        heard_at: null
+                        failed_at: null
+                        failure_code: null
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
+                    next_after: 2026-07-25T12:00:00Z
+                    sync_cursor: 2026-07-25T12:00:00Z
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /message-events:
     parameters:
@@ -1079,7 +2128,8 @@ paths:
     post:
       operationId: markRobonoMessage
       summary: Report that a message from a Robono-owned endpoint was delivered, read, or heard
-      tags: [Messages]
+      tags:
+        - Messages
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -1088,17 +2138,56 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/RobonoMessageEventRequest"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  robono_message_id: 22222222-2222-4222-8222-222222222222
+                  external_user_id: source-child-42
+                  event: read
+                  occurred_at: 2026-07-25T12:00:00Z
       responses:
         "200":
           description: Message receipt stored
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/RobonoMessageEventResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/RobonoMessageEventResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    message_id: 22222222-2222-4222-8222-222222222222
+                    status: read
+                    event: read
+                    occurred_at: 2026-07-25T12:00:00Z
+                    dry_run: false
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /languages:
     parameters:
@@ -1106,18 +2195,49 @@ paths:
     post:
       operationId: listLanguages
       summary: List translation and speech languages
-      tags: [Transforms]
+      tags:
+        - Transforms
       responses:
         "200":
           description: Supported languages
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/LanguageResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/LanguageResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    languages:
+                      - code: en
+                        name: English
+                      - code: es
+                        name: Spanish
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /message-transforms:
     parameters:
@@ -1125,25 +2245,80 @@ paths:
     post:
       operationId: transformMessage
       summary: Request transcription, translation, TTS, or translated voice
-      tags: [Transforms]
+      tags:
+        - Transforms
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/MessageTransformRequest" }
+            schema:
+              $ref: "#/components/schemas/MessageTransformRequest"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  message_id: 22222222-2222-4222-8222-222222222222
+                  outputs:
+                    - translated_text
+                  source_language: en
+                  target_language: es
       responses:
         "200":
           description: Transform result
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/TransformResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/TransformResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    status: completed
+                    processing: synchronous
+                    external_request_id: speech-42
+                    artifacts:
+                      translated_text:
+                        text: Hola
+                        language: es
+                        cached: false
+                    billing:
+                      bill_to: sandbox
+                      charged: false
+                      operation_count: 1
+                      operations:
+                        - type: translation
+                          quantity: 1
+                          billable: false
+                      cache_reused: false
+                    test_mode: true
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /speech-transforms:
     parameters:
@@ -1151,25 +2326,83 @@ paths:
     post:
       operationId: transformSpeech
       summary: Request a standalone speech transform
-      tags: [Transforms]
+      tags:
+        - Transforms
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/SpeechTransformRequest" }
+            schema:
+              $ref: "#/components/schemas/SpeechTransformRequest"
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  external_request_id: speech-42
+                  input:
+                    type: text
+                    text: Hello
+                    language: en
+                  outputs:
+                    - translated_text
+                    - voice
+                  target_language: es
       responses:
         "200":
           description: Transform result
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/TransformResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/TransformResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    status: completed
+                    processing: synchronous
+                    external_request_id: speech-42
+                    artifacts:
+                      translated_text:
+                        text: Hola
+                        language: es
+                        cached: false
+                    billing:
+                      bill_to: sandbox
+                      charged: false
+                      operation_count: 1
+                      operations:
+                        - type: translation
+                          quantity: 1
+                          billable: false
+                      cache_reused: false
+                    test_mode: true
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /push-diagnostics/events:
     parameters:
@@ -1177,7 +2410,8 @@ paths:
     post:
       operationId: reportPushDiagnosticEvent
       summary: Report one completed step in a controlled push-delivery test
-      tags: [Diagnostics]
+      tags:
+        - Diagnostics
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
@@ -1186,19 +2420,52 @@ paths:
           application/json:
             schema:
               type: object
-              required: [diagnostic_id, diagnostic_token, stage]
+              required:
+                - diagnostic_id
+                - diagnostic_token
+                - stage
               properties:
-                diagnostic_id: { type: string, format: uuid }
-                diagnostic_token: { type: string }
+                diagnostic_id:
+                  type: string
+                  format: uuid
+                diagnostic_token:
+                  type: string
                 stage:
                   type: string
-                  enum: [provider_accepted, device_received, content_fetched, rendered, polling_recovered, failed]
-                failure_stage: { type: string, maxLength: 80 }
-                failure_reason: { type: string, maxLength: 320 }
-                platform: { type: string, maxLength: 40 }
-                provider: { type: string, maxLength: 60 }
-                app_version: { type: string, maxLength: 40 }
-                detail: { type: string, maxLength: 240 }
+                  enum:
+                    - provider_accepted
+                    - device_received
+                    - content_fetched
+                    - rendered
+                    - polling_recovered
+                    - failed
+                failure_stage:
+                  type: string
+                  maxLength: 80
+                failure_reason:
+                  type: string
+                  maxLength: 320
+                platform:
+                  type: string
+                  maxLength: 40
+                provider:
+                  type: string
+                  maxLength: 60
+                app_version:
+                  type: string
+                  maxLength: 40
+                detail:
+                  type: string
+                  maxLength: 240
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  diagnostic_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                  diagnostic_token: temporary-diagnostic-token
+                  stage: device_received
+                  platform: ios
+                  app_version: 2.4.0
       responses:
         "200":
           description: Diagnostic timeline updated
@@ -1206,16 +2473,51 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [ok, request_id, diagnostic]
+                required:
+                  - ok
+                  - request_id
+                  - diagnostic
                 properties:
-                  ok: { const: true }
-                  request_id: { type: string }
-                  diagnostic: { type: object, additionalProperties: true }
-        "4XX":
-          $ref: "#/components/responses/Error"
+                  ok:
+                    const: true
+                  request_id:
+                    type: string
+                  diagnostic:
+                    type: object
+                    additionalProperties: true
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    diagnostic:
+                      diagnostic_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                      stage: device_received
+                      recorded_at: 2026-07-25T12:00:00Z
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
   /data-requests:
     parameters:
@@ -1228,43 +2530,72 @@ paths:
         authorizes the user or privacy request. Deletion requires an
         Idempotency-Key. Completion is returned immediately when possible and
         is also delivered by signed webhook; status can always be read by ID.
-      tags: [Data rights]
+      tags:
+        - Data rights
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/DataRequestOperation" }
+            schema:
+              $ref: "#/components/schemas/DataRequestOperation"
             examples:
-              export:
+              typical:
+                summary: Typical request
                 value:
                   action: create
                   request_type: export
-                  external_user_id: child-user-42
-                  external_request_id: privacy-request-42
+                  external_user_id: source-child-42
+                  external_request_id: privacy-case-42
                   format: json
-              deletion:
-                value:
-                  action: create
-                  request_type: deletion
-                  external_user_id: child-user-42
-                  external_request_id: deletion-request-42
-              status:
-                value:
-                  action: status
-                  data_request_id: cccccccc-cccc-4ccc-8ccc-cccccccccccc
       responses:
         "200":
           description: Data request accepted, completed, or retrieved
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/DataRequestResponse" }
-        "4XX":
-          $ref: "#/components/responses/Error"
+              schema:
+                $ref: "#/components/schemas/DataRequestResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    data_request:
+                      id: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
+                      request_type: export
+                      external_request_id: privacy-case-42
+                      status: pending
+                      result_summary: {}
+                      failure_code: null
+                      requested_at: 2026-07-25T12:00:00Z
+                      completed_at: null
+                      result_expires_at: null
+                    duplicate: false
         "429":
           $ref: "#/components/responses/RateLimit"
-        "5XX":
+        4XX:
+          description: Request error
+          headers:
+            Retry-After:
+              description: Seconds or HTTP date after which a retryable request may be attempted.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
           $ref: "#/components/responses/ServiceError"
 components:
   securitySchemes:
@@ -1278,7 +2609,9 @@ components:
       in: header
       required: false
       description: Contract version in YYYY-MM-DD form. The current version is 2026-07-25.
-      schema: { type: string, pattern: "^\\d{4}-\\d{2}-\\d{2}$" }
+      schema:
+        type: string
+        pattern: ^\d{4}-\d{2}-\d{2}$
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -1289,56 +2622,55 @@ components:
         reuse your own value when retrying the operation in a later call,
         process, job, or device session. Robono retains idempotency responses
         for at least 24 hours.
-      schema: { type: string, minLength: 8, maxLength: 200 }
-  requestBodies:
-    JsonBody:
-      required: false
-      content:
-        application/json:
-          schema: { type: object, additionalProperties: true }
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 200
   responses:
-    Error:
-      description: Request error
-      headers:
-        Retry-After:
-          description: Seconds or HTTP date after which a retryable request may be attempted.
-          schema: { type: string }
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ErrorResponse"
     RateLimit:
       description: Request rate or configured safety limit exceeded
       headers:
         Retry-After:
           required: true
           description: Seconds or HTTP date after which the request may be retried.
-          schema: { type: string }
+          schema:
+            type: string
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/ErrorResponse" }
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     ServiceError:
       description: Temporary Robono service failure
       headers:
         Retry-After:
           description: Optional delay before retrying.
-          schema: { type: string }
+          schema:
+            type: string
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/ErrorResponse" }
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     ErrorResponse:
       type: object
-      required: [error, request_id]
+      required:
+        - error
+        - request_id
       properties:
         error:
           type: object
-          required: [code, message]
+          required:
+            - code
+            - message
           properties:
-            code: { type: string }
-            message: { type: string }
-            retryable: { type: boolean }
-        request_id: { type: string }
+            code:
+              type: string
+            message:
+              type: string
+            retryable:
+              type: boolean
+        request_id:
+          type: string
         fields:
           type: array
           items:
@@ -1346,179 +2678,337 @@ components:
             additionalProperties: true
     Identifier:
       type: object
-      required: [label, description, example, format, input_type, min_length, max_length, normalization, case_sensitive]
+      required:
+        - label
+        - description
+        - example
+        - format
+        - input_type
+        - min_length
+        - max_length
+        - normalization
+        - case_sensitive
       properties:
-        label: { type: string }
-        description: { type: string }
-        example: { type: string }
-        format: { type: string }
+        label:
+          type: string
+        description:
+          type: string
+        example:
+          type: string
+        format:
+          type: string
         input_type:
           type: string
-          enum: [text, tel, email, number]
+          enum:
+            - text
+            - tel
+            - email
+            - number
         pattern:
           type: string
           description: ECMAScript regular expression applied after normalization.
-        min_length: { type: integer, minimum: 1, maximum: 240 }
-        max_length: { type: integer, minimum: 1, maximum: 240 }
+        min_length:
+          type: integer
+          minimum: 1
+          maximum: 240
+        max_length:
+          type: integer
+          minimum: 1
+          maximum: 240
         normalization:
           type: string
-          enum: [none, trim, lowercase, uppercase, e164]
-        case_sensitive: { type: boolean }
+          enum:
+            - none
+            - trim
+            - lowercase
+            - uppercase
+            - e164
+        case_sensitive:
+          type: boolean
     Network:
       type: object
-      required: [type, id, slug, display_name, accepted_identifier, default_capabilities]
+      required:
+        - type
+        - id
+        - slug
+        - display_name
+        - accepted_identifier
+        - default_capabilities
       properties:
         type:
           type: string
-          enum: [connected_app, robono_phone]
-        id: { type: string }
-        slug: { type: string }
-        display_name: { type: string }
-        description: { type: string }
-        icon_url: { type: string, format: uri }
-        accepts_inbound_bridge_requests: { type: boolean }
-        accepted_identifier: { $ref: "#/components/schemas/Identifier" }
-        default_capabilities: { $ref: "#/components/schemas/Capabilities" }
+          enum:
+            - connected_app
+            - robono_phone
+        id:
+          type: string
+        slug:
+          type: string
+        display_name:
+          type: string
+        description:
+          type: string
+        icon_url:
+          type: string
+          format: uri
+        accepts_inbound_bridge_requests:
+          type: boolean
+        accepted_identifier:
+          $ref: "#/components/schemas/Identifier"
+        default_capabilities:
+          $ref: "#/components/schemas/Capabilities"
     NetworkDirectoryResponse:
       type: object
-      required: [ok, request_id, directory]
+      required:
+        - ok
+        - request_id
+        - directory
       properties:
-        ok: { const: true }
-        request_id: { type: string }
+        ok:
+          const: true
+        request_id:
+          type: string
         directory:
           type: array
-          items: { $ref: "#/components/schemas/Network" }
+          items:
+            $ref: "#/components/schemas/Network"
     Guardian:
       type: object
-      required: [external_guardian_id]
+      required:
+        - external_guardian_id
       properties:
-        external_guardian_id: { type: string, maxLength: 160 }
-        display_name: { type: [string, "null"], maxLength: 160 }
-        relationship_to_child: { type: [string, "null"], maxLength: 80 }
-        avatar_url: { type: [string, "null"], format: uri }
+        external_guardian_id:
+          type: string
+          maxLength: 160
+        display_name:
+          type:
+            - string
+            - "null"
+          maxLength: 160
+        relationship_to_child:
+          type:
+            - string
+            - "null"
+          maxLength: 80
+        avatar_url:
+          type:
+            - string
+            - "null"
+          format: uri
     ExternalProfile:
       type: object
       properties:
-        display_name: { type: string, maxLength: 160 }
+        display_name:
+          type: string
+          maxLength: 160
         avatar:
           type: object
-          required: [source_url]
+          required:
+            - source_url
           properties:
-            source_url: { type: string, format: uri }
-            mime_type: { type: string }
-            version: { type: string }
-            updated_at: { type: string, format: date-time }
+            source_url:
+              type: string
+              format: uri
+            mime_type:
+              type: string
+            version:
+              type: string
+            updated_at:
+              type: string
+              format: date-time
     Capabilities:
       type: object
       description: Negotiated permissions and limits for both directions of a connection.
       additionalProperties: true
       properties:
-        protocol_version: { type: string }
+        protocol_version:
+          type: string
         allowed_outbound_message_kinds:
           type: array
-          items: { $ref: "#/components/schemas/MessageKind" }
+          items:
+            $ref: "#/components/schemas/MessageKind"
         allowed_inbound_message_kinds:
           type: array
-          items: { $ref: "#/components/schemas/MessageKind" }
-        history: { $ref: "#/components/schemas/HistoryCapabilities" }
-        text: { $ref: "#/components/schemas/TextCapabilities" }
-        voice: { $ref: "#/components/schemas/MediaCapabilities" }
-        photo: { $ref: "#/components/schemas/MediaCapabilities" }
-        video: { $ref: "#/components/schemas/MediaCapabilities" }
-        document: { $ref: "#/components/schemas/MediaCapabilities" }
-        receive_voice_waveforms: { type: boolean }
-        receive_delivery_events: { type: boolean }
-        receive_message_heard_events: { type: boolean }
+          items:
+            $ref: "#/components/schemas/MessageKind"
+        history:
+          $ref: "#/components/schemas/HistoryCapabilities"
+        text:
+          $ref: "#/components/schemas/TextCapabilities"
+        voice:
+          $ref: "#/components/schemas/MediaCapabilities"
+        photo:
+          $ref: "#/components/schemas/MediaCapabilities"
+        video:
+          $ref: "#/components/schemas/MediaCapabilities"
+        document:
+          $ref: "#/components/schemas/MediaCapabilities"
+        receive_voice_waveforms:
+          type: boolean
+        receive_delivery_events:
+          type: boolean
+        receive_message_heard_events:
+          type: boolean
         emoji_reactions:
           oneOf:
-            - { type: boolean }
+            - type: boolean
             - type: object
-              required: [allowed]
+              required:
+                - allowed
               properties:
-                allowed: { type: boolean }
-        from_source_to_target: { $ref: "#/components/schemas/DirectionCapabilities" }
-        from_target_to_source: { $ref: "#/components/schemas/DirectionCapabilities" }
+                allowed:
+                  type: boolean
+        from_source_to_target:
+          $ref: "#/components/schemas/DirectionCapabilities"
+        from_target_to_source:
+          $ref: "#/components/schemas/DirectionCapabilities"
     HistoryCapabilities:
       type: object
-      required: [max_items, message_expires_after_seconds]
+      required:
+        - max_items
+        - message_expires_after_seconds
       properties:
-        max_items: { type: [integer, "null"], minimum: 0 }
-        message_expires_after_seconds: { type: [integer, "null"], minimum: 1 }
+        max_items:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+        message_expires_after_seconds:
+          type:
+            - integer
+            - "null"
+          minimum: 1
     TextCapabilities:
       type: object
       properties:
-        max_characters: { type: integer, minimum: 1 }
+        max_characters:
+          type: integer
+          minimum: 1
     MediaOutputPreference:
       type: object
       properties:
-        preferred_mime_type: { type: string }
-        preferred_codec: { type: string }
-        transcoding: { type: string, enum: [off, preferred, required] }
+        preferred_mime_type:
+          type: string
+        preferred_codec:
+          type: string
+        transcoding:
+          type: string
+          enum:
+            - off
+            - preferred
+            - required
     MediaCapabilities:
       type: object
       properties:
-        max_duration_ms: { type: integer, minimum: 1 }
-        max_file_bytes: { type: integer, minimum: 1 }
+        max_duration_ms:
+          type: integer
+          minimum: 1
+        max_file_bytes:
+          type: integer
+          minimum: 1
         allowed_input_mime_types:
           type: array
-          items: { type: string }
-        max_width_px: { type: integer, minimum: 1 }
-        max_height_px: { type: integer, minimum: 1 }
-        max_items_per_message: { type: integer, minimum: 1 }
-        strip_metadata: { type: boolean }
-        output: { $ref: "#/components/schemas/MediaOutputPreference" }
+          items:
+            type: string
+        max_width_px:
+          type: integer
+          minimum: 1
+        max_height_px:
+          type: integer
+          minimum: 1
+        max_items_per_message:
+          type: integer
+          minimum: 1
+        strip_metadata:
+          type: boolean
+        output:
+          $ref: "#/components/schemas/MediaOutputPreference"
     DirectionCapabilities:
       type: object
-      required: [allowed_message_kinds]
+      required:
+        - allowed_message_kinds
       properties:
         allowed_message_kinds:
           type: array
-          items: { $ref: "#/components/schemas/MessageKind" }
-        text: { $ref: "#/components/schemas/TextCapabilities" }
-        voice: { $ref: "#/components/schemas/MediaCapabilities" }
-        photo: { $ref: "#/components/schemas/MediaCapabilities" }
-        video: { $ref: "#/components/schemas/MediaCapabilities" }
-        document: { $ref: "#/components/schemas/MediaCapabilities" }
+          items:
+            $ref: "#/components/schemas/MessageKind"
+        text:
+          $ref: "#/components/schemas/TextCapabilities"
+        voice:
+          $ref: "#/components/schemas/MediaCapabilities"
+        photo:
+          $ref: "#/components/schemas/MediaCapabilities"
+        video:
+          $ref: "#/components/schemas/MediaCapabilities"
+        document:
+          $ref: "#/components/schemas/MediaCapabilities"
         limitations:
           type: array
           items: {}
     AppIdentity:
       type: object
-      required: [id]
+      required:
+        - id
       properties:
-        id: { type: string }
-        slug: { type: string }
-        display_name: { type: string }
+        id:
+          type: string
+        slug:
+          type: string
+        display_name:
+          type: string
     BridgeSourceParticipant:
       type: object
-      required: [app, external_user_id, display_name]
+      required:
+        - app
+        - external_user_id
+        - display_name
       properties:
         app:
           oneOf:
-            - { $ref: "#/components/schemas/Network" }
-            - { $ref: "#/components/schemas/AppIdentity" }
-        external_user_id: { type: string }
-        display_name: { type: string }
-        profile: { $ref: "#/components/schemas/ExternalProfile" }
+            - $ref: "#/components/schemas/Network"
+            - $ref: "#/components/schemas/AppIdentity"
+        external_user_id:
+          type: string
+        display_name:
+          type: string
+        profile:
+          $ref: "#/components/schemas/ExternalProfile"
         guardians:
           type: array
-          items: { $ref: "#/components/schemas/Guardian" }
+          items:
+            $ref: "#/components/schemas/Guardian"
     BridgeTargetParticipant:
       type: object
-      required: [app, identifier, external_user_id, display_name]
+      required:
+        - app
+        - identifier
+        - external_user_id
+        - display_name
       properties:
         app:
           oneOf:
-            - { $ref: "#/components/schemas/Network" }
-            - { $ref: "#/components/schemas/AppIdentity" }
-        identifier: { type: string }
-        external_user_id: { type: [string, "null"] }
-        display_name: { type: [string, "null"] }
-        profile: { $ref: "#/components/schemas/ExternalProfile" }
-        contact_label: { type: [string, "null"] }
+            - $ref: "#/components/schemas/Network"
+            - $ref: "#/components/schemas/AppIdentity"
+        identifier:
+          type: string
+        external_user_id:
+          type:
+            - string
+            - "null"
+        display_name:
+          type:
+            - string
+            - "null"
+        profile:
+          $ref: "#/components/schemas/ExternalProfile"
+        contact_label:
+          type:
+            - string
+            - "null"
         guardians:
           type: array
-          items: { $ref: "#/components/schemas/Guardian" }
+          items:
+            $ref: "#/components/schemas/Guardian"
     RequestConnection:
       oneOf:
         - $ref: "#/components/schemas/RequestConnectionById"
@@ -1532,19 +3022,36 @@ components:
         - source_display_name
         - target_identifier
       properties:
-        target_app_id: { type: string, format: uuid }
-        source_external_user_id: { type: string, maxLength: 160 }
-        source_display_name: { type: string, maxLength: 160 }
-        target_identifier: { type: string, maxLength: 240 }
-        target_contact_label: { type: string, maxLength: 160 }
-        external_profile: { $ref: "#/components/schemas/ExternalProfile" }
-        capabilities: { $ref: "#/components/schemas/Capabilities" }
-        guardian_messaging_enabled: { type: boolean }
+        target_app_id:
+          type: string
+          format: uuid
+        source_external_user_id:
+          type: string
+          maxLength: 160
+        source_display_name:
+          type: string
+          maxLength: 160
+        target_identifier:
+          type: string
+          maxLength: 240
+        target_contact_label:
+          type: string
+          maxLength: 160
+        external_profile:
+          $ref: "#/components/schemas/ExternalProfile"
+        capabilities:
+          $ref: "#/components/schemas/Capabilities"
+        guardian_messaging_enabled:
+          type: boolean
         source_guardians:
           type: array
-          items: { $ref: "#/components/schemas/Guardian" }
-        monitoring_disclosure: { type: string }
-        external_approval: { type: object, additionalProperties: true }
+          items:
+            $ref: "#/components/schemas/Guardian"
+        monitoring_disclosure:
+          type: string
+        external_approval:
+          type: object
+          additionalProperties: true
     RequestConnectionBySlug:
       type: object
       additionalProperties: false
@@ -1554,74 +3061,175 @@ components:
         - source_display_name
         - target_identifier
       properties:
-        target_app_slug: { type: string }
-        source_external_user_id: { type: string, maxLength: 160 }
-        source_display_name: { type: string, maxLength: 160 }
-        target_identifier: { type: string, maxLength: 240 }
-        target_contact_label: { type: string, maxLength: 160 }
-        external_profile: { $ref: "#/components/schemas/ExternalProfile" }
-        capabilities: { $ref: "#/components/schemas/Capabilities" }
-        guardian_messaging_enabled: { type: boolean }
+        target_app_slug:
+          type: string
+        source_external_user_id:
+          type: string
+          maxLength: 160
+        source_display_name:
+          type: string
+          maxLength: 160
+        target_identifier:
+          type: string
+          maxLength: 240
+        target_contact_label:
+          type: string
+          maxLength: 160
+        external_profile:
+          $ref: "#/components/schemas/ExternalProfile"
+        capabilities:
+          $ref: "#/components/schemas/Capabilities"
+        guardian_messaging_enabled:
+          type: boolean
         source_guardians:
           type: array
-          items: { $ref: "#/components/schemas/Guardian" }
-        monitoring_disclosure: { type: string }
-        external_approval: { type: object, additionalProperties: true }
+          items:
+            $ref: "#/components/schemas/Guardian"
+        monitoring_disclosure:
+          type: string
+        external_approval:
+          type: object
+          additionalProperties: true
     RespondConnection:
       type: object
-      required: [bridge_connection_id, status]
+      required:
+        - bridge_connection_id
+        - status
       properties:
-        bridge_connection_id: { type: string, format: uuid }
+        bridge_connection_id:
+          type: string
+          format: uuid
         status:
           type: string
-          enum: [accepted, rejected, not_found]
-        target_external_user_id: { type: string, maxLength: 160 }
-        target_display_name: { type: string, maxLength: 160 }
-        external_profile: { $ref: "#/components/schemas/ExternalProfile" }
+          enum:
+            - accepted
+            - rejected
+            - not_found
+        target_external_user_id:
+          type: string
+          maxLength: 160
+        target_display_name:
+          type: string
+          maxLength: 160
+        external_profile:
+          $ref: "#/components/schemas/ExternalProfile"
         target_guardians:
           type: array
-          items: { $ref: "#/components/schemas/Guardian" }
-        capabilities: { $ref: "#/components/schemas/Capabilities" }
-        response_details: { type: object, additionalProperties: true }
+          items:
+            $ref: "#/components/schemas/Guardian"
+        capabilities:
+          $ref: "#/components/schemas/Capabilities"
+        response_details:
+          type: object
+          additionalProperties: true
     ConnectionStatus:
       type: string
-      enum: [pending_target_approval, accepted, rejected, not_found, blocked, disconnected, expired]
+      enum:
+        - pending_target_approval
+        - accepted
+        - rejected
+        - not_found
+        - blocked
+        - disconnected
+        - expired
     Connection:
       type: object
-      required: [bridge_connection_id, status, source, target, guardian_messaging_enabled, capabilities]
+      required:
+        - bridge_connection_id
+        - status
+        - source
+        - target
+        - guardian_messaging_enabled
+        - capabilities
       properties:
-        bridge_connection_id: { type: string, format: uuid }
-        status: { $ref: "#/components/schemas/ConnectionStatus" }
-        source: { $ref: "#/components/schemas/BridgeSourceParticipant" }
-        target: { $ref: "#/components/schemas/BridgeTargetParticipant" }
-        guardian_messaging_enabled: { type: boolean }
-        capabilities: { $ref: "#/components/schemas/Capabilities" }
-        expires_at: { type: [string, "null"], format: date-time }
-        accepted_at: { type: [string, "null"], format: date-time }
-        responded_at: { type: [string, "null"], format: date-time }
-        created_at: { type: [string, "null"], format: date-time }
+        bridge_connection_id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/ConnectionStatus"
+        source:
+          $ref: "#/components/schemas/BridgeSourceParticipant"
+        target:
+          $ref: "#/components/schemas/BridgeTargetParticipant"
+        guardian_messaging_enabled:
+          type: boolean
+        capabilities:
+          $ref: "#/components/schemas/Capabilities"
+        expires_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        accepted_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        responded_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        created_at:
+          type:
+            - string
+            - "null"
+          format: date-time
     ConnectionResponse:
       allOf:
         - $ref: "#/components/schemas/Connection"
         - type: object
-          required: [ok, request_id]
+          required:
+            - ok
+            - request_id
           properties:
-            ok: { const: true }
-            request_id: { type: string }
+            ok:
+              const: true
+            request_id:
+              type: string
     RobonoConnectionStatus:
       type: string
-      enum: [active, pending_invite, blocked, disconnected, expired]
+      enum:
+        - active
+        - pending_invite
+        - blocked
+        - disconnected
+        - expired
     RobonoUser:
       type: object
-      required: [id]
+      required:
+        - id
       properties:
-        id: { type: string, format: uuid }
-        display_name: { type: [string, "null"] }
-        phone_masked: { type: [string, "null"] }
-        avatar_url: { type: [string, "null"], format: uri }
-        avatar_version: { type: [string, "null"] }
-        avatar_updated_at: { type: [string, "null"], format: date-time }
-        profile_updated_at: { type: [string, "null"], format: date-time }
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type:
+            - string
+            - "null"
+        phone_masked:
+          type:
+            - string
+            - "null"
+        avatar_url:
+          type:
+            - string
+            - "null"
+          format: uri
+        avatar_version:
+          type:
+            - string
+            - "null"
+        avatar_updated_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        profile_updated_at:
+          type:
+            - string
+            - "null"
+          format: date-time
     RobonoConnection:
       type: object
       required:
@@ -1630,74 +3238,155 @@ components:
         - external_user_id
         - capabilities
       properties:
-        connection_id: { type: string, format: uuid }
-        conversation_id: { type: [string, "null"], format: uuid }
-        status: { $ref: "#/components/schemas/RobonoConnectionStatus" }
-        external_user_id: { type: string }
-        external_display_name: { type: [string, "null"] }
-        external_profile: { type: object, additionalProperties: true }
-        target_contact_label: { type: [string, "null"] }
-        capabilities: { $ref: "#/components/schemas/Capabilities" }
+        connection_id:
+          type: string
+          format: uuid
+        conversation_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        status:
+          $ref: "#/components/schemas/RobonoConnectionStatus"
+        external_user_id:
+          type: string
+        external_display_name:
+          type:
+            - string
+            - "null"
+        external_profile:
+          type: object
+          additionalProperties: true
+        target_contact_label:
+          type:
+            - string
+            - "null"
+        capabilities:
+          $ref: "#/components/schemas/Capabilities"
         robono_user:
           oneOf:
             - $ref: "#/components/schemas/RobonoUser"
-            - { type: "null" }
-        phone_masked: { type: [string, "null"] }
-        created_at: { type: [string, "null"], format: date-time }
-        updated_at: { type: [string, "null"], format: date-time }
+            - type: "null"
+        phone_masked:
+          type:
+            - string
+            - "null"
+        created_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        updated_at:
+          type:
+            - string
+            - "null"
+          format: date-time
     RobonoConnectionResponse:
       allOf:
         - $ref: "#/components/schemas/RobonoConnection"
         - type: object
-          required: [ok, request_id]
+          required:
+            - ok
+            - request_id
           properties:
-            ok: { const: true }
-            request_id: { type: string }
-            profile_updated: { type: boolean }
-            avatar_imported: { type: boolean }
-            capabilities_updated: { type: boolean }
-            disconnected_at: { type: [string, "null"], format: date-time }
-            reason: { type: [string, "null"] }
+            ok:
+              const: true
+            request_id:
+              type: string
+            profile_updated:
+              type: boolean
+            avatar_imported:
+              type: boolean
+            capabilities_updated:
+              type: boolean
+            disconnected_at:
+              type:
+                - string
+                - "null"
+              format: date-time
+            reason:
+              type:
+                - string
+                - "null"
     RobonoConnectionListResponse:
       type: object
-      required: [ok, request_id, connections, has_more]
+      required:
+        - ok
+        - request_id
+        - connections
+        - has_more
       properties:
-        ok: { const: true }
-        request_id: { type: string }
+        ok:
+          const: true
+        request_id:
+          type: string
         connections:
           type: array
-          items: { $ref: "#/components/schemas/RobonoConnection" }
-        has_more: { type: boolean }
-        next_before: { type: [string, "null"], format: date-time }
+          items:
+            $ref: "#/components/schemas/RobonoConnection"
+        has_more:
+          type: boolean
+        next_before:
+          type:
+            - string
+            - "null"
+          format: date-time
     MessageKind:
       type: string
-      enum: [text, voice, image, video, document]
+      enum:
+        - text
+        - voice
+        - image
+        - video
+        - document
     Media:
       type: object
-      required: [source_url, mime_type]
+      required:
+        - source_url
+        - mime_type
       properties:
         source_url:
           type: string
           format: uri
-          pattern: "^https://"
-          description: Public HTTPS URL available until the send succeeds and throughout the caller's retry window.
-        mime_type: { type: string }
-        byte_size: { type: integer, minimum: 1 }
-        duration_ms: { type: integer, minimum: 1 }
-        file_name: { type: string }
+          pattern: ^https://
+          description: Public HTTPS URL available until the send succeeds and throughout the caller's retry
+            window.
+        mime_type:
+          type: string
+        byte_size:
+          type: integer
+          minimum: 1
+        duration_ms:
+          type: integer
+          minimum: 1
+        file_name:
+          type: string
         waveform:
           type: array
-          items: { type: number }
+          items:
+            type: number
       additionalProperties: true
     AttachmentBatch:
       type: object
       additionalProperties: false
-      required: [id, index, count]
+      required:
+        - id
+        - index
+        - count
       description: Groups media records composed and displayed as one message.
       properties:
-        id: { type: string, minLength: 1, maxLength: 100 }
-        index: { type: integer, minimum: 0, maximum: 9 }
-        count: { type: integer, minimum: 2, maximum: 10 }
+        id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        index:
+          type: integer
+          minimum: 0
+          maximum: 9
+        count:
+          type: integer
+          minimum: 2
+          maximum: 10
     SendMessage:
       oneOf:
         - $ref: "#/components/schemas/SendTextMessage"
@@ -1712,12 +3401,22 @@ components:
         - message_kind
         - text_body
       properties:
-        bridge_connection_id: { type: string, format: uuid }
-        external_user_id: { type: string, maxLength: 160 }
-        external_message_id: { type: string, maxLength: 160 }
-        message_kind: { const: text }
-        text_body: { type: string }
-        dry_run: { type: boolean, default: false }
+        bridge_connection_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+          maxLength: 160
+        external_message_id:
+          type: string
+          maxLength: 160
+        message_kind:
+          const: text
+        text_body:
+          type: string
+        dry_run:
+          type: boolean
+          default: false
     SendMediaMessage:
       type: object
       additionalProperties: false
@@ -1728,16 +3427,31 @@ components:
         - message_kind
         - media
       properties:
-        bridge_connection_id: { type: string, format: uuid }
-        external_user_id: { type: string, maxLength: 160 }
-        external_message_id: { type: string, maxLength: 160 }
+        bridge_connection_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+          maxLength: 160
+        external_message_id:
+          type: string
+          maxLength: 160
         message_kind:
           type: string
-          enum: [voice, image, video, document]
-        text_body: { type: string }
-        media: { $ref: "#/components/schemas/Media" }
-        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
-        dry_run: { type: boolean, default: false }
+          enum:
+            - voice
+            - image
+            - video
+            - document
+        text_body:
+          type: string
+        media:
+          $ref: "#/components/schemas/Media"
+        attachment_batch:
+          $ref: "#/components/schemas/AttachmentBatch"
+        dry_run:
+          type: boolean
+          default: false
     SendRobonoMessage:
       oneOf:
         - $ref: "#/components/schemas/SendRobonoTextMessage"
@@ -1752,14 +3466,26 @@ components:
         - message_kind
         - text_body
       properties:
-        connection_id: { type: string, format: uuid }
-        external_user_id: { type: string, maxLength: 160 }
-        external_message_id: { type: string, maxLength: 160 }
-        message_kind: { const: text }
-        text_body: { type: string }
-        send_invite_sms_if_pending: { type: boolean }
-        external_profile: { $ref: "#/components/schemas/ExternalProfile" }
-        dry_run: { type: boolean, default: false }
+        connection_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+          maxLength: 160
+        external_message_id:
+          type: string
+          maxLength: 160
+        message_kind:
+          const: text
+        text_body:
+          type: string
+        send_invite_sms_if_pending:
+          type: boolean
+        external_profile:
+          $ref: "#/components/schemas/ExternalProfile"
+        dry_run:
+          type: boolean
+          default: false
     SendRobonoMediaMessage:
       type: object
       additionalProperties: false
@@ -1770,77 +3496,198 @@ components:
         - message_kind
         - media
       properties:
-        connection_id: { type: string, format: uuid }
-        external_user_id: { type: string, maxLength: 160 }
-        external_message_id: { type: string, maxLength: 160 }
+        connection_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+          maxLength: 160
+        external_message_id:
+          type: string
+          maxLength: 160
         message_kind:
           type: string
-          enum: [voice, image, video, document]
-        text_body: { type: string }
-        media: { $ref: "#/components/schemas/Media" }
-        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
-        send_invite_sms_if_pending: { type: boolean }
-        external_profile: { $ref: "#/components/schemas/ExternalProfile" }
-        dry_run: { type: boolean, default: false }
+          enum:
+            - voice
+            - image
+            - video
+            - document
+        text_body:
+          type: string
+        media:
+          $ref: "#/components/schemas/Media"
+        attachment_batch:
+          $ref: "#/components/schemas/AttachmentBatch"
+        send_invite_sms_if_pending:
+          type: boolean
+        external_profile:
+          $ref: "#/components/schemas/ExternalProfile"
+        dry_run:
+          type: boolean
+          default: false
     MessageStatus:
       type: string
-      enum: [stored, accepted, delivered, read, heard, failed, replaced]
+      enum:
+        - stored
+        - accepted
+        - delivered
+        - read
+        - heard
+        - failed
+        - replaced
     SendMessageResponse:
       type: object
-      required: [ok, request_id, status]
+      required:
+        - ok
+        - request_id
+        - status
       properties:
-        ok: { const: true }
-        request_id: { type: string }
-        bridge_message_id: { type: string, format: uuid }
-        guardian_message_id: { type: string, format: uuid }
+        ok:
+          const: true
+        request_id:
+          type: string
+        bridge_message_id:
+          type: string
+          format: uuid
+        guardian_message_id:
+          type: string
+          format: uuid
         status:
           oneOf:
             - $ref: "#/components/schemas/MessageStatus"
-            - { const: validated }
-        duplicate: { type: boolean }
-        dry_run: { type: boolean }
-        accepted_at: { type: [string, "null"], format: date-time }
-        accepted_via: { type: [string, "null"], enum: [push, polling, null] }
-        push_status: { type: string, enum: [accepted, retry_scheduled] }
-        recipient: { type: object, additionalProperties: true }
+            - const: validated
+        duplicate:
+          type: boolean
+        dry_run:
+          type: boolean
+        accepted_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        accepted_via:
+          type:
+            - string
+            - "null"
+          enum:
+            - push
+            - polling
+            - null
+        push_status:
+          type: string
+          enum:
+            - accepted
+            - retry_scheduled
+        recipient:
+          type: object
+          additionalProperties: true
     SendRobonoMessageResponse:
       type: object
-      required: [ok, request_id, status]
+      required:
+        - ok
+        - request_id
+        - status
       properties:
-        ok: { const: true }
-        request_id: { type: string }
-        robono_message_id: { type: string, format: uuid }
-        external_user_id: { type: string }
-        status: { type: string }
-        invite_sms_sent: { type: boolean }
-        dry_run: { type: boolean }
-        connection_state: { type: object, additionalProperties: true }
+        ok:
+          const: true
+        request_id:
+          type: string
+        robono_message_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+        status:
+          type: string
+        invite_sms_sent:
+          type: boolean
+        dry_run:
+          type: boolean
+        connection_state:
+          type: object
+          additionalProperties: true
     Message:
       type: object
-      required: [bridge_message_id, bridge_connection_id, direction, sender_external_user_id, external_message_id, message_kind, status, created_at]
+      required:
+        - bridge_message_id
+        - bridge_connection_id
+        - direction
+        - sender_external_user_id
+        - external_message_id
+        - message_kind
+        - status
+        - created_at
       properties:
-        bridge_message_id: { type: string, format: uuid }
-        bridge_connection_id: { type: string, format: uuid }
-        direction: { type: string, enum: [inbound, outbound] }
-        sender_external_user_id: { type: string }
-        external_message_id: { type: string }
-        message_kind: { $ref: "#/components/schemas/MessageKind" }
-        text_body: { type: [string, "null"] }
+        bridge_message_id:
+          type: string
+          format: uuid
+        bridge_connection_id:
+          type: string
+          format: uuid
+        direction:
+          type: string
+          enum:
+            - inbound
+            - outbound
+        sender_external_user_id:
+          type: string
+        external_message_id:
+          type: string
+        message_kind:
+          $ref: "#/components/schemas/MessageKind"
+        text_body:
+          type:
+            - string
+            - "null"
         media:
           oneOf:
-            - { $ref: "#/components/schemas/Media" }
+            - $ref: "#/components/schemas/Media"
             - type: object
               maxProperties: 0
-        status: { $ref: "#/components/schemas/MessageStatus" }
-        accepted_at: { type: [string, "null"], format: date-time }
-        accepted_via: { type: [string, "null"], enum: [push, polling, null] }
-        delivered_at: { type: [string, "null"], format: date-time }
-        read_at: { type: [string, "null"], format: date-time }
-        heard_at: { type: [string, "null"], format: date-time }
-        failed_at: { type: [string, "null"], format: date-time }
-        failure_code: { type: [string, "null"] }
-        created_at: { type: string, format: date-time }
-        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
+        status:
+          $ref: "#/components/schemas/MessageStatus"
+        accepted_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        accepted_via:
+          type:
+            - string
+            - "null"
+          enum:
+            - push
+            - polling
+            - null
+        delivered_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        read_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        heard_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        failed_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        failure_code:
+          type:
+            - string
+            - "null"
+        created_at:
+          type: string
+          format: date-time
+        attachment_batch:
+          $ref: "#/components/schemas/AttachmentBatch"
     RobonoMessage:
       type: object
       required:
@@ -1851,127 +3698,312 @@ components:
         - status
         - created_at
       properties:
-        robono_message_id: { type: string, format: uuid }
-        connection_id: { type: string, format: uuid }
-        direction: { type: string, enum: [inbound, outbound] }
-        external_message_id: { type: [string, "null"] }
-        message_kind: { $ref: "#/components/schemas/MessageKind" }
-        text_body: { type: [string, "null"] }
+        robono_message_id:
+          type: string
+          format: uuid
+        connection_id:
+          type: string
+          format: uuid
+        direction:
+          type: string
+          enum:
+            - inbound
+            - outbound
+        external_message_id:
+          type:
+            - string
+            - "null"
+        message_kind:
+          $ref: "#/components/schemas/MessageKind"
+        text_body:
+          type:
+            - string
+            - "null"
         media:
           oneOf:
-            - { $ref: "#/components/schemas/Media" }
+            - $ref: "#/components/schemas/Media"
             - type: object
               maxProperties: 0
-        status: { type: string }
-        delivered_at: { type: [string, "null"], format: date-time }
-        read_at: { type: [string, "null"], format: date-time }
-        heard_at: { type: [string, "null"], format: date-time }
-        failed_at: { type: [string, "null"], format: date-time }
-        failure_code: { type: [string, "null"] }
-        created_at: { type: string, format: date-time }
+        status:
+          type: string
+        delivered_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        read_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        heard_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        failed_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        failure_code:
+          type:
+            - string
+            - "null"
+        created_at:
+          type: string
+          format: date-time
         attachment_batch:
           $ref: "#/components/schemas/AttachmentBatch"
     RobonoMessageListResponse:
       type: object
-      required: [ok, request_id, messages, has_more]
+      required:
+        - ok
+        - request_id
+        - messages
+        - has_more
       properties:
-        ok: { const: true }
-        request_id: { type: string }
+        ok:
+          const: true
+        request_id:
+          type: string
         messages:
           type: array
-          items: { $ref: "#/components/schemas/RobonoMessage" }
-        has_more: { type: boolean }
-        next_before: { type: [string, "null"], format: date-time }
-        next_after: { type: [string, "null"], format: date-time }
-        sync_cursor: { type: [string, "null"], format: date-time }
+          items:
+            $ref: "#/components/schemas/RobonoMessage"
+        has_more:
+          type: boolean
+        next_before:
+          type:
+            - string
+            - "null"
+          format: date-time
+        next_after:
+          type:
+            - string
+            - "null"
+          format: date-time
+        sync_cursor:
+          type:
+            - string
+            - "null"
+          format: date-time
     RobonoMessageEventResponse:
       type: object
-      required: [ok, request_id, message_id, status, event, occurred_at]
+      required:
+        - ok
+        - request_id
+        - message_id
+        - status
+        - event
+        - occurred_at
       properties:
-        ok: { const: true }
-        request_id: { type: string }
-        message_id: { type: string, format: uuid }
-        status: { type: string, enum: [delivered, read, heard, validated] }
-        event: { type: string, enum: [delivered, read, heard] }
-        occurred_at: { type: string, format: date-time }
-        dry_run: { type: boolean }
-        connection_state: { type: object, additionalProperties: true }
+        ok:
+          const: true
+        request_id:
+          type: string
+        message_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - delivered
+            - read
+            - heard
+            - validated
+        event:
+          type: string
+          enum:
+            - delivered
+            - read
+            - heard
+        occurred_at:
+          type: string
+          format: date-time
+        dry_run:
+          type: boolean
+        connection_state:
+          type: object
+          additionalProperties: true
     RobonoMessageEventRequest:
       type: object
-      required: [connection_id, robono_message_id, external_user_id, event]
+      required:
+        - connection_id
+        - robono_message_id
+        - external_user_id
+        - event
       properties:
-        connection_id: { type: string, format: uuid }
-        robono_message_id: { type: string, format: uuid }
-        external_user_id: { type: string, maxLength: 160 }
-        event: { type: string, enum: [delivered, read, heard] }
-        occurred_at: { type: string, format: date-time }
-        dry_run: { type: boolean, default: false }
+        connection_id:
+          type: string
+          format: uuid
+        robono_message_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+          maxLength: 160
+        event:
+          type: string
+          enum:
+            - delivered
+            - read
+            - heard
+        occurred_at:
+          type: string
+          format: date-time
+        dry_run:
+          type: boolean
+          default: false
     LanguageResponse:
       type: object
-      required: [ok, request_id, languages]
+      required:
+        - ok
+        - request_id
+        - languages
       properties:
-        ok: { const: true }
-        request_id: { type: string }
+        ok:
+          const: true
+        request_id:
+          type: string
         languages:
           type: array
           items:
             type: object
-            required: [code, name]
+            required:
+              - code
+              - name
             properties:
-              code: { type: string, examples: [en] }
-              name: { type: string, examples: [English] }
+              code:
+                type: string
+                examples:
+                  - en
+              name:
+                type: string
+                examples:
+                  - English
     TransformOutput:
       type: string
-      enum: [transcript, translated_text, voice, translated_voice]
+      enum:
+        - transcript
+        - translated_text
+        - voice
+        - translated_voice
     MessageTransformRequest:
       type: object
-      required: [connection_id, message_id, outputs]
+      required:
+        - connection_id
+        - message_id
+        - outputs
       properties:
-        connection_id: { type: string, format: uuid }
-        message_id: { type: string, format: uuid }
+        connection_id:
+          type: string
+          format: uuid
+        message_id:
+          type: string
+          format: uuid
         outputs:
           type: array
           minItems: 1
           uniqueItems: true
-          items: { $ref: "#/components/schemas/TransformOutput" }
-        source_language: { type: [string, "null"], examples: [en] }
-        target_language: { type: [string, "null"], examples: [es] }
-        voice: { type: [string, "null"] }
+          items:
+            $ref: "#/components/schemas/TransformOutput"
+        source_language:
+          type:
+            - string
+            - "null"
+          examples:
+            - en
+        target_language:
+          type:
+            - string
+            - "null"
+          examples:
+            - es
+        voice:
+          type:
+            - string
+            - "null"
     SpeechTransformRequest:
       type: object
-      required: [input, outputs]
+      required:
+        - input
+        - outputs
       properties:
-        external_request_id: { type: string, maxLength: 160 }
+        external_request_id:
+          type: string
+          maxLength: 160
         input:
           oneOf:
             - type: object
-              required: [type, text]
+              required:
+                - type
+                - text
               properties:
-                type: { const: text }
-                text: { type: string, minLength: 1 }
-                language: { type: [string, "null"], examples: [en] }
+                type:
+                  const: text
+                text:
+                  type: string
+                  minLength: 1
+                language:
+                  type:
+                    - string
+                    - "null"
+                  examples:
+                    - en
             - type: object
-              required: [type, source_url]
+              required:
+                - type
+                - source_url
               properties:
-                type: { const: audio }
-                source_url: { type: string, format: uri }
-                mime_type: { type: string, examples: [audio/mpeg] }
-                language: { type: [string, "null"], examples: [en] }
+                type:
+                  const: audio
+                source_url:
+                  type: string
+                  format: uri
+                mime_type:
+                  type: string
+                  examples:
+                    - audio/mpeg
+                language:
+                  type:
+                    - string
+                    - "null"
+                  examples:
+                    - en
         outputs:
           type: array
           minItems: 1
           uniqueItems: true
-          items: { $ref: "#/components/schemas/TransformOutput" }
-        target_language: { type: [string, "null"], examples: [es] }
-        voice: { type: [string, "null"] }
+          items:
+            $ref: "#/components/schemas/TransformOutput"
+        target_language:
+          type:
+            - string
+            - "null"
+          examples:
+            - es
+        voice:
+          type:
+            - string
+            - "null"
     TransformTextArtifact:
       type: object
-      required: [text, language, cached]
+      required:
+        - text
+        - language
+        - cached
       properties:
-        text: { type: string }
-        language: { type: [string, "null"] }
-        target_language: { type: string }
-        cached: { type: boolean }
+        text:
+          type: string
+        language:
+          type:
+            - string
+            - "null"
+        target_language:
+          type: string
+        cached:
+          type: boolean
       additionalProperties: true
     GeneratedSpeechMedia:
       type: object
@@ -1984,38 +4016,70 @@ components:
         - generated_by
         - generated_kind
       properties:
-        source_url: { type: string, format: uri }
-        source_url_expires_at: { type: string, format: date-time }
-        mime_type: { type: string }
-        duration_ms: { type: [integer, "null"] }
-        byte_size: { type: integer, minimum: 0 }
+        source_url:
+          type: string
+          format: uri
+        source_url_expires_at:
+          type: string
+          format: date-time
+        mime_type:
+          type: string
+        duration_ms:
+          type:
+            - integer
+            - "null"
+        byte_size:
+          type: integer
+          minimum: 0
         waveform:
           type: array
-          items: { type: number }
-        generated_by: { const: robono }
-        generated_kind: { const: tts_audio }
+          items:
+            type: number
+        generated_by:
+          const: robono
+        generated_kind:
+          const: tts_audio
       additionalProperties: true
     TransformVoiceArtifact:
       type: object
-      required: [media_object_id, media, language, cached, disclosure]
+      required:
+        - media_object_id
+        - media
+        - language
+        - cached
+        - disclosure
       properties:
-        media_object_id: { type: [string, "null"], format: uuid }
+        media_object_id:
+          type:
+            - string
+            - "null"
+          format: uuid
         media:
           oneOf:
             - $ref: "#/components/schemas/GeneratedSpeechMedia"
-            - { type: "null" }
-        language: { type: [string, "null"] }
-        target_language: { type: string }
-        cached: { type: boolean }
-        disclosure: { const: Generated voice }
+            - type: "null"
+        language:
+          type:
+            - string
+            - "null"
+        target_language:
+          type: string
+        cached:
+          type: boolean
+        disclosure:
+          const: Generated voice
       additionalProperties: true
     TransformArtifacts:
       type: object
       properties:
-        transcript: { $ref: "#/components/schemas/TransformTextArtifact" }
-        translated_text: { $ref: "#/components/schemas/TransformTextArtifact" }
-        voice: { $ref: "#/components/schemas/TransformVoiceArtifact" }
-        translated_voice: { $ref: "#/components/schemas/TransformVoiceArtifact" }
+        transcript:
+          $ref: "#/components/schemas/TransformTextArtifact"
+        translated_text:
+          $ref: "#/components/schemas/TransformTextArtifact"
+        voice:
+          $ref: "#/components/schemas/TransformVoiceArtifact"
+        translated_voice:
+          $ref: "#/components/schemas/TransformVoiceArtifact"
       additionalProperties: false
     TransformBilling:
       type: object
@@ -2026,19 +4090,37 @@ components:
         - operations
         - cache_reused
       properties:
-        bill_to: { type: string, enum: [integration, sandbox] }
-        charged: { type: boolean }
-        operation_count: { type: integer, minimum: 0 }
+        bill_to:
+          type: string
+          enum:
+            - integration
+            - sandbox
+        charged:
+          type: boolean
+        operation_count:
+          type: integer
+          minimum: 0
         operations:
           type: array
           items:
             type: object
-            required: [type, quantity, billable]
+            required:
+              - type
+              - quantity
+              - billable
             properties:
-              type: { type: string, enum: [transcription, translation, tts] }
-              quantity: { const: 1 }
-              billable: { type: boolean }
-        cache_reused: { type: boolean }
+              type:
+                type: string
+                enum:
+                  - transcription
+                  - translation
+                  - tts
+              quantity:
+                const: 1
+              billable:
+                type: boolean
+        cache_reused:
+          type: boolean
     TransformResponse:
       type: object
       required:
@@ -2049,35 +4131,66 @@ components:
         - artifacts
         - billing
       properties:
-        ok: { const: true }
-        request_id: { type: string }
-        status: { const: completed }
-        processing: { const: synchronous }
-        connection_id: { type: string, format: uuid }
-        message_id: { type: string, format: uuid }
-        external_request_id: { type: [string, "null"] }
-        artifacts: { $ref: "#/components/schemas/TransformArtifacts" }
-        billing: { $ref: "#/components/schemas/TransformBilling" }
-        test_mode: { type: boolean }
+        ok:
+          const: true
+        request_id:
+          type: string
+        status:
+          const: completed
+        processing:
+          const: synchronous
+        connection_id:
+          type: string
+          format: uuid
+        message_id:
+          type: string
+          format: uuid
+        external_request_id:
+          type:
+            - string
+            - "null"
+        artifacts:
+          $ref: "#/components/schemas/TransformArtifacts"
+        billing:
+          $ref: "#/components/schemas/TransformBilling"
+        test_mode:
+          type: boolean
     WebhookEventBase:
       type: object
-      required: [event, event_id, request_id, created_at]
+      required:
+        - event
+        - event_id
+        - request_id
+        - created_at
       properties:
-        event: { type: string }
-        event_id: { type: string }
-        request_id: { type: string }
-        created_at: { type: string, format: date-time }
+        event:
+          type: string
+        event_id:
+          type: string
+        request_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
       additionalProperties: true
     ConnectionWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
         - type: object
-          required: [event, connection_id, status]
+          required:
+            - event
+            - connection_id
+            - status
           properties:
             event:
-              enum: [connection.status_changed, connection.profile_updated]
-            connection_id: { type: string, format: uuid }
-            status: { $ref: "#/components/schemas/RobonoConnectionStatus" }
+              enum:
+                - connection.status_changed
+                - connection.profile_updated
+            connection_id:
+              type: string
+              format: uuid
+            status:
+              $ref: "#/components/schemas/RobonoConnectionStatus"
     MessageCreatedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2092,11 +4205,19 @@ components:
             - text_body
             - media
           properties:
-            event: { const: message.created }
-            connection_id: { type: string, format: uuid }
-            conversation_id: { type: string, format: uuid }
-            robono_message_id: { type: string, format: uuid }
-            external_user_id: { type: string }
+            event:
+              const: message.created
+            connection_id:
+              type: string
+              format: uuid
+            conversation_id:
+              type: string
+              format: uuid
+            robono_message_id:
+              type: string
+              format: uuid
+            external_user_id:
+              type: string
             sender:
               type: object
               required:
@@ -2109,20 +4230,46 @@ components:
                 - profile_updated_at
                 - phone_masked
               properties:
-                type: { const: robono_user }
-                robono_user_id: { type: string, format: uuid }
-                display_name: { type: string }
-                avatar_url: { type: [string, "null"], format: uri }
-                avatar_version: { type: [string, "null"] }
-                avatar_updated_at: { type: [string, "null"], format: date-time }
-                profile_updated_at: { type: [string, "null"], format: date-time }
-                phone_masked: { type: [string, "null"] }
-            message_kind: { $ref: "#/components/schemas/MessageKind" }
-            text_body: { type: [string, "null"] }
+                type:
+                  const: robono_user
+                robono_user_id:
+                  type: string
+                  format: uuid
+                display_name:
+                  type: string
+                avatar_url:
+                  type:
+                    - string
+                    - "null"
+                  format: uri
+                avatar_version:
+                  type:
+                    - string
+                    - "null"
+                avatar_updated_at:
+                  type:
+                    - string
+                    - "null"
+                  format: date-time
+                profile_updated_at:
+                  type:
+                    - string
+                    - "null"
+                  format: date-time
+                phone_masked:
+                  type:
+                    - string
+                    - "null"
+            message_kind:
+              $ref: "#/components/schemas/MessageKind"
+            text_body:
+              type:
+                - string
+                - "null"
             media:
               oneOf:
-                - { $ref: "#/components/schemas/Media" }
-                - { type: "null" }
+                - $ref: "#/components/schemas/Media"
+                - type: "null"
             attachment_batch:
               $ref: "#/components/schemas/AttachmentBatch"
     MessageReceiptWebhookEvent:
@@ -2135,10 +4282,20 @@ components:
             - robono_message_id
             - external_message_id
           properties:
-            event: { enum: [message.delivered, message.heard] }
-            connection_id: { type: string, format: uuid }
-            robono_message_id: { type: string, format: uuid }
-            external_message_id: { type: [string, "null"] }
+            event:
+              enum:
+                - message.delivered
+                - message.heard
+            connection_id:
+              type: string
+              format: uuid
+            robono_message_id:
+              type: string
+              format: uuid
+            external_message_id:
+              type:
+                - string
+                - "null"
     MessageReactionWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2152,14 +4309,27 @@ components:
             - reaction
             - reactor
           properties:
-            event: { const: message.reaction_updated }
-            connection_id: { type: string, format: uuid }
-            conversation_id: { type: string, format: uuid }
-            robono_message_id: { type: string, format: uuid }
-            external_message_id: { type: [string, "null"] }
-            external_user_id: { type: string }
-            reaction: { $ref: "#/components/schemas/Reaction" }
-            reactor: { $ref: "#/components/schemas/ReactionSender" }
+            event:
+              const: message.reaction_updated
+            connection_id:
+              type: string
+              format: uuid
+            conversation_id:
+              type: string
+              format: uuid
+            robono_message_id:
+              type: string
+              format: uuid
+            external_message_id:
+              type:
+                - string
+                - "null"
+            external_user_id:
+              type: string
+            reaction:
+              $ref: "#/components/schemas/Reaction"
+            reactor:
+              $ref: "#/components/schemas/ReactionSender"
     BridgeConnectionRequestedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2171,9 +4341,13 @@ components:
             - target
             - capabilities
           properties:
-            event: { const: bridge.connection_requested }
-            bridge_connection_id: { type: string, format: uuid }
-            source: { $ref: "#/components/schemas/BridgeSourceParticipant" }
+            event:
+              const: bridge.connection_requested
+            bridge_connection_id:
+              type: string
+              format: uuid
+            source:
+              $ref: "#/components/schemas/BridgeSourceParticipant"
             target:
               type: object
               required:
@@ -2186,31 +4360,54 @@ components:
                   oneOf:
                     - $ref: "#/components/schemas/Network"
                     - $ref: "#/components/schemas/AppIdentity"
-                identifier: { type: string }
-                contact_label: { type: [string, "null"] }
-                accepted_identifier: { $ref: "#/components/schemas/Identifier" }
-            capabilities: { $ref: "#/components/schemas/Capabilities" }
+                identifier:
+                  type: string
+                contact_label:
+                  type:
+                    - string
+                    - "null"
+                accepted_identifier:
+                  $ref: "#/components/schemas/Identifier"
+            capabilities:
+              $ref: "#/components/schemas/Capabilities"
     BridgeConnectionChangedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
         - type: object
-          required: [event, bridge_connection_id, connection]
+          required:
+            - event
+            - bridge_connection_id
+            - connection
           properties:
             event:
-              enum: [bridge.connection_status_changed, bridge.connection_updated]
-            bridge_connection_id: { type: string, format: uuid }
-            connection: { $ref: "#/components/schemas/Connection" }
+              enum:
+                - bridge.connection_status_changed
+                - bridge.connection_updated
+            bridge_connection_id:
+              type: string
+              format: uuid
+            connection:
+              $ref: "#/components/schemas/Connection"
     BridgeDirectoryChangedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
         - type: object
-          required: [event, endpoint_id, change]
+          required:
+            - event
+            - endpoint_id
+            - change
           properties:
-            event: { const: bridge.directory_changed }
-            endpoint_id: { type: string }
+            event:
+              const: bridge.directory_changed
+            endpoint_id:
+              type: string
             change:
               type: string
-              enum: [created, updated, disabled, removed]
+              enum:
+                - created
+                - updated
+                - disabled
+                - removed
     BridgeMessageCreatedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2224,40 +4421,76 @@ components:
             - recipient
             - message
           properties:
-            event: { const: bridge.message_created }
-            bridge_connection_id: { type: string, format: uuid }
-            bridge_message_id: { type: string, format: uuid }
-            connection: { $ref: "#/components/schemas/Connection" }
-            sender: { $ref: "#/components/schemas/BridgeWebhookParticipant" }
-            recipient: { $ref: "#/components/schemas/BridgeWebhookParticipant" }
-            message: { $ref: "#/components/schemas/BridgeWebhookMessage" }
+            event:
+              const: bridge.message_created
+            bridge_connection_id:
+              type: string
+              format: uuid
+            bridge_message_id:
+              type: string
+              format: uuid
+            connection:
+              $ref: "#/components/schemas/Connection"
+            sender:
+              $ref: "#/components/schemas/BridgeWebhookParticipant"
+            recipient:
+              $ref: "#/components/schemas/BridgeWebhookParticipant"
+            message:
+              $ref: "#/components/schemas/BridgeWebhookMessage"
     BridgeMessageStatusWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
         - type: object
-          required: [event, bridge_connection_id, bridge_message_id, status]
+          required:
+            - event
+            - bridge_connection_id
+            - bridge_message_id
+            - status
           properties:
-            event: { const: bridge.message_status_changed }
-            bridge_connection_id: { type: string, format: uuid }
-            bridge_message_id: { type: string, format: uuid }
-            status: { $ref: "#/components/schemas/MessageStatus" }
+            event:
+              const: bridge.message_status_changed
+            bridge_connection_id:
+              type: string
+              format: uuid
+            bridge_message_id:
+              type: string
+              format: uuid
+            status:
+              $ref: "#/components/schemas/MessageStatus"
     BridgeWebhookParticipant:
       type: object
-      required: [child_app_id, external_user_id]
+      required:
+        - child_app_id
+        - external_user_id
       properties:
-        child_app_id: { type: string, format: uuid }
-        external_user_id: { type: string }
+        child_app_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
     BridgeWebhookMessage:
       type: object
-      required: [external_message_id, message_kind, created_at]
+      required:
+        - external_message_id
+        - message_kind
+        - created_at
       properties:
-        external_message_id: { type: string }
-        message_kind: { $ref: "#/components/schemas/MessageKind" }
-        text_body: { type: string }
-        media: { $ref: "#/components/schemas/Media" }
-        attachment_batch: { $ref: "#/components/schemas/AttachmentBatch" }
-        speech: { type: object, additionalProperties: true }
-        created_at: { type: string, format: date-time }
+        external_message_id:
+          type: string
+        message_kind:
+          $ref: "#/components/schemas/MessageKind"
+        text_body:
+          type: string
+        media:
+          $ref: "#/components/schemas/Media"
+        attachment_batch:
+          $ref: "#/components/schemas/AttachmentBatch"
+        speech:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
     BridgeGuardianMessageCreatedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2273,14 +4506,22 @@ components:
             - recipient_child
             - message
           properties:
-            event: { const: bridge.guardian_message_created }
-            bridge_connection_id: { type: string, format: uuid }
-            guardian_message_id: { type: string, format: uuid }
-            connection: { $ref: "#/components/schemas/Connection" }
-            sender_guardian: { $ref: "#/components/schemas/Guardian" }
+            event:
+              const: bridge.guardian_message_created
+            bridge_connection_id:
+              type: string
+              format: uuid
+            guardian_message_id:
+              type: string
+              format: uuid
+            connection:
+              $ref: "#/components/schemas/Connection"
+            sender_guardian:
+              $ref: "#/components/schemas/Guardian"
             recipient_guardians:
               type: array
-              items: { $ref: "#/components/schemas/Guardian" }
+              items:
+                $ref: "#/components/schemas/Guardian"
             sender_child:
               $ref: "#/components/schemas/BridgeNamedWebhookParticipant"
             recipient_child:
@@ -2293,10 +4534,15 @@ components:
                 - text_body
                 - created_at
               properties:
-                external_message_id: { type: string }
-                message_kind: { const: text }
-                text_body: { type: string }
-                created_at: { type: string, format: date-time }
+                external_message_id:
+                  type: string
+                message_kind:
+                  const: text
+                text_body:
+                  type: string
+                created_at:
+                  type: string
+                  format: date-time
     BridgeGuardianMessageStatusWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2307,37 +4553,70 @@ components:
             - guardian_message_id
             - status
           properties:
-            event: { const: bridge.guardian_message_status_changed }
-            bridge_connection_id: { type: string, format: uuid }
-            guardian_message_id: { type: string, format: uuid }
-            status: { $ref: "#/components/schemas/GuardianMessageStatus" }
+            event:
+              const: bridge.guardian_message_status_changed
+            bridge_connection_id:
+              type: string
+              format: uuid
+            guardian_message_id:
+              type: string
+              format: uuid
+            status:
+              $ref: "#/components/schemas/GuardianMessageStatus"
     BridgeNamedWebhookParticipant:
       allOf:
         - $ref: "#/components/schemas/BridgeWebhookParticipant"
         - type: object
-          required: [display_name]
+          required:
+            - display_name
           properties:
-            display_name: { type: string }
+            display_name:
+              type: string
     Reaction:
       type: object
-      required: [emoji, removed, reacted_at]
+      required:
+        - emoji
+        - removed
+        - reacted_at
       properties:
         emoji:
-          type: [string, "null"]
+          type:
+            - string
+            - "null"
           description: Curated reaction emoji, or null when the reaction was removed.
-        removed: { type: boolean }
-        reacted_at: { type: string, format: date-time }
+        removed:
+          type: boolean
+        reacted_at:
+          type: string
+          format: date-time
     ReactionSender:
       type: object
-      required: [type, robono_user_id, display_name, phone_masked]
+      required:
+        - type
+        - robono_user_id
+        - display_name
+        - phone_masked
       properties:
-        type: { const: robono_user }
-        robono_user_id: { type: string, format: uuid }
-        display_name: { type: string }
-        phone_masked: { type: [string, "null"] }
+        type:
+          const: robono_user
+        robono_user_id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        phone_masked:
+          type:
+            - string
+            - "null"
     GuardianMessageStatus:
       type: string
-      enum: [stored, accepted, delivered, read, failed, replaced]
+      enum:
+        - stored
+        - accepted
+        - delivered
+        - read
+        - failed
+        - replaced
     TransformCompletedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2349,32 +4628,68 @@ components:
             - artifacts
             - billing
           properties:
-            event: { const: transform.completed }
-            transform_kind: { type: string, enum: [message, speech] }
-            status: { const: completed }
-            connection_id: { type: string, format: uuid }
-            message_id: { type: string, format: uuid }
-            external_request_id: { type: [string, "null"] }
-            artifacts: { $ref: "#/components/schemas/TransformArtifacts" }
-            billing: { $ref: "#/components/schemas/TransformBilling" }
+            event:
+              const: transform.completed
+            transform_kind:
+              type: string
+              enum:
+                - message
+                - speech
+            status:
+              const: completed
+            connection_id:
+              type: string
+              format: uuid
+            message_id:
+              type: string
+              format: uuid
+            external_request_id:
+              type:
+                - string
+                - "null"
+            artifacts:
+              $ref: "#/components/schemas/TransformArtifacts"
+            billing:
+              $ref: "#/components/schemas/TransformBilling"
     TransformFailedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
         - type: object
-          required: [event, transform_kind, status, error]
+          required:
+            - event
+            - transform_kind
+            - status
+            - error
           properties:
-            event: { const: transform.failed }
-            transform_kind: { type: string, enum: [message, speech] }
-            status: { const: failed }
-            connection_id: { type: string, format: uuid }
-            message_id: { type: string, format: uuid }
-            external_request_id: { type: [string, "null"] }
+            event:
+              const: transform.failed
+            transform_kind:
+              type: string
+              enum:
+                - message
+                - speech
+            status:
+              const: failed
+            connection_id:
+              type: string
+              format: uuid
+            message_id:
+              type: string
+              format: uuid
+            external_request_id:
+              type:
+                - string
+                - "null"
             error:
               type: object
-              required: [code, message]
+              required:
+                - code
+                - message
               properties:
-                code: { type: string }
-                message: { type: string }
+                code:
+                  type: string
+                message:
+                  type: string
     DiagnosticPushWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -2385,32 +4700,63 @@ components:
             - diagnostic_token
             - external_user_id
           properties:
-            event: { const: diagnostic.push_requested }
-            push_diagnostic_id: { type: string, format: uuid }
-            diagnostic_token: { type: string }
-            external_user_id: { type: string }
+            event:
+              const: diagnostic.push_requested
+            push_diagnostic_id:
+              type: string
+              format: uuid
+            diagnostic_token:
+              type: string
+            external_user_id:
+              type: string
     DataRequestOperation:
       oneOf:
         - type: object
-          required: [action, request_type, external_user_id]
+          required:
+            - action
+            - request_type
+            - external_user_id
           properties:
-            action: { const: create }
-            request_type: { const: export }
-            external_user_id: { type: string, minLength: 1, maxLength: 200 }
-            external_request_id: { type: string, maxLength: 160 }
-            format: { const: json }
+            action:
+              const: create
+            request_type:
+              const: export
+            external_user_id:
+              type: string
+              minLength: 1
+              maxLength: 200
+            external_request_id:
+              type: string
+              maxLength: 160
+            format:
+              const: json
         - type: object
-          required: [action, request_type, external_user_id]
+          required:
+            - action
+            - request_type
+            - external_user_id
           properties:
-            action: { const: create }
-            request_type: { const: deletion }
-            external_user_id: { type: string, minLength: 1, maxLength: 200 }
-            external_request_id: { type: string, maxLength: 160 }
+            action:
+              const: create
+            request_type:
+              const: deletion
+            external_user_id:
+              type: string
+              minLength: 1
+              maxLength: 200
+            external_request_id:
+              type: string
+              maxLength: 160
         - type: object
-          required: [action, data_request_id]
+          required:
+            - action
+            - data_request_id
           properties:
-            action: { const: status }
-            data_request_id: { type: string, format: uuid }
+            action:
+              const: status
+            data_request_id:
+              type: string
+              format: uuid
     DataRequest:
       type: object
       required:
@@ -2420,23 +4766,61 @@ components:
         - result_summary
         - requested_at
       properties:
-        id: { type: string, format: uuid }
-        request_type: { type: string, enum: [export, deletion] }
-        external_request_id: { type: [string, "null"] }
-        status: { type: string, enum: [pending, processing, completed, rejected, failed] }
-        result_summary: { type: object, additionalProperties: true }
-        failure_code: { type: [string, "null"] }
-        requested_at: { type: string, format: date-time }
-        completed_at: { type: [string, "null"], format: date-time }
-        result_expires_at: { type: [string, "null"], format: date-time }
+        id:
+          type: string
+          format: uuid
+        request_type:
+          type: string
+          enum:
+            - export
+            - deletion
+        external_request_id:
+          type:
+            - string
+            - "null"
+        status:
+          type: string
+          enum:
+            - pending
+            - processing
+            - completed
+            - rejected
+            - failed
+        result_summary:
+          type: object
+          additionalProperties: true
+        failure_code:
+          type:
+            - string
+            - "null"
+        requested_at:
+          type: string
+          format: date-time
+        completed_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        result_expires_at:
+          type:
+            - string
+            - "null"
+          format: date-time
     DataRequestResponse:
       type: object
-      required: [ok, request_id, data_request]
+      required:
+        - ok
+        - request_id
+        - data_request
       properties:
-        ok: { const: true }
-        request_id: { type: string }
-        data_request: { $ref: "#/components/schemas/DataRequest" }
-        duplicate: { type: boolean }
+        ok:
+          const: true
+        request_id:
+          type: string
+        data_request:
+          $ref: "#/components/schemas/DataRequest"
+        duplicate:
+          type: boolean
         export:
           type: object
           additionalProperties: true
@@ -2465,12 +4849,31 @@ components:
                 - data.deletion_completed
                 - data.deletion_failed
                 - data.deletion_rejected
-            data_request_id: { type: string, format: uuid }
-            request_type: { type: string, enum: [export, deletion] }
-            status: { type: string, enum: [completed, failed, rejected] }
-            external_request_id: { type: [string, "null"] }
-            result_summary: { type: object, additionalProperties: true }
-            failure_code: { type: [string, "null"] }
+            data_request_id:
+              type: string
+              format: uuid
+            request_type:
+              type: string
+              enum:
+                - export
+                - deletion
+            status:
+              type: string
+              enum:
+                - completed
+                - failed
+                - rejected
+            external_request_id:
+              type:
+                - string
+                - "null"
+            result_summary:
+              type: object
+              additionalProperties: true
+            failure_code:
+              type:
+                - string
+                - "null"
     WebhookEvent:
       oneOf:
         - $ref: "#/components/schemas/ConnectionWebhookEvent"
@@ -2490,20 +4893,81 @@ components:
         - $ref: "#/components/schemas/DataRequestWebhookEvent"
     GuardianMessage:
       type: object
-      required: [guardian_message_id, bridge_connection_id, direction, sender_external_guardian_id, external_message_id, message_kind, text_body, status, created_at]
+      required:
+        - guardian_message_id
+        - bridge_connection_id
+        - direction
+        - sender_external_guardian_id
+        - external_message_id
+        - message_kind
+        - text_body
+        - status
+        - created_at
       properties:
-        guardian_message_id: { type: string, format: uuid }
-        bridge_connection_id: { type: string, format: uuid }
-        direction: { type: string, enum: [inbound, outbound] }
-        sender_external_guardian_id: { type: string }
-        external_message_id: { type: string }
-        message_kind: { const: text }
-        text_body: { type: string }
-        status: { type: string, enum: [stored, accepted, delivered, read, failed, replaced] }
-        accepted_at: { type: [string, "null"], format: date-time }
-        accepted_via: { type: [string, "null"], enum: [push, polling, null] }
-        delivered_at: { type: [string, "null"], format: date-time }
-        read_at: { type: [string, "null"], format: date-time }
-        failed_at: { type: [string, "null"], format: date-time }
-        failure_code: { type: [string, "null"] }
-        created_at: { type: string, format: date-time }
+        guardian_message_id:
+          type: string
+          format: uuid
+        bridge_connection_id:
+          type: string
+          format: uuid
+        direction:
+          type: string
+          enum:
+            - inbound
+            - outbound
+        sender_external_guardian_id:
+          type: string
+        external_message_id:
+          type: string
+        message_kind:
+          const: text
+        text_body:
+          type: string
+        status:
+          type: string
+          enum:
+            - stored
+            - accepted
+            - delivered
+            - read
+            - failed
+            - replaced
+        accepted_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        accepted_via:
+          type:
+            - string
+            - "null"
+          enum:
+            - push
+            - polling
+            - null
+        delivered_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        read_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        failed_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        failure_code:
+          type:
+            - string
+            - "null"
+        created_at:
+          type: string
+          format: date-time
+x-robono-example-coverage:
+  operations: 24
+  request_bodies: Every JSON request body includes a typical example.
+  responses: Every operation includes successful and error examples.

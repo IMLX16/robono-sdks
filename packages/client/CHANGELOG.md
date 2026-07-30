@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.7
+
+- Simplifies integration guidance and aligns the documented support policy with the tested 12-month compatibility commitment.
+
 ## 0.5.6
 
 - Publishes the tested July 2026 compatibility set with provenance, SBOM, and public license-review guidance.

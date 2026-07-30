@@ -2,11 +2,9 @@
 
 Headless Web SDK for Robono Bridge. It uses your product's existing login, screens, storage, and notifications, synchronizes after realtime or push events, retains polling as recovery, and pauses polling while the page is hidden.
 
-## License in plain English
+## License
 
-You may use this SDK to build, test, and ship an authorized application that connects to Robono, including its compiled or bundled SDK code. You may not redistribute it as a standalone SDK, use it to bypass Robono, or use it to build a competing bridge service. Service access, pricing, and support are separate. If you and Robono sign a written agreement that expressly replaces this SDK license, that agreement controls to the extent it says so. The included `LICENSE` is the complete, controlling text.
-
-See the [SDK license FAQ](https://robono.com/sdk-license) for procurement guidance and the route for organization terms.
+Licensed for authorized Robono integrations. Redistribution as a standalone SDK, bypassing Robono, and competing bridge services are prohibited. See the included `LICENSE` and [license FAQ](https://robono.com/sdk-license).
 
 ## Install
 
@@ -17,8 +15,7 @@ The package is ESM-only. CommonJS build tooling must load it with
 npm install @robono/web
 ```
 
-The package includes `SBOM.spdx.json`, a machine-readable inventory of its
-production components.
+The package includes TypeScript declarations and `SBOM.spdx.json`.
 
 ## Start
 
@@ -40,7 +37,7 @@ const unsubscribe = bridge.client.subscribe(
 try {
   await bridge.start();
 } catch (error) {
-  // Initial authentication, adapter, CORS, and configuration failures reject.
+  // Initial authentication, CORS, and configuration failures reject.
   showBridgeUnavailable(error);
 }
 ```
@@ -55,13 +52,14 @@ await bridge.receivePush(pushData);
 
 Push or realtime signals initiate immediate synchronization. Recovery polling runs about once a minute with jitter, backs off after failures, and pauses while the page is hidden. Call `bridge.dispose()` and `unsubscribe()` when the owning page ends. Subscribed state is temporary synchronization state, not your permanent database.
 
-Never put a Robono API key in browser code. Your backend must mount the authenticated and authorized `/robono/*` adapter supplied by `@robono/server`.
+Never put a Robono API key in browser code. Your backend must mount the authenticated and authorized `/robono/*` route supplied by `@robono/server`.
 
 For a separate backend origin, allow only your exact website origin, handle `OPTIONS`, and permit the authentication headers your app uses. Do not combine credentials with a wildcard origin.
 
 This is an early-access `0.x` package. Patch releases are compatible fixes; a
-minor release before `1.0` may contain a documented breaking change. The latest
-minor line is supported. Read the packaged `CHANGELOG.md` before upgrading and
+minor release before `1.0` may contain a documented breaking change. Each minor
+line receives critical security and Bridge compatibility fixes for at least 12
+months after its successor is published. Read the packaged `CHANGELOG.md` before upgrading and
 report SDK problems at
 [robono.com/contact?topic=sdk](https://robono.com/contact?topic=sdk).
 

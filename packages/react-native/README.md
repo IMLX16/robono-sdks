@@ -2,11 +2,9 @@
 
 Headless React Native SDK for Robono Bridge. It keeps your existing authentication and screens, synchronizes after push, uses limited polling as recovery, and pauses polling in the background.
 
-## License in plain English
+## License
 
-You may use this SDK to build, test, and ship an authorized application that connects to Robono, including its compiled or bundled SDK code. You may not redistribute it as a standalone SDK, use it to bypass Robono, or use it to build a competing bridge service. Service access, pricing, and support are separate. If you and Robono sign a written agreement that expressly replaces this SDK license, that agreement controls to the extent it says so. The included `LICENSE` is the complete, controlling text.
-
-See the [SDK license FAQ](https://robono.com/sdk-license) for procurement guidance and the route for organization terms.
+Licensed for authorized Robono integrations. Redistribution as a standalone SDK, bypassing Robono, and competing bridge services are prohibited. See the included `LICENSE` and [license FAQ](https://robono.com/sdk-license).
 
 It is pure JavaScript/TypeScript, works in Expo Go, and does not require CocoaPods or a native rebuild by itself. Your push provider may still require its normal native configuration.
 The package is ESM-only, as expected by current React Native and Expo tooling.
@@ -17,8 +15,7 @@ The package is ESM-only, as expected by current React Native and Expo tooling.
 npm install @robono/react-native
 ```
 
-The package includes `SBOM.spdx.json`, a machine-readable inventory of its
-production components.
+The package includes TypeScript declarations and `SBOM.spdx.json`.
 
 ## Start
 
@@ -42,7 +39,7 @@ const unsubscribe = bridge.client.subscribe(
 try {
   await bridge.start();
 } catch (error) {
-  // Initial authentication, adapter, and configuration failures reject.
+  // Initial authentication and configuration failures reject.
   showBridgeUnavailable(error);
 }
 ```
@@ -60,11 +57,12 @@ Push data should include `event` and the available event, request, connection, a
 
 Push initiates immediate synchronization. Recovery polling runs about once a minute with jitter, backs off after failures, and pauses in the background. Call `bridge.dispose()` and `unsubscribe()` when the owning app lifecycle ends. Subscribed state is temporary synchronization state, not your permanent database.
 
-Your backend must mount the authenticated and authorized `/robono/*` adapter supplied by `@robono/server`.
+Your backend must mount the authenticated and authorized `/robono/*` route supplied by `@robono/server`.
 
 This is an early-access `0.x` package. Patch releases are compatible fixes; a
-minor release before `1.0` may contain a documented breaking change. The latest
-minor line is supported. Read the packaged `CHANGELOG.md` before upgrading and
+minor release before `1.0` may contain a documented breaking change. Each minor
+line receives critical security and Bridge compatibility fixes for at least 12
+months after its successor is published. Read the packaged `CHANGELOG.md` before upgrading and
 report SDK problems at
 [robono.com/contact?topic=sdk](https://robono.com/contact?topic=sdk).
 

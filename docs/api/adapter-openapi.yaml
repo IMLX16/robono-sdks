@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: Robono Child-App Adapter
+  title: Robono App Client API
   version: 1.0.0
   description: |
-    Contract between a child app's authenticated client and its own protected
-    backend. Mount these routes at /robono/*. The backend authenticates its
+    Contract between an app's authenticated client and its protected backend.
+    Mount these routes at /robono/*. The backend authenticates its
     user, authorizes each operation, replaces any submitted user identifier
     with the authenticated identity, and calls the upstream Robono Bridge API.
     A Robono API key is never sent to a phone or browser.
@@ -20,59 +20,324 @@ paths:
   /robono/networks:
     post:
       operationId: listAdapterNetworks
-      tags: [Directory]
+      tags:
+        - Directory
       summary: Return the current endpoint directory
       responses:
-        "200": { $ref: "#/components/responses/Directory" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Current endpoint directory
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/NetworkDirectoryResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    directory:
+                      - type: connected_app
+                        id: 77777777-7777-4777-8777-777777777777
+                        slug: friend-app
+                        display_name: Friend App
+                        description: A connected child app.
+                        icon_url: https://cdn.example.com/friend-app.png
+                        accepts_inbound_bridge_requests: true
+                        accepted_identifier:
+                          label: Friend code
+                          description: Enter the code shown in the friend's app.
+                          example: FRIEND-42
+                          format: App-issued friend code
+                          input_type: text
+                          min_length: 6
+                          max_length: 32
+                          normalization: uppercase
+                          case_sensitive: false
+                        default_capabilities: &a1
+                          allowed_outbound_message_kinds:
+                            - text
+                            - voice
+                          allowed_inbound_message_kinds:
+                            - text
+                            - voice
+                          text:
+                            max_characters: 1000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/languages:
     post:
       operationId: listAdapterLanguages
-      tags: [Directory]
+      tags:
+        - Directory
       summary: Return languages currently supported by Robono transforms
       responses:
         "200":
           description: Supported languages
           content:
             application/json:
-              schema: { $ref: "./openapi.yaml#/components/schemas/LanguageResponse" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/LanguageResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    languages:
+                      - code: en
+                        name: English
+                      - code: es
+                        name: Spanish
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/network-connections:
     post:
       operationId: requestAdapterNetworkConnection
-      tags: [Connections]
+      tags:
+        - Connections
       summary: Request a relationship with a user in another connected app
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody:
-        $ref: "#/components/requestBodies/NetworkConnectionRequest"
-      responses:
-        "200": { $ref: "#/components/responses/NetworkConnection" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/network-connections/respond:
-    post:
-      operationId: respondAdapterNetworkConnection
-      tags: [Connections]
-      summary: Respond to an incoming relationship request
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "./openapi.yaml#/components/schemas/RespondConnection"
+              type: object
+              required:
+                - source_display_name
+                - target_identifier
+              properties:
+                target_app_id:
+                  type: string
+                  format: uuid
+                target_app_slug:
+                  type: string
+                source_display_name:
+                  type: string
+                  maxLength: 160
+                target_identifier:
+                  type: string
+                  maxLength: 240
+                target_contact_label:
+                  type: string
+                  maxLength: 160
+                external_profile:
+                  $ref: ./openapi.yaml#/components/schemas/ExternalProfile
+                capabilities:
+                  $ref: ./openapi.yaml#/components/schemas/Capabilities
+                guardian_messaging_enabled:
+                  type: boolean
+                source_guardians:
+                  type: array
+                  items:
+                    $ref: ./openapi.yaml#/components/schemas/Guardian
+                monitoring_disclosure:
+                  type: string
+                external_approval:
+                  type: object
+                  additionalProperties: true
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  target_app_id: 77777777-7777-4777-8777-777777777777
+                  source_display_name: Jordan
+                  target_identifier: FRIEND-42
+                  monitoring_disclosure: A guardian may review this relationship.
+                  external_approval:
+                    approved: true
+                    source: guardian-consent-42
       responses:
-        "200": { $ref: "#/components/responses/NetworkConnection" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Connected-app relationship
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/ConnectionResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: &a2
+                      app:
+                        id: 66666666-6666-4666-8666-666666666666
+                        slug: source-app
+                        display_name: Source App
+                      external_user_id: source-child-42
+                      display_name: Jordan
+                    target: &a3
+                      app:
+                        id: 77777777-7777-4777-8777-777777777777
+                        slug: friend-app
+                        display_name: Friend App
+                      identifier: FRIEND-42
+                      external_user_id: target-child-42
+                      display_name: Riley
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/network-connections/respond:
+    post:
+      operationId: respondAdapterNetworkConnection
+      tags:
+        - Connections
+      summary: Respond to an incoming relationship request
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./openapi.yaml#/components/schemas/RespondConnection
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  status: accepted
+                  target_display_name: Riley
+      responses:
+        "200":
+          description: Connected-app relationship
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/ConnectionResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: *a2
+                    target: *a3
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/network-connections/list:
     post:
       operationId: listAdapterNetworkConnections
-      tags: [Connections]
+      tags:
+        - Connections
       summary: Synchronize connected-app relationships for the signed-in user
-      requestBody: { $ref: "#/components/requestBodies/ConnectionList" }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Page"
+                - type: object
+                  properties:
+                    status:
+                      type: string
+                    bridge_connection_id:
+                      type: string
+                      format: uuid
+                    connection_id:
+                      type: string
+                      format: uuid
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  status: accepted
+                  limit: 50
       responses:
         "200":
           description: Visible connected-app relationships
@@ -80,156 +345,681 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [connections, has_more]
+                required:
+                  - connections
+                  - has_more
                 properties:
                   connections:
                     type: array
-                    items: { $ref: "./openapi.yaml#/components/schemas/Connection" }
-                  has_more: { type: boolean }
-                  next_before: { type: [string, "null"], format: date-time }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+                    items:
+                      $ref: ./openapi.yaml#/components/schemas/Connection
+                  has_more:
+                    type: boolean
+                  next_before:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    connections:
+                      - bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                        status: accepted
+                        source: *a2
+                        target: *a3
+                        guardian_messaging_enabled: false
+                        capabilities: *a1
+                        accepted_at: 2026-07-25T12:00:00Z
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/network-connections/disconnect:
     post:
       operationId: disconnectAdapterNetworkConnection
-      tags: [Connections]
+      tags:
+        - Connections
       summary: End a relationship with a user in another connected app
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody: { $ref: "#/components/requestBodies/NetworkConnectionIdentity" }
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bridge_connection_id
+              properties:
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                reason:
+                  type: string
+                  maxLength: 240
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  reason: User ended the relationship.
       responses:
-        "200": { $ref: "#/components/responses/NetworkConnection" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Connected-app relationship
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/ConnectionResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: *a2
+                    target: *a3
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/network-connections/update:
     post:
       operationId: updateAdapterNetworkConnection
-      tags: [Connections]
+      tags:
+        - Connections
       summary: Update the signed-in user's connected-app profile or capabilities
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [bridge_connection_id]
+              required:
+                - bridge_connection_id
               properties:
-                bridge_connection_id: { type: string, format: uuid }
-                display_name: { type: string, maxLength: 160 }
-                external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
-                capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                display_name:
+                  type: string
+                  maxLength: 160
+                external_profile:
+                  $ref: ./openapi.yaml#/components/schemas/ExternalProfile
+                capabilities:
+                  $ref: ./openapi.yaml#/components/schemas/Capabilities
                 guardians:
                   type: array
-                  items: { $ref: "./openapi.yaml#/components/schemas/Guardian" }
+                  items:
+                    $ref: ./openapi.yaml#/components/schemas/Guardian
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  display_name: Jordan
+                  capabilities: *a1
       responses:
-        "200": { $ref: "#/components/responses/NetworkConnection" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Connected-app relationship
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/ConnectionResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: accepted
+                    source: *a2
+                    target: *a3
+                    guardian_messaging_enabled: false
+                    capabilities: *a1
+                    accepted_at: 2026-07-25T12:00:00Z
+                    created_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/connections:
     post:
       operationId: createAdapterRobonoConnection
-      tags: [Connections]
+      tags:
+        - Connections
       summary: Request a relationship with a user at a Robono endpoint
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [target_phone_e164, external_display_name]
+              required:
+                - target_phone_e164
+                - external_display_name
               properties:
-                target_phone_e164: { type: string, pattern: "^\\+[1-9][0-9]{7,14}$" }
-                external_display_name: { type: string, maxLength: 160 }
-                external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
-                target_contact_label: { type: string, maxLength: 160 }
-                monitoring_disclosure: { type: string }
-                external_approval: { type: object, additionalProperties: true }
-                capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
+                target_phone_e164:
+                  type: string
+                  pattern: ^\+[1-9][0-9]{7,14}$
+                external_display_name:
+                  type: string
+                  maxLength: 160
+                external_profile:
+                  $ref: ./openapi.yaml#/components/schemas/ExternalProfile
+                target_contact_label:
+                  type: string
+                  maxLength: 160
+                monitoring_disclosure:
+                  type: string
+                external_approval:
+                  type: object
+                  additionalProperties: true
+                capabilities:
+                  $ref: ./openapi.yaml#/components/schemas/Capabilities
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  target_phone_e164: "+15550100101"
+                  external_display_name: Jordan
+                  target_contact_label: Riley
+                  external_approval:
+                    approved: true
+                    source: guardian-consent-42
       responses:
-        "200": { $ref: "#/components/responses/RobonoConnection" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Robono-endpoint relationship
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/RobonoConnectionResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    connection_id: 11111111-1111-4111-8111-111111111111
+                    conversation_id: 44444444-4444-4444-8444-444444444444
+                    status: active
+                    external_user_id: source-child-42
+                    external_display_name: Jordan
+                    target_contact_label: Riley
+                    capabilities: *a1
+                    robono_user: &a4
+                      id: 33333333-3333-4333-8333-333333333333
+                      display_name: Riley
+                      phone_masked: "***-***-0101"
+                    phone_masked: "***-***-0101"
+                    created_at: 2026-07-25T12:00:00Z
+                    updated_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/connections/list:
     post:
       operationId: listAdapterRobonoConnections
-      tags: [Connections]
+      tags:
+        - Connections
       summary: Synchronize Robono phone-endpoint relationships for the signed-in user
-      requestBody: { $ref: "#/components/requestBodies/ConnectionList" }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Page"
+                - type: object
+                  properties:
+                    status:
+                      type: string
+                    bridge_connection_id:
+                      type: string
+                      format: uuid
+                    connection_id:
+                      type: string
+                      format: uuid
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  status: active
+                  limit: 50
       responses:
         "200":
           description: Visible Robono-endpoint relationships
           content:
             application/json:
               schema:
-                $ref: "./openapi.yaml#/components/schemas/RobonoConnectionListResponse"
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+                $ref: ./openapi.yaml#/components/schemas/RobonoConnectionListResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    connections:
+                      - connection_id: 11111111-1111-4111-8111-111111111111
+                        conversation_id: 44444444-4444-4444-8444-444444444444
+                        status: active
+                        external_user_id: source-child-42
+                        external_display_name: Jordan
+                        target_contact_label: Riley
+                        capabilities: *a1
+                        robono_user: *a4
+                        phone_masked: "***-***-0101"
+                        created_at: 2026-07-25T12:00:00Z
+                        updated_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/connections/profile:
     post:
       operationId: updateAdapterRobonoConnection
-      tags: [Connections]
+      tags:
+        - Connections
       summary: Update the signed-in user's Robono-endpoint profile or capabilities
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [connection_id]
+              required:
+                - connection_id
               properties:
-                connection_id: { type: string, format: uuid }
-                external_display_name: { type: string, maxLength: 160 }
-                external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
-                capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
+                connection_id:
+                  type: string
+                  format: uuid
+                external_display_name:
+                  type: string
+                  maxLength: 160
+                external_profile:
+                  $ref: ./openapi.yaml#/components/schemas/ExternalProfile
+                capabilities:
+                  $ref: ./openapi.yaml#/components/schemas/Capabilities
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  external_display_name: Jordan
+                  capabilities: *a1
       responses:
-        "200": { $ref: "#/components/responses/RobonoConnection" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Robono-endpoint relationship
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/RobonoConnectionResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    connection_id: 11111111-1111-4111-8111-111111111111
+                    conversation_id: 44444444-4444-4444-8444-444444444444
+                    status: active
+                    external_user_id: source-child-42
+                    external_display_name: Jordan
+                    target_contact_label: Riley
+                    capabilities: *a1
+                    robono_user: *a4
+                    phone_masked: "***-***-0101"
+                    created_at: 2026-07-25T12:00:00Z
+                    updated_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/connections/disconnect:
     post:
       operationId: disconnectAdapterRobonoConnection
-      tags: [Connections]
+      tags:
+        - Connections
       summary: End a relationship with a user at a Robono endpoint
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody: { $ref: "#/components/requestBodies/RobonoConnectionIdentity" }
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connection_id
+              properties:
+                connection_id:
+                  type: string
+                  format: uuid
+                reason:
+                  type: string
+                  maxLength: 240
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  reason: User ended the relationship.
       responses:
-        "200": { $ref: "#/components/responses/RobonoConnection" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Robono-endpoint relationship
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/RobonoConnectionResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    connection_id: 11111111-1111-4111-8111-111111111111
+                    conversation_id: 44444444-4444-4444-8444-444444444444
+                    status: active
+                    external_user_id: source-child-42
+                    external_display_name: Jordan
+                    target_contact_label: Riley
+                    capabilities: *a1
+                    robono_user: *a4
+                    phone_masked: "***-***-0101"
+                    created_at: 2026-07-25T12:00:00Z
+                    updated_at: 2026-07-25T12:00:00Z
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/network-messages:
     post:
       operationId: sendAdapterNetworkMessage
-      tags: [Messages]
+      tags:
+        - Messages
       summary: Send a message across a connected-app relationship
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               oneOf:
-                - allOf:
-                    - $ref: "#/components/schemas/AdapterUserContext"
-                    - $ref: "./openapi.yaml#/components/schemas/SendTextMessage"
-                - allOf:
-                    - $ref: "#/components/schemas/AdapterUserContext"
-                    - $ref: "./openapi.yaml#/components/schemas/SendMediaMessage"
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - bridge_connection_id
+                    - external_message_id
+                    - message_kind
+                    - text_body
+                  properties:
+                    bridge_connection_id:
+                      type: string
+                      format: uuid
+                    external_message_id:
+                      type: string
+                      maxLength: 160
+                    message_kind:
+                      const: text
+                    text_body:
+                      type: string
+                    dry_run:
+                      type: boolean
+                      default: false
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - bridge_connection_id
+                    - external_message_id
+                    - message_kind
+                    - media
+                  properties:
+                    bridge_connection_id:
+                      type: string
+                      format: uuid
+                    external_message_id:
+                      type: string
+                      maxLength: 160
+                    message_kind:
+                      type: string
+                      enum:
+                        - voice
+                        - image
+                        - video
+                        - document
+                    text_body:
+                      type: string
+                    media:
+                      $ref: ./openapi.yaml#/components/schemas/Media
+                    attachment_batch:
+                      $ref: ./openapi.yaml#/components/schemas/AttachmentBatch
+                    dry_run:
+                      type: boolean
+                      default: false
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  external_message_id: message-42
+                  message_kind: text
+                  text_body: Want to play after school?
       responses:
         "200":
           description: Message result
           content:
             application/json:
-              schema: { $ref: "./openapi.yaml#/components/schemas/SendMessageResponse" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/SendMessageResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    bridge_message_id: 88888888-8888-4888-8888-888888888888
+                    status: accepted
+                    duplicate: false
+                    dry_run: false
+                    accepted_at: 2026-07-25T12:00:00Z
+                    accepted_via: push
+                    push_status: accepted
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/network-messages/list:
     post:
       operationId: listAdapterNetworkMessages
-      tags: [Messages]
+      tags:
+        - Messages
       summary: Synchronize messages in a connected-app relationship
-      requestBody: { $ref: "#/components/requestBodies/NetworkMessageList" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Page"
+                - type: object
+                  required:
+                    - bridge_connection_id
+                  properties:
+                    bridge_connection_id:
+                      type: string
+                      format: uuid
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  limit: 50
+                  after: 2026-07-25T11:55:00Z
       responses:
         "200":
           description: Current messages and synchronization cursor
@@ -237,181 +1027,929 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [messages, has_more]
+                required:
+                  - messages
+                  - has_more
                 properties:
                   messages:
                     type: array
-                    items: { $ref: "./openapi.yaml#/components/schemas/Message" }
-                  has_more: { type: boolean }
-                  next_before: { type: [string, "null"], format: date-time }
-                  next_after: { type: [string, "null"], format: date-time }
-                  sync_cursor: { type: [string, "null"], format: date-time }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+                    items:
+                      $ref: ./openapi.yaml#/components/schemas/Message
+                  has_more:
+                    type: boolean
+                  next_before:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+                  next_after:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+                  sync_cursor:
+                    type:
+                      - string
+                      - "null"
+                    format: date-time
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    messages:
+                      - bridge_message_id: 88888888-8888-4888-8888-888888888888
+                        bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                        direction: outbound
+                        sender_external_user_id: source-child-42
+                        external_message_id: message-42
+                        message_kind: text
+                        text_body: Want to play after school?
+                        media: {}
+                        status: delivered
+                        accepted_at: 2026-07-25T12:00:00Z
+                        accepted_via: push
+                        delivered_at: 2026-07-25T12:00:00Z
+                        read_at: null
+                        heard_at: null
+                        failed_at: null
+                        failure_code: null
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
+                    next_after: 2026-07-25T12:00:00Z
+                    sync_cursor: 2026-07-25T12:00:00Z
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/network-messages/events:
     post:
       operationId: markAdapterNetworkMessage
-      tags: [Messages]
+      tags:
+        - Messages
       summary: Report delivery, read, or heard state for a connected-app message
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody: { $ref: "#/components/requestBodies/NetworkMessageEvent" }
-      responses:
-        "200": { $ref: "#/components/responses/GenericJson" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/messages:
-    post:
-      operationId: sendAdapterRobonoMessage
-      tags: [Messages]
-      summary: Send a message across a Robono phone-endpoint relationship
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "./openapi.yaml#/components/schemas/SendRobonoMessage"
-      responses:
-        "200":
-          description: Message result
-          content:
-            application/json:
-              schema: { $ref: "./openapi.yaml#/components/schemas/SendRobonoMessageResponse" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/messages/list:
-    post:
-      operationId: listAdapterRobonoMessages
-      tags: [Messages]
-      summary: Synchronize messages in a Robono phone-endpoint relationship
-      requestBody: { $ref: "#/components/requestBodies/RobonoMessageList" }
-      responses:
-        "200":
-          description: Current messages and synchronization cursor
-          content:
-            application/json:
-              schema: { $ref: "./openapi.yaml#/components/schemas/RobonoMessageListResponse" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/message-events:
-    post:
-      operationId: markAdapterRobonoMessage
-      tags: [Messages]
-      summary: Report delivery, read, or heard state for a Robono-endpoint message
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "./openapi.yaml#/components/schemas/RobonoMessageEventRequest"
-      responses:
-        "200":
-          description: Updated message state
-          content:
-            application/json:
-              schema: { $ref: "./openapi.yaml#/components/schemas/RobonoMessageEventResponse" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/guardian-messages:
-    post:
-      operationId: sendAdapterGuardianMessage
-      tags: [Guardian messaging]
-      summary: Send an approved guardian-to-guardian message
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody: { $ref: "#/components/requestBodies/GuardianMessage" }
-      responses:
-        "200": { $ref: "#/components/responses/GenericJson" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/guardian-messages/list:
-    post:
-      operationId: listAdapterGuardianMessages
-      tags: [Guardian messaging]
-      summary: Synchronize guardian messages for an approved relationship
-      requestBody: { $ref: "#/components/requestBodies/GuardianMessageList" }
-      responses:
-        "200": { $ref: "#/components/responses/GenericJson" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/guardian-messages/events:
-    post:
-      operationId: markAdapterGuardianMessage
-      tags: [Guardian messaging]
-      summary: Report delivery or read state for a guardian message
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody: { $ref: "#/components/requestBodies/GuardianMessageEvent" }
-      responses:
-        "200": { $ref: "#/components/responses/GenericJson" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/transforms/message:
-    post:
-      operationId: createAdapterMessageTransform
-      tags: [Transforms]
-      summary: Request permitted translation or transcription for a message
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "./openapi.yaml#/components/schemas/MessageTransformRequest" }
-      responses:
-        "200":
-          description: Transform result
-          content:
-            application/json:
-              schema: { $ref: "./openapi.yaml#/components/schemas/TransformResponse" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/transforms/speech:
-    post:
-      operationId: createAdapterSpeechTransform
-      tags: [Transforms]
-      summary: Request a permitted speech transform
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "./openapi.yaml#/components/schemas/SpeechTransformRequest" }
-      responses:
-        "200":
-          description: Transform result
-          content:
-            application/json:
-              schema: { $ref: "./openapi.yaml#/components/schemas/TransformResponse" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
-  /robono/push-diagnostics/events:
-    post:
-      operationId: reportAdapterPushDiagnostic
-      tags: [Diagnostics]
-      summary: Report a push-delivery diagnostic milestone or failure
-      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [diagnostic_id, diagnostic_token, stage]
+              required:
+                - bridge_connection_id
+                - bridge_message_id
+                - event
               properties:
-                diagnostic_id: { type: string, format: uuid }
-                diagnostic_token: { type: string }
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                bridge_message_id:
+                  type: string
+                  format: uuid
+                event:
+                  type: string
+                  enum:
+                    - delivered
+                    - read
+                    - heard
+                occurred_at:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  bridge_message_id: 88888888-8888-4888-8888-888888888888
+                  event: read
+                  occurred_at: 2026-07-25T12:00:00Z
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    bridge_message_id: 88888888-8888-4888-8888-888888888888
+                    status: read
+                    occurred_at: 2026-07-25T12:00:00Z
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/messages:
+    post:
+      operationId: sendAdapterRobonoMessage
+      tags:
+        - Messages
+      summary: Send a message across a Robono phone-endpoint relationship
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - connection_id
+                    - external_message_id
+                    - message_kind
+                    - text_body
+                  properties:
+                    connection_id:
+                      type: string
+                      format: uuid
+                    external_message_id:
+                      type: string
+                      maxLength: 160
+                    message_kind:
+                      const: text
+                    text_body:
+                      type: string
+                    send_invite_sms_if_pending:
+                      type: boolean
+                    external_profile:
+                      $ref: ./openapi.yaml#/components/schemas/ExternalProfile
+                    dry_run:
+                      type: boolean
+                      default: false
+                - type: object
+                  additionalProperties: false
+                  required:
+                    - connection_id
+                    - external_message_id
+                    - message_kind
+                    - media
+                  properties:
+                    connection_id:
+                      type: string
+                      format: uuid
+                    external_message_id:
+                      type: string
+                      maxLength: 160
+                    message_kind:
+                      type: string
+                      enum:
+                        - voice
+                        - image
+                        - video
+                        - document
+                    text_body:
+                      type: string
+                    media:
+                      $ref: ./openapi.yaml#/components/schemas/Media
+                    attachment_batch:
+                      $ref: ./openapi.yaml#/components/schemas/AttachmentBatch
+                    send_invite_sms_if_pending:
+                      type: boolean
+                    external_profile:
+                      $ref: ./openapi.yaml#/components/schemas/ExternalProfile
+                    dry_run:
+                      type: boolean
+                      default: false
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  external_message_id: message-42
+                  message_kind: text
+                  text_body: Want to play after school?
+      responses:
+        "200":
+          description: Message result
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/SendRobonoMessageResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    robono_message_id: 22222222-2222-4222-8222-222222222222
+                    external_user_id: source-child-42
+                    status: accepted
+                    invite_sms_sent: false
+                    dry_run: false
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/messages/list:
+    post:
+      operationId: listAdapterRobonoMessages
+      tags:
+        - Messages
+      summary: Synchronize messages in a Robono phone-endpoint relationship
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Page"
+                - type: object
+                  required:
+                    - connection_id
+                  properties:
+                    connection_id:
+                      type: string
+                      format: uuid
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  limit: 50
+                  after: 2026-07-25T11:55:00Z
+      responses:
+        "200":
+          description: Current messages and synchronization cursor
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/RobonoMessageListResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    messages:
+                      - robono_message_id: 22222222-2222-4222-8222-222222222222
+                        connection_id: 11111111-1111-4111-8111-111111111111
+                        direction: outbound
+                        external_message_id: message-42
+                        message_kind: text
+                        text_body: Want to play after school?
+                        media: {}
+                        status: delivered
+                        delivered_at: 2026-07-25T12:00:00Z
+                        read_at: null
+                        heard_at: null
+                        failed_at: null
+                        failure_code: null
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
+                    next_after: 2026-07-25T12:00:00Z
+                    sync_cursor: 2026-07-25T12:00:00Z
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/message-events:
+    post:
+      operationId: markAdapterRobonoMessage
+      tags:
+        - Messages
+      summary: Report delivery, read, or heard state for a Robono-endpoint message
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connection_id
+                - robono_message_id
+                - event
+              properties:
+                connection_id:
+                  type: string
+                  format: uuid
+                robono_message_id:
+                  type: string
+                  format: uuid
+                event:
+                  type: string
+                  enum:
+                    - delivered
+                    - read
+                    - heard
+                occurred_at:
+                  type: string
+                  format: date-time
+                dry_run:
+                  type: boolean
+                  default: false
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  robono_message_id: 22222222-2222-4222-8222-222222222222
+                  event: read
+                  occurred_at: 2026-07-25T12:00:00Z
+      responses:
+        "200":
+          description: Updated message state
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/RobonoMessageEventResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    message_id: 22222222-2222-4222-8222-222222222222
+                    status: read
+                    event: read
+                    occurred_at: 2026-07-25T12:00:00Z
+                    dry_run: false
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/guardian-messages:
+    post:
+      operationId: sendAdapterGuardianMessage
+      tags:
+        - Guardian messaging
+      summary: Send an approved guardian-to-guardian message
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bridge_connection_id
+                - external_message_id
+                - text_body
+              properties:
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                external_message_id:
+                  type: string
+                  maxLength: 160
+                text_body:
+                  type: string
+                  minLength: 1
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  external_message_id: guardian-message-42
+                  text_body: Pickup is at 4:00.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    guardian_message_id: 99999999-9999-4999-8999-999999999999
+                    status: accepted
+                    duplicate: false
+                    dry_run: false
+                    accepted_at: 2026-07-25T12:00:00Z
+                    accepted_via: push
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/guardian-messages/list:
+    post:
+      operationId: listAdapterGuardianMessages
+      tags:
+        - Guardian messaging
+      summary: Synchronize guardian messages for an approved relationship
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Page"
+                - type: object
+                  required:
+                    - bridge_connection_id
+                  properties:
+                    bridge_connection_id:
+                      type: string
+                      format: uuid
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  limit: 50
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    messages:
+                      - guardian_message_id: 99999999-9999-4999-8999-999999999999
+                        bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                        direction: outbound
+                        sender_external_guardian_id: guardian-42
+                        external_message_id: guardian-message-42
+                        message_kind: text
+                        text_body: Pickup is at 4:00.
+                        status: read
+                        created_at: 2026-07-25T12:00:00Z
+                    has_more: false
+                    next_before: null
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/guardian-messages/events:
+    post:
+      operationId: markAdapterGuardianMessage
+      tags:
+        - Guardian messaging
+      summary: Report delivery or read state for a guardian message
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bridge_connection_id
+                - guardian_message_id
+                - event
+              properties:
+                bridge_connection_id:
+                  type: string
+                  format: uuid
+                guardian_message_id:
+                  type: string
+                  format: uuid
+                event:
+                  type: string
+                  enum:
+                    - delivered
+                    - read
+                occurred_at:
+                  type: string
+                  format: date-time
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  guardian_message_id: 99999999-9999-4999-8999-999999999999
+                  event: read
+                  occurred_at: 2026-07-25T12:00:00Z
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    guardian_message_id: 99999999-9999-4999-8999-999999999999
+                    status: read
+                    occurred_at: 2026-07-25T12:00:00Z
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/transforms/message:
+    post:
+      operationId: createAdapterMessageTransform
+      tags:
+        - Transforms
+      summary: Request permitted translation or transcription for a message
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./openapi.yaml#/components/schemas/MessageTransformRequest
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  connection_id: 11111111-1111-4111-8111-111111111111
+                  message_id: 22222222-2222-4222-8222-222222222222
+                  outputs:
+                    - translated_text
+                  source_language: en
+                  target_language: es
+      responses:
+        "200":
+          description: Transform result
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/TransformResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    status: completed
+                    processing: synchronous
+                    external_request_id: speech-42
+                    artifacts:
+                      translated_text:
+                        text: Hola
+                        language: es
+                        cached: false
+                    billing:
+                      bill_to: sandbox
+                      charged: false
+                      operation_count: 1
+                      operations:
+                        - type: translation
+                          quantity: 1
+                          billable: false
+                      cache_reused: false
+                    test_mode: true
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/transforms/speech:
+    post:
+      operationId: createAdapterSpeechTransform
+      tags:
+        - Transforms
+      summary: Request a permitted speech transform
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./openapi.yaml#/components/schemas/SpeechTransformRequest
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  external_request_id: speech-42
+                  input:
+                    type: text
+                    text: Hello
+                    language: en
+                  outputs:
+                    - translated_text
+                    - voice
+                  target_language: es
+      responses:
+        "200":
+          description: Transform result
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/TransformResponse
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    status: completed
+                    processing: synchronous
+                    external_request_id: speech-42
+                    artifacts:
+                      translated_text:
+                        text: Hola
+                        language: es
+                        cached: false
+                    billing:
+                      bill_to: sandbox
+                      charged: false
+                      operation_count: 1
+                      operations:
+                        - type: translation
+                          quantity: 1
+                          billable: false
+                      cache_reused: false
+                    test_mode: true
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/push-diagnostics/events:
+    post:
+      operationId: reportAdapterPushDiagnostic
+      tags:
+        - Diagnostics
+      summary: Report a push-delivery diagnostic milestone or failure
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - diagnostic_id
+                - diagnostic_token
+                - stage
+              properties:
+                diagnostic_id:
+                  type: string
+                  format: uuid
+                diagnostic_token:
+                  type: string
                 stage:
                   type: string
-                  enum: [provider_accepted, device_received, content_fetched, rendered, polling_recovered, failed]
-                failure_stage: { type: string }
-                failure_reason: { type: string }
-                platform: { type: string }
-                provider: { type: string }
-                app_version: { type: string }
-                detail: { type: string }
+                  enum:
+                    - provider_accepted
+                    - device_received
+                    - content_fetched
+                    - rendered
+                    - polling_recovered
+                    - failed
+                failure_stage:
+                  type: string
+                failure_reason:
+                  type: string
+                platform:
+                  type: string
+                provider:
+                  type: string
+                app_version:
+                  type: string
+                detail:
+                  type: string
+            examples:
+              typical:
+                summary: Typical request
+                value:
+                  diagnostic_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                  diagnostic_token: temporary-diagnostic-token
+                  stage: device_received
+                  platform: ios
+                  app_version: 2.4.0
       responses:
-        "200": { $ref: "#/components/responses/GenericJson" }
-        "4XX": { $ref: "#/components/responses/Error" }
-        default: { $ref: "#/components/responses/Error" }
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000000
+                    diagnostic:
+                      diagnostic_id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                      stage: device_received
+                      recorded_at: 2026-07-25T12:00:00Z
+        4XX:
+          description: Authentication, authorization, validation, rate-limit, or upstream service error
+          headers:
+            Retry-After:
+              description: Delay before retrying a retryable request.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
 components:
   securitySchemes:
     childSession:
@@ -424,184 +1962,62 @@ components:
       in: header
       required: false
       description: Stable caller-generated operation key reused across every retry.
-      schema: { type: string, minLength: 8, maxLength: 200 }
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 200
   schemas:
-    AdapterUserContext:
-      type: object
-      description: User identity is derived from the authenticated session. Any submitted external_user_id is ignored and replaced.
-      properties:
-        external_user_id: { type: string, deprecated: true }
     Page:
       type: object
       properties:
-        limit: { type: integer, minimum: 1, maximum: 100 }
-        before: { type: string, format: date-time }
-        after: { type: string, format: date-time }
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        before:
+          type: string
+          format: date-time
+        after:
+          type: string
+          format: date-time
     AdapterError:
       type: object
-      required: [error, request_id]
+      required:
+        - error
+        - request_id
       properties:
         error:
           type: object
-          required: [code, message]
+          required:
+            - code
+            - message
           properties:
-            code: { type: string }
-            message: { type: string }
-            retryable: { type: boolean }
-        request_id: { type: string }
+            code:
+              type: string
+            message:
+              type: string
+            retryable:
+              type: boolean
+        request_id:
+          type: string
         fields:
           type: array
-          items: { type: object, additionalProperties: true }
-  requestBodies:
-    NetworkConnectionRequest:
-      required: true
-      content:
-        application/json:
-          schema:
+          items:
             type: object
-            required: [source_display_name, target_identifier]
-            properties:
-              target_app_id: { type: string, format: uuid }
-              target_app_slug: { type: string }
-              source_display_name: { type: string, maxLength: 160 }
-              target_identifier: { type: string, maxLength: 240 }
-              target_contact_label: { type: string, maxLength: 160 }
-              external_profile: { $ref: "./openapi.yaml#/components/schemas/ExternalProfile" }
-              capabilities: { $ref: "./openapi.yaml#/components/schemas/Capabilities" }
-              guardian_messaging_enabled: { type: boolean }
-              source_guardians:
-                type: array
-                items: { $ref: "./openapi.yaml#/components/schemas/Guardian" }
-              monitoring_disclosure: { type: string }
-              external_approval: { type: object, additionalProperties: true }
-    ConnectionList:
-      required: false
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: "#/components/schemas/Page"
-              - type: object
-                properties:
-                  status: { type: string }
-                  bridge_connection_id: { type: string, format: uuid }
-                  connection_id: { type: string, format: uuid }
-    NetworkConnectionIdentity:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required: [bridge_connection_id]
-            properties:
-              bridge_connection_id: { type: string, format: uuid }
-              reason: { type: string, maxLength: 240 }
-    RobonoConnectionIdentity:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required: [connection_id]
-            properties:
-              connection_id: { type: string, format: uuid }
-              reason: { type: string, maxLength: 240 }
-    NetworkMessageList:
-      required: true
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: "#/components/schemas/Page"
-              - type: object
-                required: [bridge_connection_id]
-                properties:
-                  bridge_connection_id: { type: string, format: uuid }
-    RobonoMessageList:
-      required: true
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: "#/components/schemas/Page"
-              - type: object
-                required: [connection_id]
-                properties:
-                  connection_id: { type: string, format: uuid }
-    NetworkMessageEvent:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required: [bridge_connection_id, bridge_message_id, event]
-            properties:
-              bridge_connection_id: { type: string, format: uuid }
-              bridge_message_id: { type: string, format: uuid }
-              event: { type: string, enum: [delivered, read, heard] }
-              occurred_at: { type: string, format: date-time }
-    GuardianMessage:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required: [bridge_connection_id, external_message_id, text_body]
-            properties:
-              bridge_connection_id: { type: string, format: uuid }
-              external_message_id: { type: string, maxLength: 160 }
-              text_body: { type: string, minLength: 1 }
-    GuardianMessageList:
-      required: true
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: "#/components/schemas/Page"
-              - type: object
-                required: [bridge_connection_id]
-                properties:
-                  bridge_connection_id: { type: string, format: uuid }
-    GuardianMessageEvent:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required: [bridge_connection_id, guardian_message_id, event]
-            properties:
-              bridge_connection_id: { type: string, format: uuid }
-              guardian_message_id: { type: string, format: uuid }
-              event: { type: string, enum: [delivered, read] }
-              occurred_at: { type: string, format: date-time }
+            additionalProperties: true
   responses:
-    Directory:
-      description: Current endpoint directory
-      content:
-        application/json:
-          schema:
-            $ref: "./openapi.yaml#/components/schemas/NetworkDirectoryResponse"
-    NetworkConnection:
-      description: Connected-app relationship
-      content:
-        application/json:
-          schema: { $ref: "./openapi.yaml#/components/schemas/ConnectionResponse" }
-    RobonoConnection:
-      description: Robono-endpoint relationship
-      content:
-        application/json:
-          schema: { $ref: "./openapi.yaml#/components/schemas/RobonoConnectionResponse" }
-    GenericJson:
-      description: Successful operation
-      content:
-        application/json:
-          schema: { type: object, additionalProperties: true }
     Error:
       description: Authentication, authorization, validation, rate-limit, or upstream service error
       headers:
         Retry-After:
           description: Delay before retrying a retryable request.
-          schema: { type: string }
+          schema:
+            type: string
       content:
         application/json:
-          schema: { $ref: "#/components/schemas/AdapterError" }
+          schema:
+            $ref: "#/components/schemas/AdapterError"
+x-robono-example-coverage:
+  operations: 23
+  request_bodies: Every JSON request body includes a typical example.
+  responses: Every operation includes successful and error examples.

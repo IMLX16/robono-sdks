@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.7
+
+- Updates to the tested client 0.5.7 release set and clarifies the 12-month compatibility-support policy.
+
 ## 0.5.6
 
 - Updated to the tested client 0.5.6 release set and added public license-review guidance.

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.8
+
+- Exposes pending reconnect state and reconnect lifecycle timestamps for normalized endpoint connections.
+- Keeps disconnected history synchronized while communication remains disabled until acceptance.
+
 ## 0.5.7
 
 - Simplifies integration guidance and aligns the documented support policy with the tested 12-month compatibility commitment.

@@ -82,7 +82,8 @@ const result = await robono.endpointMessages.send({
 The normalized `connection.connection_id` is valid for subsequent unified SDK calls.
 
 The unified send validates negotiated message type, text length, media size, duration, MIME type, and attachment count before making the API request. For media composed as one message, give every item the same `attachment_batch.id`, its zero-based `index`, and the common `count`.
-The same normalized namespaces list, update, and disconnect connections; load message history; and mark messages delivered, read, or heard. See the [Server SDK reference](https://robono.com/sdk-reference/server/).
+
+The same normalized namespaces list, update, and disconnect connections; load message history; and mark messages delivered, read, or heard. When a user ends a friendship, call the disconnect operation rather than making a local-only change. To reconnect, request the same endpoint and identifier again. Robono preserves history and returns a pending state until the recipient explicitly accepts; do not enable messaging early. See the [connection lifecycle](https://robono.com/docs#lifecycle) and [Server SDK reference](https://robono.com/sdk-reference/server/).
 
 ## Protect client operations
 

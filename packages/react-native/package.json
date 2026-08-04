@@ -1,6 +1,6 @@
 {
   "name": "@robono/react-native",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Headless Robono SDK for React Native applications.",
   "keywords": [
     "robono",

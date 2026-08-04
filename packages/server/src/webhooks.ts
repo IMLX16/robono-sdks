@@ -162,10 +162,20 @@ function assertWebhookEvent(
       oneOf(event, "status", [
         "active",
         "pending_invite",
+        "pending_reconnect",
         "blocked",
         "disconnected",
         "expired",
       ]);
+      if (event.reconnect_response !== undefined && event.reconnect_response !== null) {
+        oneOf(event, "reconnect_response", ["accepted", "declined", "blocked"]);
+      }
+      optionalNullableTimestamp(
+        event,
+        "reconnect_responded_at",
+        "reconnect_responded_at",
+      );
+      optionalNullableTimestamp(event, "reconnected_at", "reconnected_at");
       return;
     case "message.created":
       string(event, "connection_id");
@@ -216,6 +226,12 @@ function assertWebhookEvent(
         "target.accepted_identifier",
       );
       assertCapabilities(record(event.capabilities, "capabilities"), "capabilities");
+      if (event.is_reconnect !== undefined) boolean(event, "is_reconnect");
+      optionalNullableTimestamp(
+        event,
+        "reconnect_requested_at",
+        "reconnect_requested_at",
+      );
       return;
     }
     case "bridge.connection_status_changed":
@@ -441,9 +457,17 @@ function assertBridgeConnection(connection: Record<string, unknown>) {
     "expires_at",
     "accepted_at",
     "responded_at",
+    "disconnected_at",
+    "reconnect_requested_at",
+    "reconnect_responded_at",
+    "reconnect_declined_at",
+    "reconnected_at",
     "created_at",
   ]) {
     optionalNullableTimestamp(connection, key, `connection.${key}`);
+  }
+  if (connection.is_reconnect !== undefined) {
+    boolean(connection, "is_reconnect", "connection.is_reconnect");
   }
 }
 

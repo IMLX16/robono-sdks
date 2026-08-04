@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.2
+
+- Adds explicit reconnect metadata and the `pending_reconnect` status without changing existing connection identifiers.
+- Validates reconnect requests and responses in signed webhooks while remaining compatible with earlier payloads.
+
 ## 0.8.1
 
 - Simplifies the public implementation path while retaining the complete endpoint, authorization, event, and testing contracts.

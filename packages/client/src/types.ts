@@ -151,6 +151,12 @@ export interface NetworkConnection extends JsonObject {
   target: BridgeTargetParticipant;
   guardian_messaging_enabled: boolean;
   capabilities: ConnectionCapabilities;
+  disconnected_at?: string | null;
+  reconnect_requested_at?: string | null;
+  reconnect_responded_at?: string | null;
+  reconnect_declined_at?: string | null;
+  reconnected_at?: string | null;
+  is_reconnect?: boolean;
   created_at: string | null;
 }
 
@@ -235,7 +241,7 @@ export type RespondNetworkConnectionInput =
 export interface RobonoConnection extends JsonObject {
   connection_id: string;
   conversation_id: string | null;
-  status: "active" | "pending_invite" | "blocked" | "disconnected" | "expired";
+  status: "active" | "pending_invite" | "pending_reconnect" | "blocked" | "disconnected" | "expired";
   external_user_id: string;
   external_display_name: string | null;
   target_contact_label: string | null;
@@ -247,6 +253,10 @@ export interface RobonoConnection extends JsonObject {
     avatar_version?: string | null;
   }) | null;
   phone_masked: string | null;
+  reconnect_requested_at?: string | null;
+  reconnect_responded_at?: string | null;
+  reconnect_declined_at?: string | null;
+  reconnected_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }

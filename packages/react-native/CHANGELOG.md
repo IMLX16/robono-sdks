@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.8
+
+- Adds the client-core reconnect lifecycle contract for React Native applications.
+
 ## 0.5.7
 
 - Updates to the tested client 0.5.7 release set and clarifies the 12-month compatibility-support policy.

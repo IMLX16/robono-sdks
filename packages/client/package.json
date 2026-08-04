@@ -1,6 +1,6 @@
 {
   "name": "@robono/client",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Headless client core for Robono-connected web and mobile apps.",
   "keywords": [
     "robono",

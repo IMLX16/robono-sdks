@@ -3170,6 +3170,33 @@ components:
             - string
             - "null"
           format: date-time
+        disconnected_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        reconnect_requested_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        reconnect_responded_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        reconnect_declined_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        reconnected_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        is_reconnect:
+          type: boolean
         created_at:
           type:
             - string
@@ -3192,6 +3219,7 @@ components:
       enum:
         - active
         - pending_invite
+        - pending_reconnect
         - blocked
         - disconnected
         - expired
@@ -3271,6 +3299,26 @@ components:
           type:
             - string
             - "null"
+        reconnect_requested_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        reconnect_responded_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        reconnect_declined_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        reconnected_at:
+          type:
+            - string
+            - "null"
+          format: date-time
         created_at:
           type:
             - string
@@ -4191,6 +4239,25 @@ components:
               format: uuid
             status:
               $ref: "#/components/schemas/RobonoConnectionStatus"
+            reconnect_response:
+              type:
+                - string
+                - "null"
+              enum:
+                - accepted
+                - declined
+                - blocked
+                - null
+            reconnect_responded_at:
+              type:
+                - string
+                - "null"
+              format: date-time
+            reconnected_at:
+              type:
+                - string
+                - "null"
+              format: date-time
     MessageCreatedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -4370,6 +4437,13 @@ components:
                   $ref: "#/components/schemas/Identifier"
             capabilities:
               $ref: "#/components/schemas/Capabilities"
+            is_reconnect:
+              type: boolean
+            reconnect_requested_at:
+              type:
+                - string
+                - "null"
+              format: date-time
     BridgeConnectionChangedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"

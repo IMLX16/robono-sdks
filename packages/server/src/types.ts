@@ -10,6 +10,7 @@ export type BridgeConnectionStatus =
 export type RobonoConnectionStatus =
   | "active"
   | "pending_invite"
+  | "pending_reconnect"
   | "blocked"
   | "disconnected"
   | "expired";
@@ -165,6 +166,12 @@ export interface BridgeConnection {
   expires_at: string | null;
   accepted_at: string | null;
   responded_at: string | null;
+  disconnected_at?: string | null;
+  reconnect_requested_at?: string | null;
+  reconnect_responded_at?: string | null;
+  reconnect_declined_at?: string | null;
+  reconnected_at?: string | null;
+  is_reconnect?: boolean;
   created_at: string | null;
 }
 
@@ -260,6 +267,10 @@ export interface RobonoConnectionResponse {
   capabilities: ConnectionCapabilities;
   robono_user: RobonoUserSummary | null;
   phone_masked: string | null;
+  reconnect_requested_at?: string | null;
+  reconnect_responded_at?: string | null;
+  reconnect_declined_at?: string | null;
+  reconnected_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }
@@ -803,6 +814,9 @@ export interface ConnectionWebhookEvent extends RobonoWebhookEventBase {
   event: "connection.status_changed" | "connection.profile_updated";
   connection_id: string;
   status: RobonoConnectionStatus;
+  reconnect_response?: "accepted" | "declined" | "blocked" | null;
+  reconnect_responded_at?: string | null;
+  reconnected_at?: string | null;
 }
 
 export interface RobonoWebhookSender {
@@ -868,6 +882,8 @@ export interface BridgeConnectionRequestedWebhookEvent
     accepted_identifier: IdentifierDescription;
   };
   capabilities: ConnectionCapabilities;
+  is_reconnect?: boolean;
+  reconnect_requested_at?: string | null;
 }
 
 export interface BridgeConnectionChangedWebhookEvent

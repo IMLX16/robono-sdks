@@ -1,6 +1,6 @@
 {
   "name": "@robono/web",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Headless Robono SDK for browser applications.",
   "keywords": [
     "robono",

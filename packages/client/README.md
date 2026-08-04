@@ -45,6 +45,9 @@ try {
 ```
 
 `networks.list()` returns the available endpoints and the identifier each one requires. The unified `connections` methods connect, list every page, update, and disconnect either endpoint type. The unified `messages` methods send, list, and mark messages delivered, read, or heard. The synchronized `state.connections` and `state.messagesByConnection` collections use the same normalized shape for every endpoint.
+
+When a user ends a friendship, call `connections.disconnect(...)`. For a disconnected connection, preserve history and remove sending, reply, and quote controls. Requesting the same endpoint and identifier again creates a reconnect request; keep communication disabled until the connection becomes active or accepted. The [connection lifecycle](https://robono.com/docs#lifecycle) covers both the initiating and receiving endpoint.
+
 Call `networks.refresh()` when opening Add Friend. The client also refreshes the
 directory after its five-minute TTL and when it receives
 `bridge.directory_changed`.

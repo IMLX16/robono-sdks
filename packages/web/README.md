@@ -44,6 +44,8 @@ try {
 
 The subscribed state uses one connection and message shape for every endpoint returned by the directory. Use the unified `connections.connect/list/update/disconnect` and `messages.send/list/mark` methods without branching on endpoint type in your UI.
 
+When a user ends a friendship, call `connections.disconnect(...)`. For a disconnected connection, preserve history and remove sending, reply, and quote controls. Follow the [connection lifecycle](https://robono.com/docs#lifecycle) for changes initiated by either endpoint.
+
 When your existing realtime or push layer receives a Robono event:
 
 ```ts

@@ -239,7 +239,7 @@ export function createRobonoHttpTransport(
       request("/robono/languages", {}, timeoutMs, undefined, true),
     updateParticipantLanguage: (input, requestOptions) =>
       request(
-        "/robono/participant/language",
+        "/robono/participants/language",
         input,
         timeoutMs,
         requestOptions,

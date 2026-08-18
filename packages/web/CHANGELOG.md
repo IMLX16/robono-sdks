@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0
+
+- Updates to client 0.6.0 and the canonical plural participant-language adapter route.
+
 ## 0.5.10
 
 - Adds participant language updates and per-recipient delayed-message localization through the shared client.

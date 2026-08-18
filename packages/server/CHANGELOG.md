@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.0
+
+- Standardizes the protected backend adapter on `/robono/participants/language`, matching the direct API contract.
+- Removes the former singular adapter route; client and server SDKs should be upgraded as one tested release set.
+
 ## 0.8.4
 
 - Adds one-call participant language updates across current relationships.

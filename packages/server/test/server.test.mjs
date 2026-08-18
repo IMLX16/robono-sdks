@@ -286,7 +286,7 @@ test("directory request authenticates and normalizes options", async () => {
   assert.equal(captured.url, "https://sandbox.example/v1/networks");
   assert.equal(captured.init.headers.authorization, "Bearer rbn_test_example");
   assert.equal(captured.init.headers["robono-api-version"], "2026-07-25");
-  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.4");
+  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.9.0");
   assert.deepEqual(JSON.parse(captured.init.body), {
     include_phone_robono: false,
     include_self: true,
@@ -526,7 +526,7 @@ test("backend adapter requests authorization for every exposed operation", async
   const expected = new Map([
     ["/networks", "networks.list"],
     ["/languages", "languages.list"],
-    ["/participant/language", "participant_preferences.update"],
+    ["/participants/language", "participant_preferences.update"],
     ["/user-messages/localize", "user_messages.localize"],
     ["/network-connections", "network_connections.request"],
     ["/network-connections/respond", "network_connections.respond"],
@@ -574,6 +574,31 @@ test("backend adapter requests authorization for every exposed operation", async
     assert.equal(response.status, 403, path);
   }
   assert.deepEqual(actions, [...expected.values()]);
+});
+
+test("backend adapter exposes only the canonical plural participant language route", async () => {
+  const robono = new RobonoServer({
+    apiKey: "rbn_test_example",
+    fetch: async () => {
+      throw new Error("The removed singular route reached the Robono API.");
+    },
+  });
+  const adapter = createRobonoBackendAdapter({
+    robono,
+    authenticate: () => "authenticated-user",
+    authorize: () => true,
+  });
+
+  const response = await adapter(new Request(
+    "https://child.example/robono/participant/language",
+    {
+      method: "POST",
+      body: JSON.stringify({ preferred_language: "es" }),
+    },
+  ));
+
+  assert.equal(response.status, 404);
+  assert.equal((await response.json()).error.code, "adapter_route_not_found");
 });
 
 test("published CLIs show help without requiring credentials", () => {

@@ -380,7 +380,7 @@ test("HTTP transport exposes list routes for every endpoint type", async () => {
   assert.deepEqual(urls, [
     "https://child.example/robono/network-messages",
     "https://child.example/robono/languages",
-    "https://child.example/robono/participant/language",
+    "https://child.example/robono/participants/language",
     "https://child.example/robono/user-messages/localize",
     "https://child.example/robono/messages",
     "https://child.example/robono/connections/list",

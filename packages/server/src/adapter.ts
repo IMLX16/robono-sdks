@@ -50,7 +50,7 @@ export interface RobonoBackendAdapterOptions {
 const authorizationActions: Record<string, RobonoAuthorizationAction> = {
   "/networks": "networks.list",
   "/languages": "languages.list",
-  "/participant/language": "participant_preferences.update",
+  "/participants/language": "participant_preferences.update",
   "/user-messages/localize": "user_messages.localize",
   "/network-connections": "network_connections.request",
   "/network-connections/respond": "network_connections.respond",
@@ -152,7 +152,7 @@ export function createRobonoBackendAdapter(
           await options.robono.languages(requestOptions),
         );
       }
-      if (path === "/participant/language") {
+      if (path === "/participants/language") {
         return responseJson(
           await options.robono.participants.updateLanguage({
             external_user_id: externalUserId,

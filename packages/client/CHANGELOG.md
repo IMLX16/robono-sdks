@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0
+
+- Standardizes participant language updates on the canonical plural adapter route, `/robono/participants/language`.
+- Removes the former singular adapter route.
+
 ## 0.5.10
 
 - Adds participant language updates and per-recipient delayed-message localization helpers.

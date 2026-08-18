@@ -87,7 +87,7 @@ paths:
                     request_id: req_01JEXAMPLE0000000000000001
         default:
           $ref: "#/components/responses/Error"
-  /robono/participant/language:
+  /robono/participants/language:
     parameters:
       - $ref: "#/components/parameters/AcceptLanguage"
     post:

@@ -349,7 +349,7 @@ export class RobonoServer {
         code: "fetch_required",
       });
     }
-    this.userAgent = options.userAgent ?? "@robono/server/0.8.4";
+    this.userAgent = options.userAgent ?? "@robono/server/0.9.0";
     this.apiVersion = options.apiVersion?.trim() || DEFAULT_API_VERSION;
     this.defaultLanguage = options.language?.trim() || undefined;
 

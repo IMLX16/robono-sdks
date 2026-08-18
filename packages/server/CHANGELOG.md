@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.4
+
+- Adds one-call participant language updates across current relationships.
+- Adds per-recipient localization for delayed notices and explicit language-capability and fallback metadata.
+
 ## 0.8.3
 
 - Adds per-request language negotiation and typed localized user messages while preserving stable error and status codes.

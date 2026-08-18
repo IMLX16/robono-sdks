@@ -2247,13 +2247,145 @@ paths:
                     request_id: req_01JEXAMPLE0000000000000001
         5XX:
           $ref: "#/components/responses/ServiceError"
+  /participants/language:
+    parameters:
+      - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
+    post:
+      operationId: updateParticipantLanguage
+      summary: Update one participant's language across every connection
+      description: |
+        The preference belongs to the participant identified by the API key's
+        connected app and external_user_id. It is not app-wide, connection-only,
+        or a guardian preference. Call this once whenever that participant
+        changes language; Robono updates current direct and connected-app
+        relationships for later status notices and webhooks.
+      tags:
+        - Connections
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParticipantLanguageRequest"
+            examples:
+              spanishParticipant:
+                summary: Save one participant's preferred language
+                value:
+                  external_user_id: child_42
+                  preferred_language: es-MX
+      responses:
+        "200":
+          description: Participant preference updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParticipantLanguageResponse"
+              examples:
+                updated:
+                  summary: Preference saved and propagated
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000024
+                    external_user_id: child_42
+                    requested_language: es-MX
+                    language: es
+                    updated_connections:
+                      direct: 1
+                      connected_apps: 2
+                      total: 3
+        "429":
+          $ref: "#/components/responses/RateLimit"
+        4XX:
+          description: Request error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
+          $ref: "#/components/responses/ServiceError"
+  /user-messages/localize:
+    parameters:
+      - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
+    post:
+      operationId: localizeUserMessage
+      summary: Localize a stable event code for one viewer
+      description: |
+        Use the stable code and parameters from a delayed webhook or fetched
+        record. Call separately for a child, guardian, or any other viewer who
+        uses a different language. Push payloads remain content-free sync
+        signals and do not contain visible localized wording.
+      tags:
+        - Localization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocalizeUserMessageRequest"
+            examples:
+              spanishViewer:
+                summary: Localize a delayed event for one viewer
+                value:
+                  code: connection.disconnected
+                  language: es
+      responses:
+        "200":
+          description: Localized user-safe wording
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocalizeUserMessageResponse"
+              examples:
+                localized:
+                  summary: User-safe wording in the viewer's language
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000025
+                    user_message:
+                      code: connection.disconnected
+                      requested_language: es
+                      language: es
+                      direction: ltr
+                      message: This connection has been disconnected.
+                      localized_message: Esta conexión se ha desconectado.
+                      parameters: {}
+        "429":
+          $ref: "#/components/responses/RateLimit"
+        4XX:
+          description: Request error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
+          $ref: "#/components/responses/ServiceError"
   /languages:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
       - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listLanguages
-      summary: List translation and speech languages
+      summary: List languages and their supported Robono capabilities
       tags:
         - Transforms
       responses:
@@ -2272,8 +2404,18 @@ paths:
                     languages:
                       - code: en
                         name: English
+                        capabilities:
+                          service_notices: true
+                          message_translation: true
+                          speech_transcription: true
+                          text_to_speech: true
                       - code: es
                         name: Spanish
+                        capabilities:
+                          service_notices: true
+                          message_translation: true
+                          speech_transcription: true
+                          text_to_speech: true
         "429":
           $ref: "#/components/responses/RateLimit"
         4XX:
@@ -4066,6 +4208,7 @@ components:
             required:
               - code
               - name
+              - capabilities
             properties:
               code:
                 type: string
@@ -4075,6 +4218,111 @@ components:
                 type: string
                 examples:
                   - English
+              capabilities:
+                type: object
+                required:
+                  - service_notices
+                  - message_translation
+                  - speech_transcription
+                  - text_to_speech
+                properties:
+                  service_notices:
+                    const: true
+                  message_translation:
+                    const: true
+                  speech_transcription:
+                    const: true
+                  text_to_speech:
+                    const: true
+        fallback:
+          type: object
+          required:
+            - order
+            - default_language
+          properties:
+            order:
+              type: array
+              items:
+                type: string
+            default_language:
+              type: string
+              const: en
+    ParticipantLanguageRequest:
+      type: object
+      required:
+        - external_user_id
+        - preferred_language
+      properties:
+        external_user_id:
+          type: string
+          maxLength: 160
+        preferred_language:
+          type: string
+          maxLength: 100
+          description: BCP 47 language such as es, fr-CA, pt-BR, or zh-Hant-TW.
+    ParticipantLanguageResponse:
+      type: object
+      required:
+        - ok
+        - request_id
+        - external_user_id
+        - requested_language
+        - language
+        - updated_connections
+      properties:
+        ok:
+          const: true
+        request_id:
+          type: string
+        external_user_id:
+          type: string
+        requested_language:
+          type: string
+        language:
+          type: string
+        updated_connections:
+          type: object
+          required: [direct, connected_apps, total]
+          properties:
+            direct:
+              type: integer
+              minimum: 0
+            connected_apps:
+              type: integer
+              minimum: 0
+            total:
+              type: integer
+              minimum: 0
+    LocalizeUserMessageRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          description: Stable code supplied by Robono in a webhook or response.
+        parameters:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+        language:
+          type: string
+          description: BCP 47 viewer language. Overrides Accept-Language for this request.
+    LocalizeUserMessageResponse:
+      type: object
+      required:
+        - ok
+        - request_id
+        - user_message
+      properties:
+        ok:
+          const: true
+        request_id:
+          type: string
+        user_message:
+          $ref: "#/components/schemas/UserMessage"
     TransformOutput:
       type: string
       enum:
@@ -5187,6 +5435,6 @@ components:
           type: string
           format: date-time
 x-robono-example-coverage:
-  operations: 24
+  operations: 26
   request_bodies: Every JSON request body includes a typical example.
   responses: Every operation includes successful and error examples.

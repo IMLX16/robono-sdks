@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.10
+
+- Adds participant language updates and per-recipient delayed-message localization through the shared client.
+- Updates to the tested client 0.5.10 release set.
+
 ## 0.5.9
 
 - Adds per-user language options and localized error and status wording through the shared client transport.

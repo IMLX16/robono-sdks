@@ -57,10 +57,41 @@ export interface NetworkDirectoryEntry {
 export interface Language {
   code: string;
   name: string;
+  capabilities?: {
+    service_notices: true;
+    message_translation: true;
+    speech_transcription: true;
+    text_to_speech: true;
+  };
 }
 
 export interface LanguageResponse extends JsonObject {
   languages: Language[];
+  fallback?: {
+    order: string[];
+    default_language: string;
+  };
+}
+
+export interface ParticipantLanguageResponse extends JsonObject {
+  external_user_id: string;
+  requested_language: string;
+  language: string;
+  updated_connections: {
+    direct: number;
+    connected_apps: number;
+    total: number;
+  };
+}
+
+export interface LocalizeUserMessageInput {
+  code: string;
+  parameters?: Record<string, string | number>;
+  language?: string;
+}
+
+export interface LocalizeUserMessageResponse extends JsonObject {
+  user_message: UserMessage;
 }
 
 export interface Guardian {
@@ -695,6 +726,16 @@ export interface RobonoClientTransport {
   listNetworks(): Promise<{ directory: NetworkDirectoryEntry[] }>;
   /** Added in 0.5.5. Optional so existing custom transports remain source-compatible. */
   listLanguages?(): Promise<LanguageResponse>;
+  /** Added in 0.5.10; optional so custom transports remain source-compatible. */
+  updateParticipantLanguage?(input: {
+    external_user_id: string;
+    preferred_language: string;
+  }, options?: ClientRequestOptions): Promise<ParticipantLanguageResponse>;
+  /** Localize a stable delayed-event code for one specific viewer. */
+  localizeUserMessage?(
+    input: LocalizeUserMessageInput,
+    options?: ClientRequestOptions,
+  ): Promise<LocalizeUserMessageResponse>;
   requestNetworkConnection(
     input: RequestNetworkConnectionInput & { external_user_id: string },
     options?: ClientRequestOptions,

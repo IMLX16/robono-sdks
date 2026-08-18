@@ -286,7 +286,7 @@ test("directory request authenticates and normalizes options", async () => {
   assert.equal(captured.url, "https://sandbox.example/v1/networks");
   assert.equal(captured.init.headers.authorization, "Bearer rbn_test_example");
   assert.equal(captured.init.headers["robono-api-version"], "2026-07-25");
-  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.3");
+  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.4");
   assert.deepEqual(JSON.parse(captured.init.body), {
     include_phone_robono: false,
     include_self: true,
@@ -324,6 +324,64 @@ test("server requests override the default language and expose localized user wo
       error?.userMessage?.localized_message === userMessage.localized_message,
   );
   assert.equal(capturedHeaders["accept-language"], "fr-CA");
+});
+
+test("participant language and per-viewer localization use their public routes", async () => {
+  const calls = [];
+  const client = new RobonoServer({
+    apiKey: "rbn_test_example",
+    baseUrl: "https://sandbox.example/v1",
+    fetch: async (url, init) => {
+      calls.push({ url, init, body: JSON.parse(init.body) });
+      if (url.endsWith("/participants/language")) {
+        return Response.json({
+          ok: true,
+          request_id: "req_language",
+          external_user_id: "child-42",
+          requested_language: "es-MX",
+          language: "es",
+          updated_connections: { direct: 1, connected_apps: 2, total: 3 },
+        });
+      }
+      return Response.json({
+        ok: true,
+        request_id: "req_localize",
+        user_message: {
+          code: "connection.disconnected",
+          requested_language: "fr",
+          language: "fr",
+          direction: "ltr",
+          message: "This connection has been disconnected.",
+          localized_message: "Cette connexion a été interrompue.",
+          parameters: {},
+        },
+      });
+    },
+  });
+
+  await client.participants.updateLanguage({
+    external_user_id: "child-42",
+    preferred_language: "es-MX",
+  });
+  await client.userMessages.localize({
+    code: "connection.disconnected",
+    language: "fr",
+  });
+
+  assert.deepEqual(calls.map((call) => call.url), [
+    "https://sandbox.example/v1/participants/language",
+    "https://sandbox.example/v1/user-messages/localize",
+  ]);
+  assert.deepEqual(calls[0].body, {
+    external_user_id: "child-42",
+    preferred_language: "es-MX",
+  });
+  assert.deepEqual(calls[1].body, {
+    code: "connection.disconnected",
+    language: "fr",
+  });
+  assert.equal(typeof calls[0].init.headers["idempotency-key"], "string");
+  assert.equal(calls[1].init.headers["idempotency-key"], undefined);
 });
 
 test("health follows the production GET contract without authentication", async () => {
@@ -468,6 +526,8 @@ test("backend adapter requests authorization for every exposed operation", async
   const expected = new Map([
     ["/networks", "networks.list"],
     ["/languages", "languages.list"],
+    ["/participant/language", "participant_preferences.update"],
+    ["/user-messages/localize", "user_messages.localize"],
     ["/network-connections", "network_connections.request"],
     ["/network-connections/respond", "network_connections.respond"],
     ["/network-connections/list", "network_connections.list"],

@@ -87,16 +87,44 @@ The normalized `connection.connection_id` is valid for subsequent unified SDK ca
 
 ## Localized user messages
 
-Pass each signed-in user's BCP 47 language, such as `es` or `fr-CA`, with the
-final request option `{ language: user.language }`, and persist
-`external_profile.preferred_language` for later webhook events. A constructor
-default is appropriate only when the entire integration uses one language; do
-not use one user's language as a shared server default. User-safe SDK errors are
+Pass each viewer's BCP 47 language, such as `es` or `fr-CA`, with the final
+request option `{ language: user.language }`. After sign-in and whenever a
+participant changes language, call this once:
+
+```ts
+await robono.participants.updateLanguage({
+  external_user_id: user.id,
+  preferred_language: user.language,
+}, { idempotencyKey: languageChangeOperationId });
+```
+
+The preference belongs to this connected app and `external_user_id`; it is not
+app-wide, connection-specific, or shared with guardians. A constructor default
+is appropriate only when the entire integration uses one language. User-safe SDK errors are
 available as `error.userMessage?.localized_message`; returned connection and
 message records may include `status_message.localized_message`. Keep the stable
 code for application logic and the technical error message for logs.
 The preference localizes Robono-generated user notices; it does not translate
 chat content or developer diagnostics.
+
+For delayed webhooks, `code` and `parameters` are authoritative. An included
+translation is only a convenience for the event participant. Localize the same
+event separately for a child, guardian, or other viewer when their languages
+differ:
+
+```ts
+const { user_message } = await robono.userMessages.localize({
+  code: event.status_message.code,
+  parameters: event.status_message.parameters,
+  language: viewer.language,
+});
+```
+
+Push contains identifiers, not visible wording. Synchronize after push, then use
+the fetched localized status or localize its stable code. `robono.languages()`
+returns capability flags for service notices, message translation,
+transcription, and speech output. Fallback is full locale, recognized script,
+base language, then English.
 
 The unified send validates negotiated message type, text length, media size, duration, MIME type, and attachment count before making the API request. For media composed as one message, give every item the same `attachment_batch.id`, its zero-based `index`, and the common `count`.
 

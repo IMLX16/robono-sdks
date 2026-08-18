@@ -30,9 +30,12 @@ import type {
   GuardianMessageListResponse,
   JsonObject,
   LanguageResponse,
+  LocalizeUserMessageInput,
+  LocalizeUserMessageResponse,
   MarkEndpointMessageInput,
   MessageContent,
   MessageTransformInput,
+  ParticipantLanguageResponse,
   PushDiagnosticResponse,
   ReportPushDiagnosticInput,
   RequestBridgeConnectionInput,
@@ -100,6 +103,18 @@ export class RobonoServer {
       },
       options?: RobonoRequestOptions,
     ) => Promise<JsonObject>;
+  };
+  readonly participants: {
+    updateLanguage: (
+      input: { external_user_id: string; preferred_language: string },
+      options?: RobonoRequestOptions,
+    ) => Promise<ParticipantLanguageResponse>;
+  };
+  readonly userMessages: {
+    localize: (
+      input: LocalizeUserMessageInput,
+      options?: RobonoRequestOptions,
+    ) => Promise<LocalizeUserMessageResponse>;
   };
   /**
    * Fully normalized connection operations for every directory endpoint.
@@ -334,7 +349,7 @@ export class RobonoServer {
         code: "fetch_required",
       });
     }
-    this.userAgent = options.userAgent ?? "@robono/server/0.8.3";
+    this.userAgent = options.userAgent ?? "@robono/server/0.8.4";
     this.apiVersion = options.apiVersion?.trim() || DEFAULT_API_VERSION;
     this.defaultLanguage = options.language?.trim() || undefined;
 
@@ -430,6 +445,23 @@ export class RobonoServer {
         this.request("/connections/profile", input, requestOptions),
       disconnect: (input, requestOptions) =>
         this.request("/connections/disconnect", input, requestOptions),
+    };
+    this.participants = {
+      updateLanguage: (input, requestOptions) =>
+        this.request(
+          "/participants/language",
+          input,
+          requestOptions,
+        ),
+    };
+    this.userMessages = {
+      localize: (input, requestOptions) =>
+        this.request(
+          "/user-messages/localize",
+          input,
+          requestOptions,
+          false,
+        ),
     };
     this.networkConnections = {
       request: (input, requestOptions) =>

@@ -237,6 +237,21 @@ export function createRobonoHttpTransport(
       request("/robono/networks", {}, timeoutMs, undefined, true),
     listLanguages: () =>
       request("/robono/languages", {}, timeoutMs, undefined, true),
+    updateParticipantLanguage: (input, requestOptions) =>
+      request(
+        "/robono/participant/language",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
+    localizeUserMessage: (input, requestOptions) =>
+      request(
+        "/robono/user-messages/localize",
+        input,
+        timeoutMs,
+        requestOptions,
+        true,
+      ),
     requestNetworkConnection: (input, requestOptions) =>
       request("/robono/network-connections", input, timeoutMs, requestOptions),
     respondNetworkConnection: (input, requestOptions) =>

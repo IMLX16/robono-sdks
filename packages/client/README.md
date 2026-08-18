@@ -49,11 +49,21 @@ The language is a BCP 47 value such as `es`. Override it per operation with the
 final option `{ language: signedInUser.language }`. Display
 `error.userMessage?.localized_message` for user-safe failures and
 `record.status_message?.localized_message` for returned statuses; use stable
-codes for logic and technical messages only for logs. Save the same value as
-`external_profile.preferred_language` so delayed webhooks use the user's
-language.
+codes for logic and technical messages only for logs. After sign-in and whenever
+the participant changes language, call
+`client.preferences.updateLanguage(signedInUser.language)` once. The preference
+belongs to this connected app and signed-in participant, not to a connection or
+guardian.
 This preference localizes Robono-generated user notices; it does not translate
 chat content or developer diagnostics.
+
+For a delayed event, use its stable `code` and `parameters`, then call
+`client.userMessages.localize({ code, parameters, language: viewer.language })`
+separately for each child or guardian viewer. Push contains identifiers only;
+synchronize records before creating visible notification text. The language
+catalog identifies which languages support notices, translation, transcription,
+and speech output. Fallback is full locale, recognized script, base language,
+then English.
 
 `networks.list()` returns the available endpoints and the identifier each one requires. The unified `connections` methods connect, list every page, update, and disconnect either endpoint type. The unified `messages` methods send, list, and mark messages delivered, read, or heard. The synchronized `state.connections` and `state.messagesByConnection` collections use the same normalized shape for every endpoint.
 

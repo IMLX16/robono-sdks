@@ -87,6 +87,124 @@ paths:
                     request_id: req_01JEXAMPLE0000000000000001
         default:
           $ref: "#/components/responses/Error"
+  /robono/participant/language:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
+    post:
+      operationId: updateAdapterParticipantLanguage
+      tags:
+        - Localization
+      summary: Update the signed-in participant's language everywhere
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [preferred_language]
+              properties:
+                preferred_language:
+                  type: string
+            examples:
+              spanishParticipant:
+                summary: Save the signed-in participant's preferred language
+                value:
+                  preferred_language: es-MX
+      responses:
+        "200":
+          description: Participant preference updated
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/ParticipantLanguageResponse
+              examples:
+                updated:
+                  summary: Preference saved and propagated
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000024
+                    external_user_id: child_42
+                    requested_language: es-MX
+                    language: es
+                    updated_connections:
+                      direct: 1
+                      connected_apps: 2
+                      total: 3
+        4XX:
+          description: Authentication, authorization, or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/user-messages/localize:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
+    post:
+      operationId: localizeAdapterUserMessage
+      tags:
+        - Localization
+      summary: Localize a stable delayed-event code for one viewer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./openapi.yaml#/components/schemas/LocalizeUserMessageRequest
+            examples:
+              spanishViewer:
+                summary: Localize a delayed event for one viewer
+                value:
+                  code: connection.disconnected
+                  language: es
+      responses:
+        "200":
+          description: Localized user-safe wording
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/LocalizeUserMessageResponse
+              examples:
+                localized:
+                  summary: User-safe wording in the viewer's language
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000025
+                    user_message:
+                      code: connection.disconnected
+                      requested_language: es
+                      language: es
+                      direction: ltr
+                      message: This connection has been disconnected.
+                      localized_message: Esta conexión se ha desconectado.
+                      parameters: {}
+        4XX:
+          description: Authentication, authorization, or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                invalidRequest:
+                  summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
   /robono/languages:
     parameters:
       - $ref: "#/components/parameters/AcceptLanguage"
@@ -94,7 +212,7 @@ paths:
       operationId: listAdapterLanguages
       tags:
         - Directory
-      summary: Return languages currently supported by Robono transforms
+      summary: Return languages and their supported Robono capabilities
       responses:
         "200":
           description: Supported languages
@@ -111,8 +229,18 @@ paths:
                     languages:
                       - code: en
                         name: English
+                        capabilities:
+                          service_notices: true
+                          message_translation: true
+                          speech_transcription: true
+                          text_to_speech: true
                       - code: es
                         name: Spanish
+                        capabilities:
+                          service_notices: true
+                          message_translation: true
+                          speech_transcription: true
+                          text_to_speech: true
         4XX:
           description: Authentication, authorization, validation, rate-limit, or upstream service error
           headers:
@@ -2080,6 +2208,6 @@ components:
           schema:
             $ref: "#/components/schemas/AdapterError"
 x-robono-example-coverage:
-  operations: 23
+  operations: 25
   request_bodies: Every JSON request body includes a typical example.
   responses: Every operation includes successful and error examples.

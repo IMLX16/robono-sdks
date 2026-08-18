@@ -18,10 +18,13 @@ import type {
   MarkEndpointMessageInput,
   MarkRobonoMessageInput,
   LanguageResponse,
+  LocalizeUserMessageInput,
+  LocalizeUserMessageResponse,
   MessageTransformInput,
   NetworkConnection,
   NetworkDirectoryEntry,
   NetworkMessage,
+  ParticipantLanguageResponse,
   PageOptions,
   CreateRobonoConnectionInput,
   RequestNetworkConnectionInput,
@@ -70,6 +73,18 @@ export class RobonoClient {
   };
   readonly languages: {
     list: () => Promise<LanguageResponse>;
+  };
+  readonly preferences: {
+    updateLanguage: (
+      preferredLanguage: string,
+      options?: ClientRequestOptions,
+    ) => Promise<ParticipantLanguageResponse>;
+  };
+  readonly userMessages: {
+    localize: (
+      input: LocalizeUserMessageInput,
+      options?: ClientRequestOptions,
+    ) => Promise<LocalizeUserMessageResponse>;
   };
   readonly networkConnections: {
     request: (input: RequestNetworkConnectionInput, options?: ClientRequestOptions) => Promise<NetworkConnection>;
@@ -229,6 +244,29 @@ export class RobonoClient {
           );
         }
         return await this.transport.listLanguages();
+      },
+    };
+    this.preferences = {
+      updateLanguage: async (preferredLanguage, options) => {
+        if (!this.transport.updateParticipantLanguage) {
+          throw new Error(
+            "This Robono transport does not support participant language updates. Update the transport or use createRobonoHttpTransport().",
+          );
+        }
+        return await this.transport.updateParticipantLanguage({
+          external_user_id: this.externalUserId,
+          preferred_language: preferredLanguage,
+        }, options);
+      },
+    };
+    this.userMessages = {
+      localize: async (input, options) => {
+        if (!this.transport.localizeUserMessage) {
+          throw new Error(
+            "This Robono transport does not support user-message localization. Update the transport or use createRobonoHttpTransport().",
+          );
+        }
+        return await this.transport.localizeUserMessage(input, options);
       },
     };
     this.networkConnections = {

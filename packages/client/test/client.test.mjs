@@ -107,6 +107,27 @@ function fakeTransport() {
         { code: "es", name: "Spanish" },
       ],
     }),
+    updateParticipantLanguage: async (input) => ({
+      ok: true,
+      request_id: "req-language",
+      external_user_id: input.external_user_id,
+      requested_language: input.preferred_language,
+      language: input.preferred_language.split("-")[0].toLowerCase(),
+      updated_connections: { direct: 1, connected_apps: 1, total: 2 },
+    }),
+    localizeUserMessage: async (input) => ({
+      ok: true,
+      request_id: "req-localize",
+      user_message: {
+        code: input.code,
+        requested_language: input.language ?? "en",
+        language: input.language ?? "en",
+        direction: "ltr",
+        message: "This connection has been disconnected.",
+        localized_message: "This connection has been disconnected.",
+        parameters: input.parameters ?? {},
+      },
+    }),
     requestNetworkConnection: async () => connection,
     respondNetworkConnection: async () => connection,
     listNetworkConnections: async () => ({ connections: [connection], has_more: false, next_before: null }),
@@ -328,6 +349,14 @@ test("HTTP transport exposes list routes for every endpoint type", async () => {
     text_body: "Network",
   });
   await transport.listLanguages();
+  await transport.updateParticipantLanguage({
+    external_user_id: "user-1",
+    preferred_language: "es",
+  });
+  await transport.localizeUserMessage({
+    code: "connection.disconnected",
+    language: "es",
+  });
   await transport.sendRobonoMessage({
     connection_id: "phone-1",
     external_user_id: "user-1",
@@ -351,11 +380,69 @@ test("HTTP transport exposes list routes for every endpoint type", async () => {
   assert.deepEqual(urls, [
     "https://child.example/robono/network-messages",
     "https://child.example/robono/languages",
+    "https://child.example/robono/participant/language",
+    "https://child.example/robono/user-messages/localize",
     "https://child.example/robono/messages",
     "https://child.example/robono/connections/list",
     "https://child.example/robono/messages/list",
     "https://child.example/robono/message-events",
   ]);
+});
+
+test("client language helpers bind preferences to the signed-in participant", async () => {
+  const calls = [];
+  const transport = {
+    ...fakeTransport(),
+    updateParticipantLanguage: async (input, options) => {
+      calls.push({ operation: "update", input, options });
+      return {
+        ok: true,
+        request_id: "req-language",
+        external_user_id: input.external_user_id,
+        requested_language: input.preferred_language,
+        language: "es",
+        updated_connections: { direct: 1, connected_apps: 0, total: 1 },
+      };
+    },
+    localizeUserMessage: async (input, options) => {
+      calls.push({ operation: "localize", input, options });
+      return {
+        ok: true,
+        request_id: "req-localize",
+        user_message: {
+          code: input.code,
+          requested_language: input.language,
+          language: input.language,
+          direction: "ltr",
+          message: "This connection has been disconnected.",
+          localized_message: "Esta conexión se ha desconectado.",
+          parameters: input.parameters ?? {},
+        },
+      };
+    },
+  };
+  const client = new RobonoClient({
+    externalUserId: "signed-in-child",
+    transport,
+    pollingEnabled: false,
+  });
+
+  await client.preferences.updateLanguage("es-MX", { requestId: "req-1" });
+  await client.userMessages.localize({
+    code: "connection.disconnected",
+    language: "es",
+  });
+
+  assert.deepEqual(calls[0], {
+    operation: "update",
+    input: {
+      external_user_id: "signed-in-child",
+      preferred_language: "es-MX",
+    },
+    options: { requestId: "req-1" },
+  });
+  assert.equal(calls[1].operation, "localize");
+  assert.equal(calls[1].input.language, "es");
 });
 
 test("client transforms preserve caller idempotency and expose diagnostics", async () => {

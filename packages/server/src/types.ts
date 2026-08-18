@@ -632,12 +632,48 @@ export interface GuardianMessageListResponse {
 export interface Language {
   code: string;
   name: string;
+  capabilities?: {
+    service_notices: true;
+    message_translation: true;
+    speech_transcription: true;
+    text_to_speech: true;
+  };
 }
 
 export interface LanguageResponse {
   ok: true;
   request_id: string;
   languages: Language[];
+  fallback?: {
+    order: string[];
+    default_language: string;
+  };
+}
+
+export interface ParticipantLanguageResponse extends JsonObject {
+  ok: true;
+  request_id: string;
+  external_user_id: string;
+  requested_language: string;
+  language: string;
+  updated_connections: {
+    direct: number;
+    connected_apps: number;
+    total: number;
+  };
+}
+
+export interface LocalizeUserMessageInput {
+  code: string;
+  parameters?: Record<string, string | number>;
+  /** BCP 47 language for this particular viewer. */
+  language?: string;
+}
+
+export interface LocalizeUserMessageResponse extends JsonObject {
+  ok: true;
+  request_id: string;
+  user_message: UserMessage;
 }
 
 export type TransformOutput =

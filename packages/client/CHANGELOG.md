@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.10
+
+- Adds participant language updates and per-recipient delayed-message localization helpers.
+- Distinguishes service-notice, translation, transcription, and text-to-speech language capabilities.
+
 ## 0.5.9
 
 - Adds per-user language options and typed localized error and status wording.

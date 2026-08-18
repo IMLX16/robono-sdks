@@ -5,6 +5,8 @@ import type { JsonObject } from "./types.js";
 export type RobonoAuthorizationAction =
   | "networks.list"
   | "languages.list"
+  | "participant_preferences.update"
+  | "user_messages.localize"
   | "network_connections.request"
   | "network_connections.respond"
   | "network_connections.list"
@@ -48,6 +50,8 @@ export interface RobonoBackendAdapterOptions {
 const authorizationActions: Record<string, RobonoAuthorizationAction> = {
   "/networks": "networks.list",
   "/languages": "languages.list",
+  "/participant/language": "participant_preferences.update",
+  "/user-messages/localize": "user_messages.localize",
   "/network-connections": "network_connections.request",
   "/network-connections/respond": "network_connections.respond",
   "/network-connections/list": "network_connections.list",
@@ -146,6 +150,36 @@ export function createRobonoBackendAdapter(
       if (path === "/languages") {
         return responseJson(
           await options.robono.languages(requestOptions),
+        );
+      }
+      if (path === "/participant/language") {
+        return responseJson(
+          await options.robono.participants.updateLanguage({
+            external_user_id: externalUserId,
+            preferred_language: requiredString(
+              body.preferred_language,
+              "preferred_language",
+            ),
+          }, requestOptions),
+        );
+      }
+      if (path === "/user-messages/localize") {
+        const language = optionalString(body.language);
+        const parameters = record(body.parameters) ?? undefined;
+        return responseJson(
+          await options.robono.userMessages.localize({
+            code: requiredString(body.code, "code"),
+            ...(parameters
+              ? {
+                parameters: Object.fromEntries(
+                  Object.entries(parameters).filter(([, value]) =>
+                    typeof value === "string" || typeof value === "number"
+                  ),
+                ) as Record<string, string | number>,
+              }
+              : {}),
+            ...(language ? { language } : {}),
+          }, requestOptions),
         );
       }
       if (path === "/network-connections") {
@@ -672,6 +706,12 @@ function optionalNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value)
     ? value
     : undefined;
+}
+
+function record(value: unknown): JsonObject | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as JsonObject
+    : null;
 }
 
 function requiredEvent(value: unknown) {

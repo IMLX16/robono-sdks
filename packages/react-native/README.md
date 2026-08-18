@@ -29,6 +29,7 @@ const bridge = createRobonoReactNative({
   http: {
     baseUrl: "https://your-app.example",
     getAccessToken: () => yourAuth.getAccessToken(),
+    language: signedInUser.language,
   },
 });
 
@@ -43,6 +44,14 @@ try {
   showBridgeUnavailable(error);
 }
 ```
+
+Use a BCP 47 value such as `es`. Localized, user-safe failures are available as
+`error.userMessage?.localized_message`, and returned records may include
+`status_message.localized_message`. Persist the same value as
+`external_profile.preferred_language` when connecting or updating the user so
+later webhooks use that language.
+This preference localizes Robono-generated user notices; it does not translate
+chat content or developer diagnostics.
 
 The subscribed state uses one connection and message shape for every endpoint returned by the directory. Use the unified `connections.connect/list/update/disconnect` and `messages.send/list/mark` methods without branching on endpoint type in your UI.
 

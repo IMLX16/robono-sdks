@@ -9,17 +9,17 @@ import type {
   BridgeConnection,
   BridgeConnectionListResponse,
   BridgeConnectionResponse,
-  BridgeMessageRecord,
   BridgeMessageEventResponse,
   BridgeMessageListResponse,
-  ConnectionCapabilities,
+  BridgeMessageRecord,
   ConnectEndpointInput,
+  ConnectionCapabilities,
   CreateDataRequestInput,
   CreateRobonoConnectionInput,
-  DirectoryEntry,
-  DirectoryResponse,
   DataRequestResponse,
   DataRequestStatusResponse,
+  DirectoryEntry,
+  DirectoryResponse,
   DisconnectEndpointConnectionInput,
   EndpointConnection,
   EndpointConnectionCursor,
@@ -30,16 +30,17 @@ import type {
   GuardianMessageListResponse,
   JsonObject,
   LanguageResponse,
+  MarkEndpointMessageInput,
   MessageContent,
   MessageTransformInput,
   PushDiagnosticResponse,
   ReportPushDiagnosticInput,
   RequestBridgeConnectionInput,
   RespondBridgeConnectionInput,
-  RobonoConnectionResponse,
   RobonoConnectionListResponse,
-  RobonoMessageRecord,
+  RobonoConnectionResponse,
   RobonoMessageListResponse,
+  RobonoMessageRecord,
   RobonoRequestOptions,
   RobonoServerOptions,
   SendBridgeMessageInput,
@@ -53,7 +54,7 @@ import type {
   TransformResponse,
   UpdateBridgeConnectionInput,
   UpdateEndpointConnectionInput,
-  MarkEndpointMessageInput,
+  UserMessage,
 } from "./types.js";
 
 const DEFAULT_BASE_URL = "https://api.robono.com/v1";
@@ -315,6 +316,7 @@ export class RobonoServer {
   private readonly fetcher: typeof globalThis.fetch;
   private readonly userAgent: string;
   private readonly apiVersion: string;
+  private readonly defaultLanguage: string | undefined;
 
   constructor(options: RobonoServerOptions) {
     if (!options.apiKey?.trim()) {
@@ -332,8 +334,9 @@ export class RobonoServer {
         code: "fetch_required",
       });
     }
-    this.userAgent = options.userAgent ?? "@robono/server/0.8.1";
+    this.userAgent = options.userAgent ?? "@robono/server/0.8.3";
     this.apiVersion = options.apiVersion?.trim() || DEFAULT_API_VERSION;
+    this.defaultLanguage = options.language?.trim() || undefined;
 
     this.directory = {
       list: (input = {}, requestOptions) =>
@@ -397,18 +400,13 @@ export class RobonoServer {
             ...(input.external_profile
               ? { external_profile: input.external_profile }
               : {}),
-            ...(input.capabilities
-              ? { capabilities: input.capabilities }
-              : {}),
+            ...(input.capabilities ? { capabilities: input.capabilities } : {}),
             ...(typeof input.guardian_messaging_enabled === "boolean"
               ? {
-                guardian_messaging_enabled:
-                  input.guardian_messaging_enabled,
+                guardian_messaging_enabled: input.guardian_messaging_enabled,
               }
               : {}),
-            ...(input.guardians
-              ? { source_guardians: input.guardians }
-              : {}),
+            ...(input.guardians ? { source_guardians: input.guardians } : {}),
             ...(input.monitoring_disclosure
               ? { monitoring_disclosure: input.monitoring_disclosure }
               : {}),
@@ -453,10 +451,10 @@ export class RobonoServer {
         this.request("/messages/list", input, requestOptions, false),
       send: (async (
         input: SendEndpointMessageInput | SendBridgeMessageInput,
-        requestOptions: (RobonoRequestOptions & {
+        requestOptions: RobonoRequestOptions & {
           connection?: BridgeConnection;
           direction?: BridgeDirection;
-        }) = {},
+        } = {},
       ) => {
         if ("connection" in input) {
           const {
@@ -465,7 +463,11 @@ export class RobonoServer {
             external_profile,
             ...message
           } = input;
-          assertEndpointMessageAllowed(connection, message, input.external_user_id);
+          assertEndpointMessageAllowed(
+            connection,
+            message,
+            input.external_user_id,
+          );
           if (connection.endpoint_type === "robono_phone") {
             const raw = await this.request<SendRobonoMessageResponse>(
               "/messages",
@@ -553,13 +555,19 @@ export class RobonoServer {
             },
             requestOptions,
           );
-          connections.push(...bridgePage.connections.map((connection) =>
-            normalizeEndpointConnection(
-              endpointForBridge(directory.directory, connection, external_user_id),
-              connection as BridgeConnectionResponse,
-              external_user_id,
-            )
-          ));
+          connections.push(
+            ...bridgePage.connections.map((connection) =>
+              normalizeEndpointConnection(
+                endpointForBridge(
+                  directory.directory,
+                  connection,
+                  external_user_id,
+                ),
+                connection as BridgeConnectionResponse,
+                external_user_id,
+              )
+            ),
+          );
           if (bridgePage.has_more) {
             if (!bridgePage.next_before) {
               throw new RobonoError(
@@ -589,19 +597,19 @@ export class RobonoServer {
           {
             external_user_id,
             limit: pageLimit - connections.length,
-            ...(cursor.robono_before
-              ? { before: cursor.robono_before }
-              : {}),
+            ...(cursor.robono_before ? { before: cursor.robono_before } : {}),
           },
           requestOptions,
         );
-        connections.push(...robonoPage.connections.map((connection) =>
+        connections.push(
+          ...robonoPage.connections.map((connection) =>
             normalizeEndpointConnection(
               phoneEndpoint(directory.directory),
               connection,
               external_user_id,
             )
-          ));
+          ),
+        );
         if (robonoPage.has_more && !robonoPage.next_before) {
           throw new RobonoError(
             "The Bridge returned an incomplete connection cursor.",
@@ -769,10 +777,15 @@ export class RobonoServer {
           ...input,
         }, requestOptions),
       status: (dataRequestId, requestOptions) =>
-        this.request<DataRequestStatusResponse>("/data-requests", {
-          action: "status",
-          data_request_id: dataRequestId,
-        }, requestOptions, false),
+        this.request<DataRequestStatusResponse>(
+          "/data-requests",
+          {
+            action: "status",
+            data_request_id: dataRequestId,
+          },
+          requestOptions,
+          false,
+        ),
     };
   }
 
@@ -855,6 +868,8 @@ export class RobonoServer {
         if (method === "POST") headers["content-type"] = "application/json";
         if (authenticated) headers.authorization = `Bearer ${this.apiKey}`;
         if (idempotencyKey) headers["idempotency-key"] = idempotencyKey;
+        const language = options.language?.trim() || this.defaultLanguage;
+        if (language) headers["accept-language"] = language;
         const response = await this.fetcher(url, {
           method,
           headers,
@@ -935,6 +950,7 @@ function apiErrorFrom(
   const record = isRecord(payload) ? payload : {};
   const nested = isRecord(record.error) ? record.error : record;
   const status = response.status;
+  const userMessage = userMessageValue(record.user_message);
   return new RobonoError(
     stringValue(nested.message) || stringValue(record.message) ||
       `Robono request failed with status ${status}.`,
@@ -950,6 +966,7 @@ function apiErrorFrom(
         ? nested.fields
         : [],
       details: record.details ?? nested.details,
+      ...(userMessage ? { userMessage } : {}),
       retryable: RETRYABLE_STATUS.has(status),
       ...(parseRetryAfter(response.headers.get("retry-after")) !== null
         ? {
@@ -960,6 +977,40 @@ function apiErrorFrom(
         : {}),
     },
   );
+}
+
+function userMessageValue(value: unknown): UserMessage | undefined {
+  if (!isRecord(value)) return undefined;
+  const code = stringValue(value.code);
+  const requestedLanguage = stringValue(value.requested_language);
+  const language = stringValue(value.language);
+  const message = stringValue(value.message);
+  const localizedMessage = stringValue(value.localized_message);
+  const direction = value.direction === "rtl"
+    ? "rtl"
+    : value.direction === "ltr"
+    ? "ltr"
+    : null;
+  if (
+    !code || !requestedLanguage || !language || !message || !localizedMessage ||
+    !direction
+  ) return undefined;
+  const parameters = isRecord(value.parameters)
+    ? Object.fromEntries(
+      Object.entries(value.parameters).filter(([, item]) =>
+        typeof item === "string" || typeof item === "number"
+      ),
+    ) as Record<string, string | number>
+    : {};
+  return {
+    code,
+    requested_language: requestedLanguage,
+    language,
+    direction,
+    message,
+    localized_message: localizedMessage,
+    parameters,
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -1025,6 +1076,7 @@ function normalizeEndpointConnection(
       endpoint_type: "connected_app",
       connection_id: raw.bridge_connection_id,
       status: raw.status,
+      ...(raw.status_message ? { status_message: raw.status_message } : {}),
       external_user_id: ownSource
         ? raw.source.external_user_id
         : raw.target.external_user_id ?? externalUserId,
@@ -1047,6 +1099,7 @@ function normalizeEndpointConnection(
     endpoint_type: "robono_phone",
     connection_id: raw.connection_id,
     status: raw.status,
+    ...(raw.status_message ? { status_message: raw.status_message } : {}),
     external_user_id: raw.external_user_id,
     capabilities: raw.capabilities,
     peer: {
@@ -1182,6 +1235,7 @@ function normalizeEndpointMessage(
     connection_id: connection.connection_id,
     message_id: messageId,
     status: raw.status,
+    ...(raw.status_message ? { status_message: raw.status_message } : {}),
     raw,
   };
 }
@@ -1203,21 +1257,16 @@ function normalizeEndpointMessageRecord(
     text_body: raw.text_body,
     media: raw.media,
     status: raw.status,
-    accepted_at: bridge
-      ? (raw as BridgeMessageRecord).accepted_at
-      : null,
-    accepted_via: bridge
-      ? (raw as BridgeMessageRecord).accepted_via
-      : null,
+    ...(raw.status_message ? { status_message: raw.status_message } : {}),
+    accepted_at: bridge ? (raw as BridgeMessageRecord).accepted_at : null,
+    accepted_via: bridge ? (raw as BridgeMessageRecord).accepted_via : null,
     delivered_at: raw.delivered_at,
     read_at: raw.read_at,
     heard_at: raw.heard_at,
     failed_at: raw.failed_at,
     failure_code: raw.failure_code,
     created_at: raw.created_at,
-    ...(raw.attachment_batch
-      ? { attachment_batch: raw.attachment_batch }
-      : {}),
+    ...(raw.attachment_batch ? { attachment_batch: raw.attachment_batch } : {}),
     raw,
   };
 }
@@ -1246,9 +1295,8 @@ function assertEndpointMessageAllowed(
 
   const capabilities = connection.capabilities;
   const limits = {
-    allowed_message_kinds:
-      capabilities.allowed_outbound_message_kinds ??
-        ["text", "voice", "image", "video", "document"],
+    allowed_message_kinds: capabilities.allowed_outbound_message_kinds ??
+      ["text", "voice", "image", "video", "document"],
     ...(capabilities.text ? { text: capabilities.text } : {}),
     ...(capabilities.voice ? { voice: capabilities.voice } : {}),
     ...(capabilities.photo ? { photo: capabilities.photo } : {}),
@@ -1289,7 +1337,7 @@ function assertAttachmentBatchAllowed(
   const maximumItems = Math.min(
     10,
     typeof configuredMaximum === "number" &&
-        Number.isFinite(configuredMaximum) && configuredMaximum > 0
+      Number.isFinite(configuredMaximum) && configuredMaximum > 0
       ? Math.floor(configuredMaximum)
       : 10,
   );

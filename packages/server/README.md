@@ -61,6 +61,10 @@ const connection = await robono.endpointConnections.connect({
   endpoint,
   external_user_id: user.id,
   external_display_name: user.displayName,
+  external_profile: {
+    display_name: user.displayName,
+    preferred_language: user.language,
+  },
   target_identifier: identifierEnteredByUser,
   capabilities: {
     allowed_outbound_message_kinds: ["text"],
@@ -80,6 +84,19 @@ const result = await robono.endpointMessages.send({
 ```
 
 The normalized `connection.connection_id` is valid for subsequent unified SDK calls.
+
+## Localized user messages
+
+Pass each signed-in user's BCP 47 language, such as `es` or `fr-CA`, with the
+final request option `{ language: user.language }`, and persist
+`external_profile.preferred_language` for later webhook events. A constructor
+default is appropriate only when the entire integration uses one language; do
+not use one user's language as a shared server default. User-safe SDK errors are
+available as `error.userMessage?.localized_message`; returned connection and
+message records may include `status_message.localized_message`. Keep the stable
+code for application logic and the technical error message for logs.
+The preference localizes Robono-generated user notices; it does not translate
+chat content or developer diagnostics.
 
 The unified send validates negotiated message type, text length, media size, duration, MIME type, and attachment count before making the API request. For media composed as one message, give every item the same `attachment_batch.id`, its zero-based `index`, and the common `count`.
 

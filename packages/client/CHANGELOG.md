@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.9
+
+- Adds per-user language options and typed localized error and status wording.
+- Sends `Accept-Language` through the protected adapter and preserves stable codes for application logic.
+
 ## 0.5.8
 
 - Exposes pending reconnect state and reconnect lifecycle timestamps for normalized endpoint connections.

@@ -19,6 +19,16 @@ export type ConnectionStatus =
 
 export type JsonObject = Record<string, unknown>;
 
+export interface UserMessage {
+  code: string;
+  requested_language: string;
+  language: string;
+  direction: "ltr" | "rtl";
+  message: string;
+  localized_message: string;
+  parameters: Record<string, string | number>;
+}
+
 export interface IdentifierDescription {
   label: string;
   description: string;
@@ -62,6 +72,8 @@ export interface Guardian {
 
 export interface ExternalProfile {
   display_name?: string;
+  /** Used for delayed push and webhook events. */
+  preferred_language?: string;
   avatar?: {
     source_url: string;
     mime_type?: string;
@@ -147,6 +159,7 @@ export interface BridgeTargetParticipant {
 export interface NetworkConnection extends JsonObject {
   bridge_connection_id: string;
   status: ConnectionStatus;
+  status_message?: UserMessage;
   source: BridgeSourceParticipant;
   target: BridgeTargetParticipant;
   guardian_messaging_enabled: boolean;
@@ -188,6 +201,7 @@ export interface NetworkMessage extends JsonObject {
   text_body: string | null;
   media: MediaInput | JsonObject;
   status: MessageStatus;
+  status_message?: UserMessage;
   accepted_at: string | null;
   accepted_via: "push" | "polling" | null;
   delivered_at: string | null;
@@ -242,6 +256,7 @@ export interface RobonoConnection extends JsonObject {
   connection_id: string;
   conversation_id: string | null;
   status: "active" | "pending_invite" | "pending_reconnect" | "blocked" | "disconnected" | "expired";
+  status_message?: UserMessage;
   external_user_id: string;
   external_display_name: string | null;
   target_contact_label: string | null;
@@ -270,6 +285,7 @@ export interface RobonoMessage extends JsonObject {
   text_body: string | null;
   media: MediaInput | JsonObject;
   status: string;
+  status_message?: UserMessage;
   delivered_at: string | null;
   read_at: string | null;
   heard_at: string | null;
@@ -284,6 +300,7 @@ export interface EndpointConnection {
   endpoint_type: NetworkDirectoryEntry["type"];
   connection_id: string;
   status: ConnectionStatus | RobonoConnection["status"];
+  status_message?: UserMessage;
   capabilities: ConnectionCapabilities;
   peer: EndpointPeer;
   created_at: string | null;
@@ -310,6 +327,7 @@ export interface EndpointMessage {
   text_body: string | null;
   media: MediaInput | JsonObject;
   status: string;
+  status_message?: UserMessage;
   accepted_at: string | null;
   accepted_via: "push" | "polling" | null;
   delivered_at: string | null;
@@ -395,11 +413,17 @@ export type SendRobonoMessageInput = MessageContent & {
 export interface SendNetworkMessageResponse extends JsonObject {
   bridge_message_id: string;
   status: MessageStatus;
+  status_message?: UserMessage;
 }
 
 export interface SendRobonoMessageResponse extends JsonObject {
   robono_message_id: string;
   status: string;
+  status_message?: UserMessage;
+  invite_sms_sent?: boolean;
+  invite_sms_previously_sent?: boolean;
+  invite_sms_sent_at?: string | null;
+  invite_sms_reason?: string | null;
 }
 
 export interface MarkRobonoMessageInput {
@@ -412,6 +436,7 @@ export interface MarkRobonoMessageInput {
 export interface MessageEventResponse extends JsonObject {
   message_id: string;
   status: string;
+  status_message?: UserMessage;
   occurred_at: string;
 }
 
@@ -506,6 +531,8 @@ export interface ClientRequestOptions {
   signal?: AbortSignal;
   /** Override the transport's bounded retry count for this request. */
   retries?: number;
+  /** BCP 47 language for user-facing wording returned by this request. */
+  language?: string;
 }
 
 export interface TransformRequestOptions extends ClientRequestOptions {

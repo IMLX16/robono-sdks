@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Robono Bridge API
-  version: 1.3.0
+  version: 1.4.0
   description: |
     Provider-neutral API for connecting users across private networks and every
     endpoint advertised by the Robono directory. Send Robono-Api-Version when
@@ -480,6 +480,7 @@ paths:
   /networks:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listNetworks
       summary: List networks available for new connections
@@ -563,6 +564,7 @@ paths:
   /network-connections:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: requestNetworkConnection
       summary: Request a connection to a user in another network
@@ -649,6 +651,7 @@ paths:
   /network-connections/respond:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: respondToNetworkConnection
       summary: Accept, reject, or report no match for an incoming request
@@ -718,6 +721,7 @@ paths:
   /network-connections/list:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listNetworkConnections
       summary: Recover or synchronize connections
@@ -825,6 +829,7 @@ paths:
   /network-connections/disconnect:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: disconnectNetworkConnection
       summary: Disconnect a network relationship
@@ -909,6 +914,7 @@ paths:
   /network-connections/update:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: updateNetworkConnection
       summary: Update a participant display name, language/rules, or guardians
@@ -999,6 +1005,7 @@ paths:
   /network-messages:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: sendNetworkMessage
       summary: Send content across an accepted connection
@@ -1068,6 +1075,7 @@ paths:
   /network-messages/list:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listNetworkMessages
       summary: Recover or synchronize messages and delivery states
@@ -1202,6 +1210,7 @@ paths:
   /network-messages/events:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: markNetworkMessage
       summary: Report that a received message was delivered, read, or heard
@@ -1305,6 +1314,7 @@ paths:
   /guardian-messages:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: sendGuardianMessage
       summary: Send a guardian message through a guardian-enabled connection
@@ -1395,6 +1405,7 @@ paths:
   /guardian-messages/list:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listGuardianMessages
       summary: Recover or synchronize guardian messages and delivery states
@@ -1499,6 +1510,7 @@ paths:
   /guardian-messages/events:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: markGuardianMessage
       summary: Report that a guardian message was delivered or read
@@ -1583,6 +1595,7 @@ paths:
   /connections:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: connectToRobono
       summary: Connect to a Robono-owned endpoint using its directory identifier
@@ -1663,6 +1676,24 @@ paths:
                     updated_at: 2026-07-25T12:00:00Z
                     ok: true
                     request_id: req_01JEXAMPLE0000000000000000
+        "409":
+          description: A reconnection request for this relationship is already pending
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                reconnectAlreadyPending:
+                  summary: Duplicate reconnection request
+                  value:
+                    error:
+                      code: reconnect_already_pending
+                      message: A reconnection request is already waiting for the recipient's response.
+                      details:
+                        connection_id: 11111111-1111-4111-8111-111111111111
+                        status: pending_reconnect
+                        reconnect_requested_at: 2026-07-25T12:00:00Z
+                    request_id: req_01JEXAMPLE0000000000000001
         "429":
           $ref: "#/components/responses/RateLimit"
         4XX:
@@ -1690,6 +1721,7 @@ paths:
   /connections/list:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listRobonoConnections
       summary: Recover or synchronize connections to Robono-owned endpoints
@@ -1781,6 +1813,7 @@ paths:
   /connections/profile:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: updateRobonoConnection
       summary: Update the user profile or rules attached to a connection
@@ -1870,6 +1903,7 @@ paths:
   /connections/disconnect:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: disconnectRobonoConnection
       summary: Disconnect from a Robono-owned endpoint
@@ -1957,6 +1991,7 @@ paths:
   /messages:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: sendMessageToRobono
       summary: Send content through a connection to a Robono-owned endpoint
@@ -1996,7 +2031,28 @@ paths:
                     external_user_id: source-child-42
                     status: accepted
                     invite_sms_sent: false
+                    invite_sms_previously_sent: true
+                    invite_sms_sent_at: "2026-08-17T14:30:00.000Z"
+                    invite_sms_reason: invitation_already_sent
                     dry_run: false
+        "409":
+          description: The connection is not ready to carry messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                pendingReconnect:
+                  summary: Waiting for the recipient to approve a reconnection
+                  value:
+                    error:
+                      code: connection_pending_reconnect
+                      message: This reconnection is waiting for the recipient's approval. Messages can be sent after the connection becomes active.
+                      fields:
+                        - path: connection_id
+                          code: connection_pending_reconnect
+                          message: This reconnection request is awaiting approval.
+                    request_id: req_01JEXAMPLE0000000000000001
         "429":
           $ref: "#/components/responses/RateLimit"
         4XX:
@@ -2024,6 +2080,7 @@ paths:
   /messages/list:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listRobonoMessages
       summary: Recover or synchronize messages from a Robono-owned endpoint
@@ -2125,6 +2182,7 @@ paths:
   /message-events:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: markRobonoMessage
       summary: Report that a message from a Robono-owned endpoint was delivered, read, or heard
@@ -2192,6 +2250,7 @@ paths:
   /languages:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listLanguages
       summary: List translation and speech languages
@@ -2242,6 +2301,7 @@ paths:
   /message-transforms:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: transformMessage
       summary: Request transcription, translation, TTS, or translated voice
@@ -2323,6 +2383,7 @@ paths:
   /speech-transforms:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: transformSpeech
       summary: Request a standalone speech transform
@@ -2407,6 +2468,7 @@ paths:
   /push-diagnostics/events:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: reportPushDiagnosticEvent
       summary: Report one completed step in a controlled push-delivery test
@@ -2522,6 +2584,7 @@ paths:
   /data-requests:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: manageDataRequest
       summary: Export or delete one connected-app user's Robono bridge data
@@ -2604,6 +2667,17 @@ components:
       scheme: bearer
       bearerFormat: Robono API key
   parameters:
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      description: |
+        BCP 47 language requested for user-facing wording, such as `en`, `es`,
+        or `fr`. Official SDKs expose this as the `language` request option.
+        English is returned when the requested language is unavailable.
+      schema:
+        type: string
+        maxLength: 80
     ApiVersion:
       name: Robono-Api-Version
       in: header
@@ -2669,13 +2743,53 @@ components:
               type: string
             retryable:
               type: boolean
+            fields:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            details:
+              type: object
+              additionalProperties: true
         request_id:
           type: string
-        fields:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
+        user_message:
+          $ref: "#/components/schemas/UserMessage"
+    UserMessage:
+      type: object
+      description: Localized, user-safe wording. Technical error text remains available separately for logs.
+      required:
+        - code
+        - requested_language
+        - language
+        - direction
+        - message
+        - localized_message
+        - parameters
+      properties:
+        code:
+          type: string
+          description: Stable code that an app may use to supply its own wording.
+        requested_language:
+          type: string
+        language:
+          type: string
+          description: Language actually returned after fallback.
+        direction:
+          type: string
+          enum: [ltr, rtl]
+        message:
+          type: string
+          description: English fallback.
+        localized_message:
+          type: string
+          description: Wording ready to display in the returned language.
+        parameters:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
     Identifier:
       type: object
       required:
@@ -2801,6 +2915,13 @@ components:
         display_name:
           type: string
           maxLength: 160
+        preferred_language:
+          type: string
+          maxLength: 80
+          description: |
+            BCP 47 language used for delayed webhooks and other user-facing
+            events that occur after the original request has completed.
+          examples: [en, es, fr]
         avatar:
           type: object
           required:
@@ -3147,6 +3268,8 @@ components:
           format: uuid
         status:
           $ref: "#/components/schemas/ConnectionStatus"
+        status_message:
+          $ref: "#/components/schemas/UserMessage"
         source:
           $ref: "#/components/schemas/BridgeSourceParticipant"
         target:
@@ -3276,6 +3399,8 @@ components:
           format: uuid
         status:
           $ref: "#/components/schemas/RobonoConnectionStatus"
+        status_message:
+          $ref: "#/components/schemas/UserMessage"
         external_user_id:
           type: string
         external_display_name:
@@ -3407,6 +3532,7 @@ components:
         duration_ms:
           type: integer
           minimum: 1
+          description: Duration in milliseconds. Robono verifies supported voice files and normalizes voice durations upward to a whole-second value; for example, 10403 becomes 11000.
         file_name:
           type: string
         waveform:
@@ -3604,6 +3730,8 @@ components:
           oneOf:
             - $ref: "#/components/schemas/MessageStatus"
             - const: validated
+        status_message:
+          $ref: "#/components/schemas/UserMessage"
         duplicate:
           type: boolean
         dry_run:
@@ -3647,8 +3775,21 @@ components:
           type: string
         status:
           type: string
+        status_message:
+          $ref: "#/components/schemas/UserMessage"
         invite_sms_sent:
           type: boolean
+        invite_sms_previously_sent:
+          type: boolean
+        invite_sms_sent_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        invite_sms_reason:
+          type:
+            - string
+            - "null"
         dry_run:
           type: boolean
         connection_state:
@@ -3694,6 +3835,8 @@ components:
               maxProperties: 0
         status:
           $ref: "#/components/schemas/MessageStatus"
+        status_message:
+          $ref: "#/components/schemas/UserMessage"
         accepted_at:
           type:
             - string
@@ -3774,6 +3917,8 @@ components:
               maxProperties: 0
         status:
           type: string
+        status_message:
+          $ref: "#/components/schemas/UserMessage"
         delivered_at:
           type:
             - string

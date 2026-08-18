@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.3
+
+- Adds per-request language negotiation and typed localized user messages while preserving stable error and status codes.
+- Persists user language for delayed webhook events and identifies requested, returned, fallback, and text-direction metadata.
+
 ## 0.8.2
 
 - Adds explicit reconnect metadata and the `pending_reconnect` status without changing existing connection identifiers.

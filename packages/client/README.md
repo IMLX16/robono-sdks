@@ -28,6 +28,7 @@ const client = new RobonoClient({
   transport: createRobonoHttpTransport({
     baseUrl: "https://your-app.example",
     getAccessToken: () => yourAuth.getAccessToken(),
+    language: signedInUser.language,
   }),
 });
 
@@ -43,6 +44,16 @@ try {
   showBridgeUnavailable(error);
 }
 ```
+
+The language is a BCP 47 value such as `es`. Override it per operation with the
+final option `{ language: signedInUser.language }`. Display
+`error.userMessage?.localized_message` for user-safe failures and
+`record.status_message?.localized_message` for returned statuses; use stable
+codes for logic and technical messages only for logs. Save the same value as
+`external_profile.preferred_language` so delayed webhooks use the user's
+language.
+This preference localizes Robono-generated user notices; it does not translate
+chat content or developer diagnostics.
 
 `networks.list()` returns the available endpoints and the identifier each one requires. The unified `connections` methods connect, list every page, update, and disconnect either endpoint type. The unified `messages` methods send, list, and mark messages delivered, read, or heard. The synchronized `state.connections` and `state.messagesByConnection` collections use the same normalized shape for every endpoint.
 

@@ -729,6 +729,46 @@ test("HTTP transport exposes retry guidance from an API response", async () => {
   );
 });
 
+test("HTTP transport sends the requested language and exposes localized user wording", async () => {
+  let capturedHeaders;
+  const userMessage = {
+    code: "connection.reconnect_already_pending",
+    requested_language: "es-mx",
+    language: "es",
+    direction: "ltr",
+    message: "A reconnection request is already waiting for a response.",
+    localized_message: "Ya hay una solicitud de reconexión pendiente de respuesta.",
+    parameters: {},
+  };
+  const transport = createRobonoHttpTransport({
+    baseUrl: "https://child.example",
+    getAccessToken: () => "child-session",
+    language: "en",
+    fetch: async (_url, init) => {
+      capturedHeaders = init.headers;
+      return Response.json({
+        error: {
+          code: "reconnect_already_pending",
+          message: "A reconnection request is already pending.",
+        },
+        user_message: userMessage,
+      }, { status: 409 });
+    },
+  });
+
+  await assert.rejects(
+    transport.requestNetworkConnection({
+      external_user_id: "user-1",
+      source_display_name: "Jordan",
+      target_identifier: "BLUE-STAR",
+    }, { retries: 0, language: "es-MX" }),
+    (error) =>
+      error?.userMessage?.code === userMessage.code &&
+      error?.userMessage?.localized_message === userMessage.localized_message,
+  );
+  assert.equal(capturedHeaders["accept-language"], "es-MX");
+});
+
 test("HTTP transport retries a transient write with one stable idempotency key", async () => {
   const idempotencyKeys = [];
   let calls = 0;

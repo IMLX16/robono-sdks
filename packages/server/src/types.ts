@@ -24,12 +24,24 @@ export type GuardianMessageStatus =
 
 export type JsonObject = Record<string, unknown>;
 
+export interface UserMessage {
+  code: string;
+  requested_language: string;
+  language: string;
+  direction: "ltr" | "rtl";
+  message: string;
+  localized_message: string;
+  parameters: Record<string, string | number>;
+}
+
 export interface RobonoRequestOptions {
   idempotencyKey?: string;
   requestId?: string;
   signal?: AbortSignal;
   timeoutMs?: number;
   retries?: number;
+  /** BCP 47 language for user-facing wording returned by this request. */
+  language?: string;
 }
 
 export interface RobonoServerOptions {
@@ -40,6 +52,8 @@ export interface RobonoServerOptions {
   fetch?: typeof globalThis.fetch;
   userAgent?: string;
   apiVersion?: string;
+  /** Default BCP 47 language; a request option may override it. */
+  language?: string;
 }
 
 export interface IdentifierDescription {
@@ -159,6 +173,7 @@ export interface BridgeTargetParticipant {
 export interface BridgeConnection {
   bridge_connection_id: string;
   status: BridgeConnectionStatus;
+  status_message?: UserMessage;
   source: BridgeSourceParticipant;
   target: BridgeTargetParticipant;
   guardian_messaging_enabled: boolean;
@@ -226,6 +241,8 @@ export interface UpdateBridgeConnectionInput {
 
 export interface ExternalProfileInput {
   display_name?: string;
+  /** Used for delayed webhooks when no request header is available. */
+  preferred_language?: string;
   avatar?: {
     source_url: string;
     mime_type?: string;
@@ -261,6 +278,7 @@ export interface RobonoConnectionResponse {
   connection_id: string;
   conversation_id: string | null;
   status: RobonoConnectionStatus;
+  status_message?: UserMessage;
   external_user_id: string;
   external_display_name: string | null;
   target_contact_label: string | null;
@@ -293,6 +311,7 @@ export interface EndpointConnection {
   endpoint_type: DirectoryEntry["type"];
   connection_id: string;
   status: BridgeConnectionStatus | RobonoConnectionResponse["status"];
+  status_message?: UserMessage;
   external_user_id: string;
   capabilities: ConnectionCapabilities;
   peer: EndpointPeer;
@@ -394,6 +413,7 @@ export interface SendBridgeMessageResponse {
     | "heard"
     | "failed"
     | "replaced";
+  status_message?: UserMessage;
   duplicate?: boolean;
   dry_run?: boolean;
   accepted_at?: string | null;
@@ -420,6 +440,7 @@ export interface BridgeMessageRecord extends JsonObject {
     | "heard"
     | "failed"
     | "replaced";
+  status_message?: UserMessage;
   accepted_at: string | null;
   accepted_via: "push" | "polling" | null;
   delivered_at: string | null;
@@ -446,6 +467,7 @@ export interface BridgeMessageEventResponse {
   request_id: string;
   bridge_message_id: string;
   status: BridgeMessageRecord["status"];
+  status_message?: UserMessage;
   occurred_at: string;
 }
 
@@ -464,7 +486,11 @@ export interface SendRobonoMessageResponse {
   robono_message_id?: string;
   external_user_id?: string;
   status: string;
+  status_message?: UserMessage;
   invite_sms_sent?: boolean;
+  invite_sms_previously_sent?: boolean;
+  invite_sms_sent_at?: string | null;
+  invite_sms_reason?: string | null;
   dry_run?: boolean;
   connection_state?: JsonObject;
 }
@@ -478,6 +504,7 @@ export interface RobonoMessageRecord extends JsonObject {
   text_body: string | null;
   media: MediaInput | JsonObject;
   status: string;
+  status_message?: UserMessage;
   delivered_at: string | null;
   read_at: string | null;
   heard_at: string | null;
@@ -511,6 +538,7 @@ export interface EndpointMessageResponse {
   connection_id: string;
   message_id: string | null;
   status: string;
+  status_message?: UserMessage;
   raw:
     | SendBridgeMessageResponse
     | SendRobonoMessageResponse
@@ -528,6 +556,7 @@ export interface EndpointMessageRecord {
   text_body: string | null;
   media: MediaInput | JsonObject;
   status: string;
+  status_message?: UserMessage;
   accepted_at: string | null;
   accepted_via: "push" | "polling" | null;
   delivered_at: string | null;

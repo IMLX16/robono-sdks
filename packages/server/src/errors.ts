@@ -1,3 +1,5 @@
+import type { UserMessage } from "./types.js";
+
 export interface RobonoErrorDetails {
   status?: number;
   code?: string;
@@ -7,6 +9,7 @@ export interface RobonoErrorDetails {
   retryable?: boolean;
   retryAfterMs?: number;
   cause?: unknown;
+  userMessage?: UserMessage;
 }
 
 export class RobonoError extends Error {
@@ -18,6 +21,8 @@ export class RobonoError extends Error {
   readonly retryable: boolean;
   readonly retryAfterMs: number | null;
   override readonly cause: unknown;
+  /** Localized, user-safe wording. Technical `message` remains for logs. */
+  readonly userMessage: UserMessage | null;
 
   constructor(message: string, input: RobonoErrorDetails = {}) {
     super(message);
@@ -30,6 +35,7 @@ export class RobonoError extends Error {
     this.retryable = input.retryable ?? false;
     this.retryAfterMs = input.retryAfterMs ?? null;
     this.cause = input.cause;
+    this.userMessage = input.userMessage ?? null;
   }
 }
 

@@ -27,6 +27,7 @@ const bridge = createRobonoWeb({
   http: {
     baseUrl: window.location.origin,
     getAccessToken: () => yourAuth.getAccessToken(),
+    language: signedInUser.language,
   },
 });
 
@@ -42,6 +43,14 @@ try {
 }
 ```
 
+Use a BCP 47 value such as `es`. Localized, user-safe failures are available as
+`error.userMessage?.localized_message`, and returned records may include
+`status_message.localized_message`. Persist the same value as
+`external_profile.preferred_language` when connecting or updating the user so
+later webhooks use that language.
+This preference localizes Robono-generated user notices; it does not translate
+chat content or developer diagnostics.
+
 The subscribed state uses one connection and message shape for every endpoint returned by the directory. Use the unified `connections.connect/list/update/disconnect` and `messages.send/list/mark` methods without branching on endpoint type in your UI.
 
 When a user ends a friendship, call `connections.disconnect(...)`. For a disconnected connection, preserve history and remove sending, reply, and quote controls. Follow the [connection lifecycle](https://robono.com/docs#lifecycle) for changes initiated by either endpoint.
@@ -56,7 +65,7 @@ Push or realtime signals initiate immediate synchronization. Recovery polling ru
 
 Never put a Robono API key in browser code. Your backend must mount the authenticated and authorized `/robono/*` route supplied by `@robono/server`.
 
-For a separate backend origin, allow only your exact website origin, handle `OPTIONS`, and permit the authentication headers your app uses. Do not combine credentials with a wildcard origin.
+For a separate backend origin, allow only your exact website origin, handle `OPTIONS`, and permit the authentication headers your app uses plus `Accept-Language`. Do not combine credentials with a wildcard origin.
 
 This is an early-access `0.x` package. Patch releases are compatible fixes; a
 minor release before `1.0` may contain a documented breaking change. Each minor

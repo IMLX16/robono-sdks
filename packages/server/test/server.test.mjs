@@ -286,11 +286,44 @@ test("directory request authenticates and normalizes options", async () => {
   assert.equal(captured.url, "https://sandbox.example/v1/networks");
   assert.equal(captured.init.headers.authorization, "Bearer rbn_test_example");
   assert.equal(captured.init.headers["robono-api-version"], "2026-07-25");
-  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.1");
+  assert.equal(captured.init.headers["x-client-info"], "@robono/server/0.8.3");
   assert.deepEqual(JSON.parse(captured.init.body), {
     include_phone_robono: false,
     include_self: true,
   });
+});
+
+test("server requests override the default language and expose localized user wording", async () => {
+  let capturedHeaders;
+  const userMessage = {
+    code: "request.too_many",
+    requested_language: "fr-ca",
+    language: "fr",
+    direction: "ltr",
+    message: "Too many requests. Please wait and try again.",
+    localized_message: "Trop de demandes. Patientez, puis réessayez.",
+    parameters: {},
+  };
+  const client = new RobonoServer({
+    apiKey: "rbn_test_example",
+    language: "en",
+    retries: 0,
+    fetch: async (_url, init) => {
+      capturedHeaders = init.headers;
+      return Response.json({
+        error: { code: "rate_limit_exceeded", message: "Rate limited." },
+        user_message: userMessage,
+      }, { status: 429 });
+    },
+  });
+
+  await assert.rejects(
+    client.directory.list(undefined, { language: "fr-CA" }),
+    (error) =>
+      error?.userMessage?.code === userMessage.code &&
+      error?.userMessage?.localized_message === userMessage.localized_message,
+  );
+  assert.equal(capturedHeaders["accept-language"], "fr-CA");
 });
 
 test("health follows the production GET contract without authentication", async () => {

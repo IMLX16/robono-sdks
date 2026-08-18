@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Robono App Client API
-  version: 1.0.0
+  version: 1.1.0
   description: |
     Contract between an app's authenticated client and its protected backend.
     Mount these routes at /robono/*. The backend authenticates its
@@ -18,6 +18,8 @@ security:
   - childSession: []
 paths:
   /robono/networks:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listAdapterNetworks
       tags:
@@ -86,6 +88,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/languages:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listAdapterLanguages
       tags:
@@ -132,6 +136,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-connections:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: requestAdapterNetworkConnection
       tags:
@@ -246,6 +252,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-connections/respond:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: respondAdapterNetworkConnection
       tags:
@@ -310,6 +318,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-connections/list:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listAdapterNetworkConnections
       tags:
@@ -398,6 +408,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-connections/disconnect:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: disconnectAdapterNetworkConnection
       tags:
@@ -470,6 +482,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-connections/update:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: updateAdapterNetworkConnection
       tags:
@@ -551,6 +565,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/connections:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: createAdapterRobonoConnection
       tags:
@@ -646,6 +662,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/connections/list:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listAdapterRobonoConnections
       tags:
@@ -724,6 +742,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/connections/profile:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: updateAdapterRobonoConnection
       tags:
@@ -804,6 +824,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/connections/disconnect:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: disconnectAdapterRobonoConnection
       tags:
@@ -879,6 +901,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-messages:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: sendAdapterNetworkMessage
       tags:
@@ -994,6 +1018,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-messages/list:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listAdapterNetworkMessages
       tags:
@@ -1101,6 +1127,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/network-messages/events:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: markAdapterNetworkMessage
       tags:
@@ -1182,6 +1210,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/messages:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: sendAdapterRobonoMessage
       tags:
@@ -1279,6 +1309,9 @@ paths:
                     external_user_id: source-child-42
                     status: accepted
                     invite_sms_sent: false
+                    invite_sms_previously_sent: true
+                    invite_sms_sent_at: "2026-08-17T14:30:00.000Z"
+                    invite_sms_reason: invitation_already_sent
                     dry_run: false
         4XX:
           description: Authentication, authorization, validation, rate-limit, or upstream service error
@@ -1303,6 +1336,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/messages/list:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listAdapterRobonoMessages
       tags:
@@ -1384,6 +1419,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/message-events:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: markAdapterRobonoMessage
       tags:
@@ -1469,6 +1506,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/guardian-messages:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: sendAdapterGuardianMessage
       tags:
@@ -1546,6 +1585,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/guardian-messages/list:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: listAdapterGuardianMessages
       tags:
@@ -1620,6 +1661,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/guardian-messages/events:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: markAdapterGuardianMessage
       tags:
@@ -1700,6 +1743,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/transforms/message:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: createAdapterMessageTransform
       tags:
@@ -1777,6 +1822,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/transforms/speech:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: createAdapterSpeechTransform
       tags:
@@ -1857,6 +1904,8 @@ paths:
         default:
           $ref: "#/components/responses/Error"
   /robono/push-diagnostics/events:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
     post:
       operationId: reportAdapterPushDiagnostic
       tags:
@@ -1957,6 +2006,17 @@ components:
       scheme: bearer
       bearerFormat: Child-app session or JWT
   parameters:
+    AcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      description: |
+        BCP 47 language requested for user-facing wording, such as `en`, `es`,
+        or `fr`. The adapter forwards it to Robono. English is returned when
+        the requested language is unavailable.
+      schema:
+        type: string
+        maxLength: 80
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -2000,6 +2060,8 @@ components:
               type: boolean
         request_id:
           type: string
+        user_message:
+          $ref: ./openapi.yaml#/components/schemas/UserMessage
         fields:
           type: array
           items:

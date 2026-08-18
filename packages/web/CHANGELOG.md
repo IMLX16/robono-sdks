@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.9
+
+- Adds per-user language options and localized error and status wording through the shared client transport.
+- Documents the `Accept-Language` CORS requirement and updates to the tested client 0.5.9 release set.
+
 ## 0.5.8
 
 - Adds the client-core reconnect lifecycle contract for browser applications.

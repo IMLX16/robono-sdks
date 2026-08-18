@@ -2,22 +2,22 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "@robono/web@0.5.8",
-  "documentNamespace": "http://spdx.org/spdxdocs/@robono%2fweb-0.5.8-***",
+  "name": "@robono/web@0.5.9",
+  "documentNamespace": "http://spdx.org/spdxdocs/@robono%2fweb-0.5.9-***",
   "creationInfo": {
-    "created": "2026-08-04T04:09:57.082Z",
+    "created": "2026-08-18T05:58:04.010Z",
     "creators": [
       "Tool: npm/cli-11.6.2"
     ]
   },
   "documentDescribes": [
-    "SPDXRef-Package-robono.web-0.5.8"
+    "SPDXRef-Package-robono.web-0.5.9"
   ],
   "packages": [
     {
       "name": "@robono/web",
-      "SPDXID": "SPDXRef-Package-robono.web-0.5.8",
-      "versionInfo": "0.5.8",
+      "SPDXID": "SPDXRef-Package-robono.web-0.5.9",
+      "versionInfo": "0.5.9",
       "packageFileName": "",
       "description": "Headless Robono SDK for browser applications.",
       "primaryPackagePurpose": "LIBRARY",
@@ -29,14 +29,14 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40robono/web@0.5.8"
+          "referenceLocator": "pkg:npm/%40robono/web@0.5.9"
         }
       ]
     },
     {
       "name": "@robono/client",
-      "SPDXID": "SPDXRef-Package-robono.client-0.5.8",
-      "versionInfo": "0.5.8",
+      "SPDXID": "SPDXRef-Package-robono.client-0.5.9",
+      "versionInfo": "0.5.9",
       "packageFileName": "../client",
       "description": "Headless client core for Robono-connected web and mobile apps.",
       "downloadLocation": "NOASSERTION",
@@ -47,7 +47,7 @@
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40robono/client@0.5.8"
+          "referenceLocator": "pkg:npm/%40robono/client@0.5.9"
         }
       ]
     }
@@ -55,12 +55,12 @@
   "relationships": [
     {
       "spdxElementId": "SPDXRef-DOCUMENT",
-      "relatedSpdxElement": "SPDXRef-Package-robono.web-0.5.8",
+      "relatedSpdxElement": "SPDXRef-Package-robono.web-0.5.9",
       "relationshipType": "DESCRIBES"
     },
     {
-      "spdxElementId": "SPDXRef-Package-robono.client-0.5.8",
-      "relatedSpdxElement": "SPDXRef-Package-robono.web-0.5.8",
+      "spdxElementId": "SPDXRef-Package-robono.client-0.5.9",
+      "relatedSpdxElement": "SPDXRef-Package-robono.web-0.5.9",
       "relationshipType": "DEPENDENCY_OF"
     }
   ]

@@ -2,6 +2,7 @@ import type {
   ClientRequestOptions,
   RobonoClientTransport,
   TransformRequestOptions,
+  UserMessage,
 } from "./types.js";
 
 export interface RobonoHttpTransportOptions {
@@ -16,6 +17,8 @@ export interface RobonoHttpTransportOptions {
   /** Bounded automatic retries for retryable failures. Defaults to 2. */
   retries?: number;
   headers?: Record<string, string>;
+  /** Default BCP 47 language; a request option may override it. */
+  language?: string;
 }
 
 export class RobonoClientError extends Error {
@@ -27,6 +30,8 @@ export class RobonoClientError extends Error {
   readonly fields: unknown[];
   readonly details: unknown;
   override readonly cause: unknown;
+  /** Localized, user-safe wording. Technical `message` remains for logs. */
+  readonly userMessage: UserMessage | null;
 
   constructor(
     message: string,
@@ -39,6 +44,7 @@ export class RobonoClientError extends Error {
       fields?: unknown[];
       details?: unknown;
       cause?: unknown;
+      userMessage?: UserMessage;
     } = {},
   ) {
     super(message);
@@ -51,6 +57,7 @@ export class RobonoClientError extends Error {
     this.fields = options.fields ?? [];
     this.details = options.details;
     this.cause = options.cause;
+    this.userMessage = options.userMessage ?? null;
   }
 }
 
@@ -140,11 +147,15 @@ export function createRobonoHttpTransport(
           headers: {
             "content-type": "application/json",
             "authorization": `Bearer ${token.trim()}`,
-            ...(idempotencyKey
-              ? { "idempotency-key": idempotencyKey }
-              : {}),
+            ...(idempotencyKey ? { "idempotency-key": idempotencyKey } : {}),
             ...(requestOptions?.requestId?.trim()
               ? { "x-request-id": requestOptions.requestId.trim() }
+              : {}),
+            ...((requestOptions?.language?.trim() || options.language?.trim())
+              ? {
+                "accept-language": requestOptions?.language?.trim() ||
+                  options.language!.trim(),
+              }
               : {}),
             ...options.headers,
           },
@@ -165,6 +176,7 @@ export function createRobonoHttpTransport(
             bool(payload.retryable) ??
             (response.status === 408 || response.status === 425 ||
               response.status === 429 || response.status >= 500);
+          const userMessage = userMessageValue(payload.user_message);
           const error = new RobonoClientError(
             string(nested?.message) || string(payload.message) ||
               "Robono request failed.",
@@ -177,6 +189,7 @@ export function createRobonoHttpTransport(
               ...(retryAfterMs !== null ? { retryAfterMs } : {}),
               fields: array(payload.fields) ?? array(nested?.fields) ?? [],
               details: payload.details ?? nested?.details,
+              ...(userMessage ? { userMessage } : {}),
             },
           );
           if (error.retryable && attempt < retries) {
@@ -227,7 +240,12 @@ export function createRobonoHttpTransport(
     requestNetworkConnection: (input, requestOptions) =>
       request("/robono/network-connections", input, timeoutMs, requestOptions),
     respondNetworkConnection: (input, requestOptions) =>
-      request("/robono/network-connections/respond", input, timeoutMs, requestOptions),
+      request(
+        "/robono/network-connections/respond",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
     listNetworkConnections: (input) =>
       request(
         "/robono/network-connections/list",
@@ -237,9 +255,19 @@ export function createRobonoHttpTransport(
         true,
       ),
     disconnectNetworkConnection: (input, requestOptions) =>
-      request("/robono/network-connections/disconnect", input, timeoutMs, requestOptions),
+      request(
+        "/robono/network-connections/disconnect",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
     updateNetworkConnection: (input, requestOptions) =>
-      request("/robono/network-connections/update", input, timeoutMs, requestOptions),
+      request(
+        "/robono/network-connections/update",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
     createRobonoConnection: (input, requestOptions) =>
       request("/robono/connections", input, timeoutMs, requestOptions),
     listRobonoConnections: (input) =>
@@ -247,7 +275,12 @@ export function createRobonoHttpTransport(
     updateRobonoConnection: (input, requestOptions) =>
       request("/robono/connections/profile", input, timeoutMs, requestOptions),
     disconnectRobonoConnection: (input, requestOptions) =>
-      request("/robono/connections/disconnect", input, timeoutMs, requestOptions),
+      request(
+        "/robono/connections/disconnect",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
     sendNetworkMessage: (input, requestOptions) =>
       request("/robono/network-messages", input, timeoutMs, requestOptions),
     listNetworkMessages: (input) =>
@@ -259,7 +292,12 @@ export function createRobonoHttpTransport(
         true,
       ),
     markNetworkMessage: (input, requestOptions) =>
-      request("/robono/network-messages/events", input, timeoutMs, requestOptions),
+      request(
+        "/robono/network-messages/events",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
     sendRobonoMessage: (input, requestOptions) =>
       request("/robono/messages", input, timeoutMs, requestOptions),
     listRobonoMessages: (input) =>
@@ -277,13 +315,23 @@ export function createRobonoHttpTransport(
         true,
       ),
     markGuardianMessage: (input, requestOptions) =>
-      request("/robono/guardian-messages/events", input, timeoutMs, requestOptions),
+      request(
+        "/robono/guardian-messages/events",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
     transformMessage: (input, requestOptions) =>
       request("/robono/transforms/message", input, 120_000, requestOptions),
     transformSpeech: (input, requestOptions) =>
       request("/robono/transforms/speech", input, 120_000, requestOptions),
     reportPushDiagnostic: (input, requestOptions) =>
-      request("/robono/push-diagnostics/events", input, timeoutMs, requestOptions),
+      request(
+        "/robono/push-diagnostics/events",
+        input,
+        timeoutMs,
+        requestOptions,
+      ),
   };
 }
 
@@ -315,6 +363,41 @@ function bool(value: unknown) {
 
 function array(value: unknown) {
   return Array.isArray(value) ? value : null;
+}
+
+function userMessageValue(value: unknown): UserMessage | undefined {
+  const item = record(value);
+  if (!item) return undefined;
+  const code = string(item.code);
+  const requestedLanguage = string(item.requested_language);
+  const language = string(item.language);
+  const message = string(item.message);
+  const localizedMessage = string(item.localized_message);
+  const direction = item.direction === "rtl"
+    ? "rtl"
+    : item.direction === "ltr"
+    ? "ltr"
+    : null;
+  if (
+    !code || !requestedLanguage || !language || !message || !localizedMessage ||
+    !direction
+  ) return undefined;
+  const parameters = record(item.parameters)
+    ? Object.fromEntries(
+      Object.entries(item.parameters as Record<string, unknown>).filter((
+        [, entry],
+      ) => typeof entry === "string" || typeof entry === "number"),
+    ) as Record<string, string | number>
+    : {};
+  return {
+    code,
+    requested_language: requestedLanguage,
+    language,
+    direction,
+    message,
+    localized_message: localizedMessage,
+    parameters,
+  };
 }
 
 function parseRetryAfter(value: string | null) {

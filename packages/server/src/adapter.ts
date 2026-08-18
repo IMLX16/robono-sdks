@@ -133,6 +133,9 @@ export function createRobonoBackendAdapter(
       const requestOptions = {
         requestId,
         ...(idempotencyKey ? { idempotencyKey } : {}),
+        ...(request.headers.get("accept-language")?.trim()
+          ? { language: request.headers.get("accept-language")!.trim() }
+          : {}),
       };
 
       if (path === "/networks") {

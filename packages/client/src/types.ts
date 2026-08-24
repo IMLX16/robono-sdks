@@ -171,17 +171,19 @@ export interface AppIdentity {
 
 export interface BridgeSourceParticipant {
   app: NetworkDirectoryEntry | AppIdentity;
-  external_user_id: string;
+  external_user_id: string | null;
   display_name: string;
+  account_deleted_at?: string | null;
   profile?: ExternalProfile;
   guardians?: Guardian[];
 }
 
 export interface BridgeTargetParticipant {
   app: NetworkDirectoryEntry | AppIdentity;
-  identifier: string;
+  identifier: string | null;
   external_user_id: string | null;
   display_name: string | null;
+  account_deleted_at?: string | null;
   profile?: ExternalProfile;
   contact_label?: string | null;
   guardians?: Guardian[];
@@ -226,7 +228,8 @@ export interface NetworkMessage extends JsonObject {
   bridge_message_id: string;
   bridge_connection_id: string;
   direction: "inbound" | "outbound";
-  sender_external_user_id: string;
+  /** Null after the sending participant has deleted their connected-app account. */
+  sender_external_user_id: string | null;
   external_message_id: string;
   message_kind: MessageKind;
   text_body: string | null;
@@ -288,7 +291,8 @@ export interface RobonoConnection extends JsonObject {
   conversation_id: string | null;
   status: "active" | "pending_invite" | "pending_reconnect" | "blocked" | "disconnected" | "expired";
   status_message?: UserMessage;
-  external_user_id: string;
+  external_user_id: string | null;
+  external_account_deleted_at?: string | null;
   external_display_name: string | null;
   target_contact_label: string | null;
   capabilities: ConnectionCapabilities;

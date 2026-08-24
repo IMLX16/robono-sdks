@@ -1109,9 +1109,7 @@ function normalizeEndpointConnection(
       connection_id: raw.bridge_connection_id,
       status: raw.status,
       ...(raw.status_message ? { status_message: raw.status_message } : {}),
-      external_user_id: ownSource
-        ? raw.source.external_user_id
-        : raw.target.external_user_id ?? externalUserId,
+      external_user_id: externalUserId,
       capabilities: raw.capabilities,
       peer: {
         endpoint,
@@ -1132,7 +1130,7 @@ function normalizeEndpointConnection(
     connection_id: raw.connection_id,
     status: raw.status,
     ...(raw.status_message ? { status_message: raw.status_message } : {}),
-    external_user_id: raw.external_user_id,
+    external_user_id: externalUserId,
     capabilities: raw.capabilities,
     peer: {
       endpoint,

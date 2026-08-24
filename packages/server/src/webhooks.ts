@@ -235,10 +235,50 @@ function assertWebhookEvent(
       return;
     }
     case "bridge.connection_status_changed":
-    case "bridge.connection_updated":
+    case "bridge.connection_updated": {
       string(event, "bridge_connection_id");
       assertBridgeConnection(record(event.connection, "connection"));
+      if (event.status !== undefined) {
+        oneOf(event, "status", [
+          "pending_target_approval",
+          "accepted",
+          "rejected",
+          "not_found",
+          "blocked",
+          "disconnected",
+          "expired",
+        ]);
+      }
+      if (event.reason !== undefined) {
+        nullableString(event, "reason");
+      }
+      optionalNullableTimestamp(event, "disconnected_at");
+      if (event.deleted_participant !== undefined) {
+        const deletedParticipant = record(
+          event.deleted_participant,
+          "deleted_participant",
+        );
+        string(deletedParticipant, "app_id", "deleted_participant.app_id");
+        oneOf(
+          deletedParticipant,
+          "side",
+          ["source", "target"],
+          "deleted_participant.side",
+        );
+        oneOf(
+          deletedParticipant,
+          "state",
+          ["deleted"],
+          "deleted_participant.state",
+        );
+        timestamp(
+          deletedParticipant,
+          "deleted_at",
+          "deleted_participant.deleted_at",
+        );
+      }
       return;
+    }
     case "bridge.directory_changed":
       string(event, "endpoint_id");
       oneOf(event, "change", ["created", "updated", "disabled", "removed"]);
@@ -398,8 +438,13 @@ function assertRobonoSender(sender: Record<string, unknown>) {
 
 function assertBridgeSource(source: Record<string, unknown>) {
   assertAppIdentity(record(source.app, "source.app"), "source.app");
-  string(source, "external_user_id", "source.external_user_id");
+  nullableString(source, "external_user_id", "source.external_user_id");
   string(source, "display_name", "source.display_name");
+  optionalNullableTimestamp(
+    source,
+    "account_deleted_at",
+    "source.account_deleted_at",
+  );
   if (source.profile !== undefined) {
     assertExternalProfile(record(source.profile, "source.profile"), "source.profile");
   }
@@ -425,13 +470,18 @@ function assertBridgeConnection(connection: Record<string, unknown>) {
     record(target.app, "connection.target.app"),
     "connection.target.app",
   );
-  string(target, "identifier", "connection.target.identifier");
+  nullableString(target, "identifier", "connection.target.identifier");
   nullableString(
     target,
     "external_user_id",
     "connection.target.external_user_id",
   );
   nullableString(target, "display_name", "connection.target.display_name");
+  optionalNullableTimestamp(
+    target,
+    "account_deleted_at",
+    "connection.target.account_deleted_at",
+  );
   if (target.profile !== undefined) {
     assertExternalProfile(
       record(target.profile, "connection.target.profile"),

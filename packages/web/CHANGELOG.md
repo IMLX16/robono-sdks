@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1
+
+- Updates to client 0.6.1 and its connected-app account-deletion lifecycle.
+
 ## 0.6.0
 
 - Updates to client 0.6.0 and the canonical plural participant-language adapter route.

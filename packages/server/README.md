@@ -130,6 +130,8 @@ The unified send validates negotiated message type, text length, media size, dur
 
 The same normalized namespaces list, update, and disconnect connections; load message history; and mark messages delivered, read, or heard. When a user ends a friendship, call the disconnect operation rather than making a local-only change. To reconnect, request the same endpoint and identifier again. Robono preserves history and returns a pending state until the recipient explicitly accepts; do not enable messaging early. See the [connection lifecycle](https://robono.com/docs#lifecycle) and [Server SDK reference](https://robono.com/sdk-reference/server/).
 
+When a participant deletes their account in your app, call `dataRequests.deleteUser()` from an authorized backend action with a persisted idempotency key. Robono anonymizes the participant, disconnects every affected relationship, preserves friend-held history, and sends peers `bridge.connection_status_changed` with `reason: "account_deleted"`. Use the stable connection ID because the deleted participant identifier becomes `null`. See the [account-deletion lifecycle](https://robono.com/docs#lifecycle).
+
 ## Protect client operations
 
 Keep the API key on your server. Mount the app-facing route at `/robono/*` behind your existing authentication:

@@ -147,7 +147,26 @@ function webhookEvents(timestamp) {
     [{
       ...base("bridge.connection_status_changed"),
       bridge_connection_id: "connection-1",
-      connection,
+      status: "disconnected",
+      reason: "account_deleted",
+      disconnected_at: timestamp,
+      deleted_participant: {
+        app_id: "app-a",
+        side: "source",
+        state: "deleted",
+        deleted_at: timestamp,
+      },
+      connection: {
+        ...connection,
+        status: "disconnected",
+        source: {
+          ...connection.source,
+          external_user_id: null,
+          display_name: "Deleted account",
+          account_deleted_at: timestamp,
+        },
+        disconnected_at: timestamp,
+      },
     }, "connection"],
     [{
       ...base("bridge.connection_updated"),
@@ -1785,6 +1804,14 @@ test("webhook verifier rejects malformed nested contract objects", async () => {
         payload.connection.target.profile = { avatar: {} };
       },
       field: "avatar.source_url",
+    },
+    {
+      label: "deleted participant marker",
+      event: "bridge.connection_status_changed",
+      mutate(payload) {
+        payload.deleted_participant.side = "peer";
+      },
+      field: "deleted_participant.side",
     },
     {
       label: "bridge media URL",

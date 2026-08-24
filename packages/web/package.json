@@ -1,6 +1,6 @@
 {
   "name": "@robono/web",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Headless Robono SDK for browser applications.",
   "keywords": [
     "robono",
@@ -59,7 +59,7 @@
     "provenance": true
   },
   "dependencies": {
-    "@robono/client": "^0.6.0"
+    "@robono/client": "^0.6.1"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",

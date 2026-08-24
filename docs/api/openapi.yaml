@@ -200,6 +200,40 @@ webhooks:
                       display_name: Riley
                     guardian_messaging_enabled: false
                     capabilities: {}
+              bridgeParticipantDeleted:
+                summary: A participant deleted their account
+                value:
+                  event: bridge.connection_status_changed
+                  event_id: evt_01J00000000000000000000019
+                  request_id: req_01J00000000000000000000019
+                  created_at: 2026-08-24T12:00:00Z
+                  bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                  status: disconnected
+                  reason: account_deleted
+                  disconnected_at: 2026-08-24T12:00:00Z
+                  deleted_participant:
+                    app_id: 66666666-6666-4666-8666-666666666666
+                    side: source
+                    state: deleted
+                    deleted_at: 2026-08-24T12:00:00Z
+                  connection:
+                    bridge_connection_id: 55555555-5555-4555-8555-555555555555
+                    status: disconnected
+                    source:
+                      app:
+                        id: 66666666-6666-4666-8666-666666666666
+                      external_user_id: null
+                      display_name: Deleted account
+                      account_deleted_at: 2026-08-24T12:00:00Z
+                    target:
+                      app:
+                        id: 77777777-7777-4777-8777-777777777777
+                      identifier: FRIEND-42
+                      external_user_id: target-child-42
+                      display_name: Riley
+                    guardian_messaging_enabled: false
+                    capabilities: {}
+                    disconnected_at: 2026-08-24T12:00:00Z
               bridgeConnectionUpdated:
                 summary: Connected-app connection profile or capabilities changed
                 value:
@@ -2735,6 +2769,11 @@ paths:
         authorizes the user or privacy request. Deletion requires an
         Idempotency-Key. Completion is returned immediately when possible and
         is also delivered by signed webhook; status can always be read by ID.
+        Deletion anonymizes the participant and disconnects every relationship,
+        while preserving history already held by friends. Affected connected
+        apps receive bridge.connection_status_changed with reason
+        account_deleted. Later connection and preserved-message responses do
+        not return the deleted participant's identifier.
       tags:
         - Data rights
       parameters:
@@ -3231,9 +3270,16 @@ components:
             - $ref: "#/components/schemas/Network"
             - $ref: "#/components/schemas/AppIdentity"
         external_user_id:
-          type: string
+          type:
+            - string
+            - "null"
         display_name:
           type: string
+        account_deleted_at:
+          type:
+            - string
+            - "null"
+          format: date-time
         profile:
           $ref: "#/components/schemas/ExternalProfile"
         guardians:
@@ -3253,7 +3299,9 @@ components:
             - $ref: "#/components/schemas/Network"
             - $ref: "#/components/schemas/AppIdentity"
         identifier:
-          type: string
+          type:
+            - string
+            - "null"
         external_user_id:
           type:
             - string
@@ -3262,6 +3310,11 @@ components:
           type:
             - string
             - "null"
+        account_deleted_at:
+          type:
+            - string
+            - "null"
+          format: date-time
         profile:
           $ref: "#/components/schemas/ExternalProfile"
         contact_label:
@@ -3544,7 +3597,14 @@ components:
         status_message:
           $ref: "#/components/schemas/UserMessage"
         external_user_id:
-          type: string
+          type:
+            - string
+            - "null"
+        external_account_deleted_at:
+          type:
+            - string
+            - "null"
+          format: date-time
         external_display_name:
           type:
             - string
@@ -3961,7 +4021,10 @@ components:
             - inbound
             - outbound
         sender_external_user_id:
-          type: string
+          description: Null after the sending participant has deleted their connected-app account.
+          type:
+            - string
+            - "null"
         external_message_id:
           type: string
         message_kind:
@@ -4651,6 +4714,20 @@ components:
                 - string
                 - "null"
               format: date-time
+            reason:
+              type:
+                - string
+                - "null"
+            disconnected_at:
+              type:
+                - string
+                - "null"
+              format: date-time
+            external_account_deleted_at:
+              type:
+                - string
+                - "null"
+              format: date-time
     MessageCreatedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"
@@ -4855,6 +4932,38 @@ components:
               format: uuid
             connection:
               $ref: "#/components/schemas/Connection"
+            status:
+              $ref: "#/components/schemas/ConnectionStatus"
+            reason:
+              type:
+                - string
+                - "null"
+            disconnected_at:
+              type:
+                - string
+                - "null"
+              format: date-time
+            deleted_participant:
+              type: object
+              required:
+                - app_id
+                - side
+                - state
+                - deleted_at
+              properties:
+                app_id:
+                  type: string
+                  format: uuid
+                side:
+                  type: string
+                  enum:
+                    - source
+                    - target
+                state:
+                  const: deleted
+                deleted_at:
+                  type: string
+                  format: date-time
     BridgeDirectoryChangedWebhookEvent:
       allOf:
         - $ref: "#/components/schemas/WebhookEventBase"

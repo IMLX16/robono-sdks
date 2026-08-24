@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1
+
+- Adds deleted-account state to direct and connected-app connections and messages.
+- Keeps preserved conversation history readable while treating deleted participants as non-interactive.
+
 ## 0.6.0
 
 - Standardizes participant language updates on the canonical plural adapter route, `/robono/participants/language`.

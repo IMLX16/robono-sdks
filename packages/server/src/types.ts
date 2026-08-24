@@ -154,17 +154,19 @@ export interface AppIdentity {
 
 export interface BridgeSourceParticipant {
   app: DirectoryEntry | AppIdentity;
-  external_user_id: string;
+  external_user_id: string | null;
   display_name: string;
+  account_deleted_at?: string | null;
   profile?: ExternalProfileInput;
   guardians?: Guardian[];
 }
 
 export interface BridgeTargetParticipant {
   app: DirectoryEntry | AppIdentity;
-  identifier: string;
+  identifier: string | null;
   external_user_id: string | null;
   display_name: string | null;
+  account_deleted_at?: string | null;
   profile?: ExternalProfileInput;
   contact_label?: string | null;
   guardians?: Guardian[];
@@ -232,7 +234,8 @@ export interface RespondBridgeConnectionInput {
 
 export interface UpdateBridgeConnectionInput {
   bridge_connection_id: string;
-  external_user_id: string;
+  external_user_id: string | null;
+  external_account_deleted_at?: string | null;
   display_name?: string;
   external_profile?: ExternalProfileInput;
   capabilities?: ConnectionCapabilities;
@@ -427,7 +430,8 @@ export interface BridgeMessageRecord extends JsonObject {
   bridge_message_id: string;
   bridge_connection_id: string;
   direction: "inbound" | "outbound";
-  sender_external_user_id: string;
+  /** Null after the sending participant has deleted their connected-app account. */
+  sender_external_user_id: string | null;
   external_message_id: string;
   message_kind: MessageKind;
   text_body: string | null;
@@ -882,6 +886,9 @@ export interface ConnectionWebhookEvent extends RobonoWebhookEventBase {
   reconnect_response?: "accepted" | "declined" | "blocked" | null;
   reconnect_responded_at?: string | null;
   reconnected_at?: string | null;
+  reason?: string | null;
+  disconnected_at?: string | null;
+  external_account_deleted_at?: string | null;
 }
 
 export interface RobonoWebhookSender {
@@ -956,6 +963,15 @@ export interface BridgeConnectionChangedWebhookEvent
   event: "bridge.connection_status_changed" | "bridge.connection_updated";
   bridge_connection_id: string;
   connection: BridgeConnection;
+  status?: BridgeConnectionStatus;
+  reason?: string | null;
+  disconnected_at?: string | null;
+  deleted_participant?: {
+    app_id: string;
+    side: "source" | "target";
+    state: "deleted";
+    deleted_at: string;
+  };
 }
 
 export interface BridgeDirectoryChangedWebhookEvent

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.1
+
+- Adds the connected-app account-deletion lifecycle to typed connections, historical messages, and signed webhook events.
+- Preserves peer-held history while removing deleted participant identifiers and exposing stable deletion metadata.
+
 ## 0.9.0
 
 - Standardizes the protected backend adapter on `/robono/participants/language`, matching the direct API contract.

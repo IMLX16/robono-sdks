@@ -1,0 +1,59 @@
+{
+  "name": "@robono/linked-apps",
+  "version": "0.1.0-preview.1",
+  "private": false,
+  "description": "User-authorized companion-app access to Robono (development preview)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "INTEGRATION.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm test"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://robono.com/linked-apps",
+  "bugs": {
+    "url": "https://robono.com/contact",
+    "email": "support@robono.com"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "preview"
+  },
+  "keywords": [
+    "robono",
+    "messaging",
+    "linked-apps",
+    "sdk",
+    "typescript"
+  ],
+  "author": {
+    "name": "Add to Loop LLC",
+    "email": "support@robono.com",
+    "url": "https://robono.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IMLX16/robono-sdks.git",
+    "directory": "packages/linked-apps"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

@@ -1,13 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createHmac, webcrypto } from 'node:crypto';
-import { RobonoLinkedApps, secureTokenStore, nativeCryptoProvider, verifyWebhook } from '../dist/index.js';
+import { webcrypto } from 'node:crypto';
+import { RobonoLinkedApps, secureTokenStore, nativeCryptoProvider } from '../dist/index.js';
 function client(pages) {
   const calls=[];
   let tokens={accessToken:'token',refreshToken:'refresh',expiresAt:Date.now()+600000,grantId:'grant',scopes:['messages:read']};
-  const api=new RobonoLinkedApps({functionsUrl:'https://backend.example/functions/v1',clientId:'client',tokenStore:{get:async()=>tokens,set:async v=>tokens=v},fetch:async(url,options)=>{
-    const body=JSON.parse(options.body);calls.push(body);
-    const page=pages.shift();return new Response(JSON.stringify(typeof page==='function'?page(body):page),{status:200});
+  const api=new RobonoLinkedApps({functionsUrl:'https://backend.example/functions/v1',clientId:'client',tokenStore:{get:async()=>tokens,set:async v=>tokens=v},webSocket:()=>{
+    const ws={readyState:1,onopen:null,onmessage:null,onerror:null,onclose:null,close(){this.readyState=3},send(raw){
+      const body=JSON.parse(raw);calls.push(body);
+      if(body.type==='authenticate')queueMicrotask(()=>ws.onmessage?.({data:JSON.stringify({type:'ready',grant_id:'grant'})}));
+      if(body.type==='authenticate'||body.type==='ack'){
+        const page=pages.shift();if(page)queueMicrotask(()=>ws.onmessage?.({data:JSON.stringify({type:'page',page})}));
+      }
+    }};queueMicrotask(()=>ws.onopen?.({}));return ws;
   }});
   return {api,calls};
 }
@@ -17,7 +22,8 @@ test('watch snapshots from captured cursor, drains pages, persists only successf
   let snapshots=0;
   await c.api.watch({signal:controller.signal,cursorStore:{get:async()=>null,set:async(g,v)=>{writes.push([g,v]);if(v==='5')controller.abort()}},onResync:async()=>{snapshots++},onEvents:async events=>{delivered.push(...events.map(e=>e.id))}});
   assert.equal(snapshots,1);assert.deepEqual(delivered,['4','5']);assert.deepEqual(writes,[['grant','3'],['grant','4'],['grant','5']]);
-  assert.deepEqual(c.calls.map(c=>c.input.cursor),[null,'3','4']);
+  assert.deepEqual(c.calls.filter(c=>c.type==='ack').map(c=>c.cursor),['3','4']);
+  assert.equal(c.calls[0].cursor,null);
 });
 test('expired cursor reconciles before advancing and cancellation never checkpoints unprocessed work',async()=>{
   const c=client([{events:[],cursor:'20',resync_required:true,has_more:false}]);
@@ -36,13 +42,6 @@ test('secure storage and native crypto adapters preserve tokens and clear secret
   await store.set({accessToken:'secret',grantId:'grant'});assert.equal((await store.get()).accessToken,'secret');await store.set(null);assert.equal(await store.get(),null);
   const engine=nativeCryptoProvider({getRandomBytes:n=>webcrypto.getRandomValues(new Uint8Array(n)),digest:(a,b)=>webcrypto.subtle.digest(a,b)});
   assert.equal(engine.randomBytes(32).length,32);assert.equal((await engine.sha256(new Uint8Array([1]))).length,32);
-});
-test('webhook verifies exact bytes, freshness and signature without trusting parsed fields',async()=>{
-  const secret='s'.repeat(64),timestamp=String(Math.floor(Date.now()/1000));
-  const body=JSON.stringify({version:1,id:'delivery',type:'sync_available',client_id:'client',grant_id:'grant',cursor:'3'});
-  const signature='v1='+createHmac('sha256',secret).update(`${timestamp}.${body}`).digest('hex');
-  assert.equal((await verifyWebhook({body,timestamp,signature,secret,crypto:webcrypto})).cursor,'3');
-  for(const overrides of [{body:body+' '},{signature:'v1'+'0'.repeat(64)},{nowMs:Date.now()+600000},{secret:'bad'}])await assert.rejects(()=>verifyWebhook({body,timestamp,signature,secret,crypto:webcrypto,...overrides}));
 });
 test('media upload refuses untrusted destination, enforces size, and sends no account credential',async()=>{
   const requests=[];const api=new RobonoLinkedApps({functionsUrl:'https://backend.example/functions/v1',clientId:'c',tokenStore:{get:async()=>null,set:async()=>{}},fetch:async(url,init)=>{requests.push(init);return new Response('{}')}});

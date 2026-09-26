@@ -1,12 +1,15 @@
 # Integrating an independent app
 
-Use a separate registration for development and production. Robono supplies its
-functions URL, client ID and reviewed redirect URI/scopes. Client IDs are public.
-A backend webhook signing secret is confidential and must never enter a mobile bundle.
+Register at https://www.robono.com/linked-apps/manage. Developer signup, email
+verification and two-factor authentication are self-service. Registration returns an
+active client ID and functions URL immediately. No Bridge organization, subscription,
+API key or manual activation is required. Use separate development and production
+registrations. Client IDs are public; each user must still approve account access.
+Live updates use an authenticated connection opened by your SDK. No incoming endpoint or delivery configuration is required.
 
 ## Link an account with a code
 
-Pairing support requires SDK 0.1.0-preview.2 or newer. The currently registered
+Use SDK 0.1.0-preview.3 or newer for persistent connections. The currently registered
 client ID is public; users never need a developer account. Pairing-only clients
 use an empty `redirect_uris` list and do not need callback URLs.
 
@@ -72,10 +75,10 @@ for existing clients. New code pairing requires no callback handler.
 ## Display and send
 
 ```ts
-const snapshot = await ot.conversations();
-const page = await ot.messages(conversationId, { limit: 50 });
+const snapshot = await robono.conversations();
+const page = await robono.messages(conversationId, { limit: 50 });
 // Generate and persist this ID before sending; use it again on every retry.
-const result = await ot.send({ conversationId, messageKind: 'text',
+const result = await robono.send({ conversationId, messageKind: 'text',
   clientMessageId: durableOutgoingId, textBody: 'Hello' });
 ```
 
@@ -100,10 +103,10 @@ actual listening. Use `delivered` and `read` for their corresponding user states
 
 ```ts
 const controller = new AbortController();
-const watching = ot.watch({
+const watching = robono.watch({
   signal: controller.signal,
   cursorStore: persistedCursors, // keyed by grant ID
-  onResync: async () => reconcile(await ot.conversations()),
+  onResync: async () => reconcile(await robono.conversations()),
   onEvents: async events => {
     // Deduplicate message IDs. Fetch only relevant current pages; remove unavailable
     // or deleted content. Do not notify for receipt-only events or your own messages.
@@ -122,42 +125,67 @@ reported. Walkie-talkie replacement can invalidate an earlier message even if it
 was previously downloaded. Read all pages with `has_more` using both returned page
 markers; preserve microsecond timestamps as strings. Do not synthesize timestamps.
 
-Polling stores its cursor only after successful processing. A callback can run again
+The watcher stores its cursor only after successful processing. A callback can run again
 after a crash, so make local writes idempotent. Failed callbacks keep the previous
 cursor. Abort does not advance past unfinished work. Grant changes terminate the old
 watcher; cursors and cached data must never move to a different account.
 
-## Background notices
+## Live connections and background notifications
 
-1. Configure a reviewed HTTPS backend webhook with Robono.
-2. Your backend associates a grant with an authenticated account in your own service.
-   Verify it by calling `account.get` using that account's linked token; never trust
-   a client-supplied grant ID to route another user's notifications.
-3. Call `configureBackgroundDelivery(true)` after the mapping is ready.
-4. Verify the **raw** webhook body before parsing/queuing it:
+`watch()` opens a TLS WebSocket to `/linked-app-stream`, authenticates with the
+linked account token, and resumes from its saved cursor. The SDK reconnects with
+backoff, including routine server rotation. No webhook is offered.
 
-```ts
-import { verifyWebhook } from '@robono/linked-apps';
-const hint = await verifyWebhook({ body: rawBody,
-  timestamp: request.headers.get('x-robono-timestamp')!,
-  signature: request.headers.get('x-robono-signature')!,
-  secret: backendOnlySigningKey });
-// Check expected client_id; atomically deduplicate hint.id and enqueue the hint.
-// Return 2xx only after the queue write commits.
+Modern browsers, React Native and Node.js 22+ supply WebSocket. Other runtimes may
+inject `webSocket: url => new WebSocketImplementation(url)` in the SDK constructor.
+Do not disable TLS verification. Stop a phone's watcher when backgrounded; resume
+it on foreground. A phone operating system can suspend its sockets.
+
+For notifications while your phone app is suspended, your backend can run the same
+watcher and send a content-free hint through your app's APNs/FCM/Expo credentials.
+This uses an outbound connection to Robono, with no URL to register. First verify
+the account/grant using `account()` before routing hints to your own user's devices.
+Disclose server-side account access and protect its credentials. Use one token
+owner to coordinate refreshes; do not let independent phone/server processes rotate
+the same refresh token. Relay through that owner, or pair separately for each host.
+
+Keep separate cursor stores for independent consumers. Maximum three connections
+per grant. Events are retained for seven days. A longer absence triggers a fresh
+snapshot, not silent event loss. Callbacks must be idempotent. The stream carries
+change IDs, not message content; fetch the authoritative messages via the API.
+Keep companion hints silent by default to avoid duplicating Robono's alerts.
+Background execution and notification timing remain subject to iOS/Android rules.
+
+### Protocol for clients not using the SDK
+
+Connect to `wss://vzoqxavqacydtwypjsrd.supabase.co/functions/v1/linked-app-stream`
+without query parameters. Within ten seconds send this JSON text frame:
+
+```json
+{"type":"authenticate","version":1,"access_token":"rla_…","cursor":null}
 ```
 
-The signature covers `timestamp + '.' + rawBody` with HMAC-SHA256, accepted within
-five minutes. Delivery IDs remain stable across retries; attempt timestamps change.
-Reject replayed IDs after verification, check client identity, limit request size and
-retain dedup IDs for at least seven days. Invalid signatures receive no processing.
+Use the last successfully processed cursor string, or null for initial sync. Never
+put tokens in URLs or subprotocols. Require `messages:read` permission. The server
+sends `{"type":"ready","grant_id":"…","heartbeat_seconds":15}`; verify the grant.
+A `{"type":"page","page":…}` frame contains the same page as `events.poll`.
+For initial sync or `resync_required`, reconcile conversations and current histories.
+Otherwise apply its events, preserving their order and deduplicating IDs. Save the
+page cursor only after processing succeeds, then send
+`{"type":"ack","cursor":"<saved cursor>"}`. There is at most one outstanding page
+and at most 100 events per page. ACK within 60 seconds or reconnect from the previous
+saved cursor. Respond to `{"type":"ping"}` with `{"type":"pong"}`.
 
-5. Send a content-free sync hint through **your app's** APNs/FCM/Expo credentials.
-6. On wake/resume, call `events(cursor)` or restart `watch`; do not trust a webhook's
-   cursor as proof you already applied earlier events. Never overwrite the local
-   cursor with the pushed cursor. Keep Robono notifications as the default alert and
-   companion hints silent to avoid duplicate sounds.
+On `{"type":"reconnect"}`, reconnect with jitter from your saved cursor. The
+current hosting environment rotates connections after about 85 seconds. The SDK
+handles this. An error frame contains `error` and HTTP-style `status`; stop on
+invalid/revoked credentials or insufficient permission. Back off on temporary
+failures/rate limits. Rotate nearly expired access tokens through the existing
+refresh API, then reconnect. Messages retained during interruptions are replayed.
+`events(cursor)` remains available for a one-time reconciliation; `watch()` uses
+the persistent connection rather than repeatedly polling the HTTP API.
 
-Disconnect: call `ot.disconnect()`; clear your local cached account content and stop
+Disconnect: call `robono.disconnect()`; clear your local cached account content and stop
 watchers after revocation succeeds. A lost response may require retry/relink UI; a
 user can always revoke from Robono's Linked apps screen. Account deletion, revoked
 permissions or `invalid_token` must not trigger repeated unauthorized background work.

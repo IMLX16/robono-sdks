@@ -1,3 +1,13 @@
+# 0.1.0-preview.3
+
+- `watch()` now uses an authenticated persistent WebSocket and automatic recovery.
+- Acknowledgements follow successful processing and cursor persistence. Reconnects
+  replay missed events; token refresh and account switching are handled explicitly.
+- Remove `configureBackgroundDelivery`, `verifyWebhook` and `pollIntervalMs`.
+  No webhook delivery option remains. Use a backend watcher for your own app's push.
+- Global WebSocket is used in supported runtimes; other hosts can inject a factory.
+- Self-service registration and code pairing require no delivery endpoint setup.
+
 # 0.1.0-preview.2
 
 - Add `beginPairing`, `pollPairing`, and cancellable `waitForPairing`.

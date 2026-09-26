@@ -1,4 +1,5 @@
 import { type EventPage, waitForPoll, type WatchOptions } from "./delivery.js";
+import { consumeStream, type LinkedSocketFactory } from "./stream.js";
 import type {
   ConversationPage,
   Message,
@@ -8,7 +9,7 @@ import type {
 } from "./types.js";
 export * from "./types.js";
 export * from "./delivery.js";
-export * from "./webhook.js";
+export type { LinkedSocket, LinkedSocketFactory } from "./stream.js";
 export type Scope =
   | "account:read"
   | "messages:read"
@@ -131,6 +132,7 @@ export class RobonoLinkedApps {
       crypto?: CryptoProvider;
       fetch?: typeof fetch;
       timeoutMs?: number;
+      webSocket?: LinkedSocketFactory;
     },
   ) {
     const url = new URL(options.functionsUrl);
@@ -477,48 +479,59 @@ export class RobonoLinkedApps {
   events(cursor: string | null, signal?: AbortSignal) {
     return this.call<EventPage>("events.poll", { cursor }, signal);
   }
-  configureBackgroundDelivery(enabled: boolean) {
-    return this.call<{ enabled: boolean }>("delivery.configure", { enabled });
-  }
-  /** Run while active; stop on background, resume on foreground or a push hint.
-   * Callbacks must tolerate redelivery. Cursor advances only after success.
+  /** Open a live connection, replay missed events, and reconnect automatically.
+   * On phones, stop on suspension/logout; a backend may keep watching for push.
+   * Checkpoints and acknowledgements happen only after successful callbacks.
    */
   async watch(options: WatchOptions): Promise<void> {
-    const tokens = await this.options.tokenStore.get();
-    if (!tokens) throw new RobonoLinkedAppError("not_connected", 401);
-    const grantId = tokens.grantId;
-    let cursor = await options.cursorStore.get(grantId);
+    const initial = await this.options.tokenStore.get();
+    if (!initial) throw new RobonoLinkedAppError("not_connected", 401);
+    const grantId = initial.grantId;
+    const factory = this.options.webSocket ?? ((url: string) => new WebSocket(url));
+    if (!this.options.webSocket && typeof globalThis.WebSocket !== "function") {
+      throw new Error("Provide a WebSocket implementation for this runtime.");
+    }
+    const streamUrl = this.baseUrl.replace(/^http/, "ws") + "/linked-app-stream";
+    const current = async () => {
+      const tokens = await this.options.tokenStore.get();
+      if (!tokens || tokens.grantId !== grantId) throw new RobonoLinkedAppError("not_connected", 401);
+      return tokens;
+    };
     let failures = 0;
     while (!options.signal.aborted) {
+      let sessionToken = "";
       try {
-        const current = await this.options.tokenStore.get();
-        if (!current || current.grantId !== grantId) {
-          throw new RobonoLinkedAppError("not_connected", 401);
-        }
-        const page = await this.events(cursor, options.signal);
+        let tokens = await current();
+        if (tokens.expiresAt <= Date.now() + 30_000) tokens = await this.refresh();
+        if (tokens.grantId !== grantId) throw new RobonoLinkedAppError("not_connected", 401);
+        sessionToken = tokens.accessToken;
+        let cursor = await options.cursorStore.get(grantId);
+        await consumeStream({ url: streamUrl, factory, tokens, cursor, signal: options.signal,
+          onPage: async (page) => {
+            await current();
+            if (options.signal.aborted) return;
+            if (cursor === null || page.resync_required) await options.onResync();
+            else if (page.events.length) await options.onEvents(page.events);
+            await current();
+            if (options.signal.aborted) return;
+            await options.cursorStore.set(grantId, page.cursor);
+            cursor = page.cursor;
+            failures = 0;
+          },
+        });
         if (options.signal.aborted) return;
-        if (cursor === null || page.resync_required) await options.onResync();
-        else if (page.events.length) await options.onEvents(page.events);
-        if (options.signal.aborted) return;
-        await options.cursorStore.set(grantId, page.cursor);
-        cursor = page.cursor;
-        failures = 0;
-        if (page.has_more) continue;
       } catch (error) {
         if (options.signal.aborted) return;
-        if (
-          error instanceof RobonoLinkedAppError &&
-          [400, 401, 403].includes(error.status)
-        ) throw error;
+        if (error instanceof RobonoLinkedAppError && error.code === "invalid_token") {
+          const tokens = await current();
+          // Another request may have rotated the token used by this socket.
+          if (tokens.accessToken !== sessionToken || tokens.expiresAt <= Date.now() + 30_000) continue;
+        }
+        if (error instanceof RobonoLinkedAppError && [400, 401, 403].includes(error.status)) throw error;
         options.onError?.(error);
         failures++;
       }
-      await waitForPoll(
-        failures
-          ? Math.min(30_000, 1000 * 2 ** Math.min(failures, 5))
-          : Math.max(1000, options.pollIntervalMs ?? 1000),
-        options.signal,
-      );
+      await waitForPoll(failures ? Math.min(30_000, 1000 * 2 ** Math.min(failures, 5)) : 250 + Math.floor(Math.random() * 500), options.signal);
     }
   }
   async disconnect() {

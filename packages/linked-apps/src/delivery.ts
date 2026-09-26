@@ -24,7 +24,6 @@ export interface WatchOptions {
   /** Reconcile the conversation list and currently open message pages. */
   onResync(): Promise<void>;
   onError?(error: unknown): void;
-  pollIntervalMs?: number;
 }
 export async function waitForPoll(ms: number, signal: AbortSignal) {
   if (signal.aborted) return;

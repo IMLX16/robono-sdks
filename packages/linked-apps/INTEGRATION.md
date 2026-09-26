@@ -4,16 +4,19 @@ Use a separate registration for development and production. Robono supplies its
 functions URL, client ID and reviewed redirect URI/scopes. Client IDs are public.
 A backend webhook signing secret is confidential and must never enter a mobile bundle.
 
-## Link an account
+## Link an account with a code
+
+Pairing support requires SDK 0.1.0-preview.2 or newer. The currently registered
+client ID is public; users never need a developer account. Pairing-only clients
+use an empty `redirect_uris` list and do not need callback URLs.
 
 ```ts
 import { RobonoLinkedApps, secureTokenStore, nativeCryptoProvider } from '@robono/linked-apps';
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
-import { Linking } from 'react-native';
 
-const ot = new RobonoLinkedApps({
-  functionsUrl: config.robonoFunctionsUrl,
+const robono = new RobonoLinkedApps({
+  functionsUrl: 'https://vzoqxavqacydtwypjsrd.supabase.co/functions/v1',
   clientId: config.robonoClientId,
   tokenStore: secureTokenStore(SecureStore, 'robono.linked.account.primary'),
   crypto: nativeCryptoProvider({
@@ -21,31 +24,50 @@ const ot = new RobonoLinkedApps({
     digest: (_, bytes) => Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, new Uint8Array(bytes)),
   }),
 });
-const link = await ot.beginLink('com.example.app://robono/callback',
+const pairing = await robono.beginPairing(
   ['account:read', 'messages:read', 'messages:send', 'receipts:write']);
-// Keep the verifier/state in Keychain/Keystore across the app switch.
-await SecureStore.setItemAsync('robono.pending-link', JSON.stringify(link.pending));
-await Linking.openURL(link.authorizationUrl);
-// In your callback handler, after matching the registered route:
-const pending = JSON.parse((await SecureStore.getItemAsync('robono.pending-link'))!);
-await ot.completeLink(callbackUrl, pending);
-await SecureStore.deleteItemAsync('robono.pending-link');
+// Show pairing.userCode with a five-minute expiry indication.
+// Tell the user: Robono > Linked apps > Connect an app > enter this code.
+// Optional: open pairing.verificationAppUrl to take them to Robono.
+await SecureStore.setItemAsync('robono.pending-pair', JSON.stringify(pairing.pending));
+const controller = new AbortController();
+// Abort when this screen closes, the account changes, or the app backgrounds.
+const tokens = await robono.waitForPairing(pairing.pending, controller.signal);
+await SecureStore.deleteItemAsync('robono.pending-pair');
+// Connected. Tokens are already saved by the configured TokenStore.
 ```
 
-The native adapters are dependency-injected: bare React Native can supply equivalent
-Keychain/Keystore and cryptography implementations. Never use Math.random or ordinary
-AsyncStorage for credentials/verifiers. Choose platform key accessibility according
-to your app's background needs; never opt into backup/sync of account secrets.
+If backgrounded while the user opens Robono, cancel polling, preserve pending
+state securely, then resume `waitForPairing` on foreground if it has not expired.
+Use one poller per pairing and one SDK instance per connected account. You can
+call `pollPairing` directly; it returns `pending` or `connected` and updates the
+pending state's interval and next-poll time. Persist those updates if resuming
+across process restarts. Network failures are surfaced: offer a retry with
+backoff while the code remains valid. Never spin on errors.
 
-Register the callback on **both iOS and Android**. Prefer an owned HTTPS universal/app
-link where possible. Private native schemes must be unique reverse-domain names;
-PKCE protects code redemption from interception. Never accept arbitrary callback
-hosts, skip state verification, or copy a Robono phone session into your app.
+Robono authenticates the owner using its existing phone session. A signed-out
+user signs in through Robono's normal login first. There is no extra SMS check
+for account linking. The code does not itself authorize access: the user must
+review the app, account, and permissions and choose Allow connection in Robono.
+Never request the user's Robono login code, password, or phone-session token.
 
-Only one SDK instance owns a connected account's refresh sequence. Multiple runtimes
-or processes must coordinate access to secure storage. A lost refresh response or
-crash before the rotated pair is persisted may require relinking; retrying a spent
-refresh token revokes the grant. Do not automatically repeat token exchanges.
+The visible code expires after five minutes. The device code and PKCE verifier
+are secrets; never show, log, put them in URLs, or send them to analytics. Native
+clients use Keychain/Keystore; browser/server hosts must supply equivalent secure
+storage. Only the app that initiated pairing can exchange the approved request.
+Do not call completion repeatedly after receiving tokens. If the successful
+exchange response is lost, start a new pairing; a consumed code cannot be reused.
+
+HTTP clients: POST `linked-app-pair` with client_id, scopes, S256 code_challenge
+and code_challenge_method. Poll `linked-app-token` using grant_type
+`urn:ietf:params:oauth:grant-type:device_code`, client_id, device_code and
+code_verifier. Wait at least the returned interval (initially five seconds).
+`authorization_pending` means keep waiting; `slow_down` increases the interval
+by five seconds (up to sixty). Stop on `access_denied`, `expired_token`, or
+`invalid_grant`. A 429 requires backoff. Only a successful response contains tokens.
+
+The older registered-callback `beginLink` / `completeLink` APIs remain supported
+for existing clients. New code pairing requires no callback handler.
 
 ## Display and send
 

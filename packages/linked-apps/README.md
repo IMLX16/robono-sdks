@@ -17,8 +17,10 @@ npm --prefix packages/linked-apps test
 
 Use one `RobonoLinkedApps` instance per connected account. Inject a Keychain/Keystore
 `TokenStore` and native `CryptoProvider`; adapters are exported. Browser/server
-runtimes may use WebCrypto. Securely persist pending PKCE verifier/state before
-opening Robono; validate the callback using `completeLink`.
+runtimes may use WebCrypto. Use `beginPairing` to obtain a code, show it to the user, then call
+`waitForPairing` to finish after approval in Robono. Store pending state securely.
+Robono reuses its normal login; account linking adds no SMS verification.
+Registered callback linking remains available for existing clients.
 
 [Integration guide](./INTEGRATION.md) ·
 [API reference](https://robono.com/api-reference-viewer.html?spec=linked-apps) ·
@@ -40,7 +42,7 @@ require relinking because reusing a spent refresh token revokes the grant.
 The official distribution channel is npm. Install this exact preview version:
 
 ```sh
-npm install --save-exact @robono/linked-apps@0.1.0-preview.1
+npm install --save-exact @robono/linked-apps@0.1.0-preview.2
 ```
 
 Preview releases use the `preview` tag. Pin the version and commit your lockfile; review release notes and test before updating. The Robono website does not distribute SDK archives.

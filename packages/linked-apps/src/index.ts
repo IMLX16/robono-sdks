@@ -38,6 +38,16 @@ export interface PendingLink {
   state: string;
   expiresAt: string;
 }
+/** Secret pending state: keep in secure storage, never display or log it. */
+export interface PendingPairing {
+  clientId: string;
+  deviceCode: string;
+  verifier: string;
+  expiresAt: string;
+  interval: number;
+  nextPollAt: number;
+}
+export type PairingResult = { status: "pending" } | { status: "connected"; tokens: Tokens };
 export interface SendMessage {
   conversationId: string;
   messageKind: "text" | "voice" | "image" | "video" | "document";
@@ -111,6 +121,7 @@ export function webCryptoProvider(): CryptoProvider {
 export class RobonoLinkedApps {
   private readonly baseUrl: string;
   private readonly fetcher: typeof fetch;
+  private pairingPolls = new Map<string, Promise<PairingResult>>();
   private refreshPending: Promise<Tokens> | null = null;
   constructor(
     private readonly options: {
@@ -172,6 +183,81 @@ export class RobonoLinkedApps {
       clearTimeout(timeout);
       signal?.removeEventListener("abort", cancel);
     }
+  }
+  /** Show only userCode. The user approves inside their signed-in Robono app. */
+  async beginPairing(scopes: Scope[], signal?: AbortSignal) {
+    if (!scopes.length || scopes.some((scope) => !scopeNames.has(scope))) {
+      throw new Error("Select supported permissions.");
+    }
+    const crypto = this.options.crypto ?? webCryptoProvider();
+    const verifier = hex(crypto.randomBytes(32));
+    const challenge = base64url(await crypto.sha256(new TextEncoder().encode(verifier)));
+    const result = await this.post<{
+      user_code: string; device_code: string; expires_at: string; interval: number;
+      verification_uri: string; verification_app_uri: string;
+    }>("linked-app-pair", {
+      client_id: this.options.clientId, scopes,
+      code_challenge: challenge, code_challenge_method: "S256",
+    }, undefined, signal);
+    const interval = Math.max(5, result.interval);
+    return {
+      userCode: result.user_code,
+      verificationUrl: result.verification_uri,
+      verificationAppUrl: result.verification_app_uri,
+      pending: {
+        clientId: this.options.clientId, deviceCode: result.device_code, verifier,
+        expiresAt: result.expires_at, interval, nextPollAt: Date.now() + interval * 1000,
+      } satisfies PendingPairing,
+    };
+  }
+  /** Returns pending until approval. Concurrent calls share one token exchange. */
+  async pollPairing(pending: PendingPairing, signal?: AbortSignal): Promise<PairingResult> {
+    if (pending.clientId !== this.options.clientId ||
+        !Number.isFinite(Date.parse(pending.expiresAt)) ||
+        Date.parse(pending.expiresAt) <= Date.now()) {
+      throw new RobonoLinkedAppError("expired_token", 400);
+    }
+    if (signal?.aborted) throw new RobonoLinkedAppError("cancelled", 400);
+    const existing = this.pairingPolls.get(pending.deviceCode);
+    if (existing) return existing;
+    if (Date.now() < pending.nextPollAt) return { status: "pending" };
+    const operation = (async (): Promise<PairingResult> => {
+      pending.nextPollAt = Date.now() + Math.max(5, pending.interval) * 1000;
+      try {
+        const wire = await this.post<WireToken>("linked-app-token", {
+          client_id: this.options.clientId,
+          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+          device_code: pending.deviceCode, code_verifier: pending.verifier,
+        }, undefined, signal);
+        const tokens = await this.save(wire);
+        return { status: "connected", tokens };
+      } catch (error) {
+        if (error instanceof RobonoLinkedAppError &&
+            ["authorization_pending", "slow_down"].includes(error.code)) {
+          if (error.code === "slow_down") pending.interval = Math.min(60, pending.interval + 5);
+          return { status: "pending" };
+        }
+        throw error;
+      } finally {
+        pending.nextPollAt = Date.now() + Math.max(5, pending.interval) * 1000;
+      }
+    })();
+    this.pairingPolls.set(pending.deviceCode, operation);
+    try { return await operation; }
+    finally { this.pairingPolls.delete(pending.deviceCode); }
+  }
+  /** Cancel when leaving the pairing screen. Never polls in the background implicitly. */
+  async waitForPairing(pending: PendingPairing, signal: AbortSignal): Promise<Tokens> {
+    while (!signal.aborted) {
+      if (Date.parse(pending.expiresAt) <= Date.now()) {
+        throw new RobonoLinkedAppError("expired_token", 400);
+      }
+      await waitForPoll(Math.max(0, Math.min(pending.nextPollAt, Date.parse(pending.expiresAt)) - Date.now()), signal);
+      if (signal.aborted) break;
+      const result = await this.pollPairing(pending, signal);
+      if (result.status === "connected") return result.tokens;
+    }
+    throw new RobonoLinkedAppError("cancelled", 400);
   }
   async beginLink(redirectUri: string, scopes: Scope[]) {
     if (!scopes.length || scopes.some((scope) => !scopeNames.has(scope))) {

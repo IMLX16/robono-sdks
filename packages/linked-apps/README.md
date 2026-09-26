@@ -1,7 +1,7 @@
 # @robono/linked-apps
 
 Robono's user-authorized messaging API client, for independent applications.
-Developer preview. Register your app at https://www.robono.com/linked-apps/manage to receive an active client ID. Each user must approve their own Robono account connection.
+Developer preview. Install the SDK and supply your app details through `app` in its configuration. No developer account, website registration, issued client ID or manual activation is required. Each user approves their own Robono account connection.
 SDK installation alone does not enable account access.
 
 Supports PKCE account linking, rotating credentials, typed conversations/messages,
@@ -43,9 +43,9 @@ require relinking because reusing a spent refresh token revokes the grant.
 The official distribution channel is npm. Install this exact preview version:
 
 ```sh
-npm install --save-exact @robono/linked-apps@0.1.0-preview.3
+npm install --save-exact @robono/linked-apps@0.1.0-preview.4
 ```
 
 Preview releases use the `preview` tag. Pin the version and commit your lockfile; review release notes and test before updating. The Robono website does not distribute SDK archives.
 
-The SDK is covered by the included Robono SDK License Agreement. This package contains no client secret or credentials. Robono supplies the registered client ID and environment URL separately.
+The SDK is covered by the included Robono SDK License Agreement. This package contains no client secret or credentials. The default Robono service URL is built in. Existing registered client IDs remain compatible; new integrations use app details.

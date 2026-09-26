@@ -1,3 +1,13 @@
+# 0.1.0-preview.4
+
+- Add direct integration through `app` details in SDK configuration. No developer
+  account, website registration, issued client ID or manual activation is needed.
+- Use Robono's public service URL by default. Existing `clientId` integrations and
+  explicitly selected development servers remain supported.
+- Normalize and bind app details to a stable internal identity. Direct integrations
+  use code pairing; user consent, PKCE, access scopes and revocation stay intact.
+- Validate returned identity and preserve pairing/refresh across SDK restarts.
+
 # 0.1.0-preview.3
 
 - `watch()` now uses an authenticated persistent WebSocket and automatic recovery.

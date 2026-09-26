@@ -1,3 +1,5 @@
+import { directAppIdentity, normalizeAppIdentity, type AppIdentity } from "./identity.js";
+export type { AppIdentity } from "./identity.js";
 import { type EventPage, waitForPoll, type WatchOptions } from "./delivery.js";
 import { consumeStream, type LinkedSocketFactory } from "./stream.js";
 import type {
@@ -122,12 +124,17 @@ export function webCryptoProvider(): CryptoProvider {
 export class RobonoLinkedApps {
   private readonly baseUrl: string;
   private readonly fetcher: typeof fetch;
+  private readonly app?: AppIdentity;
+  private identityPending?: Promise<string>;
   private pairingPolls = new Map<string, Promise<PairingResult>>();
   private refreshPending: Promise<Tokens> | null = null;
   constructor(
     private readonly options: {
-      functionsUrl: string;
-      clientId: string;
+      functionsUrl?: string;
+      /** Direct integration: app details replace website registration. */
+      app?: AppIdentity;
+      /** Compatibility for existing registered integrations. Use app for new integrations. */
+      clientId?: string;
       tokenStore: TokenStore;
       crypto?: CryptoProvider;
       fetch?: typeof fetch;
@@ -135,7 +142,9 @@ export class RobonoLinkedApps {
       webSocket?: LinkedSocketFactory;
     },
   ) {
-    const url = new URL(options.functionsUrl);
+    if (Boolean(options.app) === Boolean(options.clientId)) throw new Error("Provide app details or an existing clientId, not both.");
+    this.app = options.app ? normalizeAppIdentity(options.app) : undefined;
+    const url = new URL(options.functionsUrl ?? "https://vzoqxavqacydtwypjsrd.supabase.co/functions/v1");
     if (
       url.username || url.password || url.search || url.hash ||
       !(url.protocol === "https:" ||
@@ -148,6 +157,14 @@ export class RobonoLinkedApps {
     }
     this.baseUrl = url.toString().replace(/\/$/, "");
     this.fetcher = options.fetch ?? globalThis.fetch;
+  }
+  private clientIdentity(): Promise<string> {
+    if (this.options.clientId) return Promise.resolve(this.options.clientId);
+    if (!this.identityPending) {
+      const crypto = this.options.crypto ?? webCryptoProvider();
+      this.identityPending = directAppIdentity(this.app!, bytes => crypto.sha256(bytes)).then(result => result.clientId);
+    }
+    return this.identityPending;
   }
   private async post<T>(
     endpoint: string,
@@ -196,25 +213,26 @@ export class RobonoLinkedApps {
     const challenge = base64url(await crypto.sha256(new TextEncoder().encode(verifier)));
     const result = await this.post<{
       user_code: string; device_code: string; expires_at: string; interval: number;
-      verification_uri: string; verification_app_uri: string;
+      verification_uri: string; verification_app_uri: string; client_id?: string;
     }>("linked-app-pair", {
-      client_id: this.options.clientId, scopes,
+      ...(this.app ? { app: this.app } : { client_id: await this.clientIdentity() }), scopes,
       code_challenge: challenge, code_challenge_method: "S256",
     }, undefined, signal);
+    if (this.app && result.client_id !== await this.clientIdentity()) throw new RobonoLinkedAppError("invalid_client_identity", 400);
     const interval = Math.max(5, result.interval);
     return {
       userCode: result.user_code,
       verificationUrl: result.verification_uri,
       verificationAppUrl: result.verification_app_uri,
       pending: {
-        clientId: this.options.clientId, deviceCode: result.device_code, verifier,
+        clientId: await this.clientIdentity(), deviceCode: result.device_code, verifier,
         expiresAt: result.expires_at, interval, nextPollAt: Date.now() + interval * 1000,
       } satisfies PendingPairing,
     };
   }
   /** Returns pending until approval. Concurrent calls share one token exchange. */
   async pollPairing(pending: PendingPairing, signal?: AbortSignal): Promise<PairingResult> {
-    if (pending.clientId !== this.options.clientId ||
+    if (pending.clientId !== await this.clientIdentity() ||
         !Number.isFinite(Date.parse(pending.expiresAt)) ||
         Date.parse(pending.expiresAt) <= Date.now()) {
       throw new RobonoLinkedAppError("expired_token", 400);
@@ -227,7 +245,7 @@ export class RobonoLinkedApps {
       pending.nextPollAt = Date.now() + Math.max(5, pending.interval) * 1000;
       try {
         const wire = await this.post<WireToken>("linked-app-token", {
-          client_id: this.options.clientId,
+          client_id: await this.clientIdentity(),
           grant_type: "urn:ietf:params:oauth:grant-type:device_code",
           device_code: pending.deviceCode, code_verifier: pending.verifier,
         }, undefined, signal);
@@ -262,6 +280,7 @@ export class RobonoLinkedApps {
     throw new RobonoLinkedAppError("cancelled", 400);
   }
   async beginLink(redirectUri: string, scopes: Scope[]) {
+    if (this.app) throw new Error("Direct integrations use beginPairing; redirect linking requires an existing registered clientId.");
     if (!scopes.length || scopes.some((scope) => !scopeNames.has(scope))) {
       throw new Error("Select supported permissions.");
     }
@@ -274,7 +293,7 @@ export class RobonoLinkedApps {
     const result = await this.post<
       { authorization_url: string; request_id: string; expires_at: string }
     >("linked-app-authorize", {
-      client_id: this.options.clientId,
+      client_id: await this.clientIdentity(),
       redirect_uri: redirectUri,
       scopes,
       state,
@@ -285,7 +304,7 @@ export class RobonoLinkedApps {
       authorizationUrl: result.authorization_url,
       requestId: result.request_id,
       pending: {
-        clientId: this.options.clientId,
+        clientId: await this.clientIdentity(),
         redirectUri,
         verifier,
         state,
@@ -296,7 +315,7 @@ export class RobonoLinkedApps {
   async completeLink(callback: string, pending: PendingLink) {
     const url = new URL(callback), expected = new URL(pending.redirectUri);
     if (
-      pending.clientId !== this.options.clientId ||
+      pending.clientId !== await this.clientIdentity() ||
       Date.parse(pending.expiresAt) <= Date.now() ||
       url.protocol !== expected.protocol || url.host !== expected.host ||
       url.pathname !== expected.pathname ||
@@ -319,7 +338,7 @@ export class RobonoLinkedApps {
     }
     return this.save(
       await this.post<WireToken>("linked-app-token", {
-        client_id: this.options.clientId,
+        client_id: await this.clientIdentity(),
         grant_type: "authorization_code",
         redirect_uri: pending.redirectUri,
         code,
@@ -347,7 +366,7 @@ export class RobonoLinkedApps {
       try {
         return await this.save(
           await this.post<WireToken>("linked-app-token", {
-            client_id: this.options.clientId,
+            client_id: await this.clientIdentity(),
             grant_type: "refresh_token",
             refresh_token: tokens.refreshToken,
           }),

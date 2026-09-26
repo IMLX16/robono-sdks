@@ -1,17 +1,22 @@
 # Integrating an independent app
 
-Register at https://www.robono.com/linked-apps/manage. Developer signup, email
-verification and two-factor authentication are self-service. Registration returns an
-active client ID and functions URL immediately. No Bridge organization, subscription,
-API key or manual activation is required. Use separate development and production
-registrations. Client IDs are public; each user must still approve account access.
-Live updates use an authenticated connection opened by your SDK. No incoming endpoint or delivery configuration is required.
+Install `@robono/linked-apps@0.1.0-preview.4` and supply your app details in SDK
+configuration. No Robono developer account, website registration, API key, issued
+client ID, callback URL or manual activation is needed. The SDK uses Robono's
+published service address by default. This connects to Robono app accounts, not
+the Robono Bridge network API.
+
+App details are supplied by your app; Robono does not certify ownership of the name
+or URLs. Use accurate names and public HTTPS website/privacy-policy links. Robono
+creates its internal client identifier automatically. Keep these details stable:
+a changed profile has a different identifier and needs new account connections.
+For development, use a distinct app name and separate secure credential storage.
+Your users still approve access inside Robono. Installing the SDK grants no access.
 
 ## Link an account with a code
 
-Use SDK 0.1.0-preview.3 or newer for persistent connections. The currently registered
-client ID is public; users never need a developer account. Pairing-only clients
-use an empty `redirect_uris` list and do not need callback URLs.
+Direct integration requires SDK 0.1.0-preview.4 or newer. Existing integrations
+with registered client IDs remain supported, but new integrations should use `app`.
 
 ```ts
 import { RobonoLinkedApps, secureTokenStore, nativeCryptoProvider } from '@robono/linked-apps';
@@ -19,8 +24,12 @@ import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 
 const robono = new RobonoLinkedApps({
-  functionsUrl: 'https://vzoqxavqacydtwypjsrd.supabase.co/functions/v1',
-  clientId: config.robonoClientId,
+  app: {
+    name: 'Your App',
+    developerName: 'Your Company',
+    websiteUrl: 'https://example.com',
+    privacyUrl: 'https://example.com/privacy',
+  },
   tokenStore: secureTokenStore(SecureStore, 'robono.linked.account.primary'),
   crypto: nativeCryptoProvider({
     getRandomBytes: Crypto.getRandomBytes,
@@ -61,16 +70,21 @@ storage. Only the app that initiated pairing can exchange the approved request.
 Do not call completion repeatedly after receiving tokens. If the successful
 exchange response is lost, start a new pairing; a consumed code cannot be reused.
 
-HTTP clients: POST `linked-app-pair` with client_id, scopes, S256 code_challenge
-and code_challenge_method. Poll `linked-app-token` using grant_type
-`urn:ietf:params:oauth:grant-type:device_code`, client_id, device_code and
+HTTP clients: POST `linked-app-pair` with `app` (name, developerName, websiteUrl,
+privacyUrl), scopes, S256 code_challenge and code_challenge_method. Do not send a
+client_id with app. Save the returned client_id with the pending secret state; no
+separate client-registration call is required. Poll `linked-app-token` using grant_type
+`urn:ietf:params:oauth:grant-type:device_code`, the returned client_id, device_code and
 code_verifier. Wait at least the returned interval (initially five seconds).
 `authorization_pending` means keep waiting; `slow_down` increases the interval
 by five seconds (up to sixty). Stop on `access_denied`, `expired_token`, or
 `invalid_grant`. A 429 requires backoff. Only a successful response contains tokens.
 
-The older registered-callback `beginLink` / `completeLink` APIs remain supported
-for existing clients. New code pairing requires no callback handler.
+The older `clientId` configuration and registered-callback `beginLink` / `completeLink`
+APIs remain supported for existing clients. Do not combine `app` and `clientId`.
+Direct integration uses code pairing and requires no callback handler. The internal
+identifier is public; authorization still depends on PKCE and explicit account approval.
+An app name or client ID is not proof of app ownership.
 
 ## Display and send
 

@@ -9,6 +9,8 @@ import type {
 } from "./types.js";
 
 const webhookEventNames = new Set<RobonoWebhookEventName>([
+  "calling.incoming",
+  "calling.dismissed",
   "connection.status_changed",
   "connection.profile_updated",
   "message.created",
@@ -26,6 +28,7 @@ const webhookEventNames = new Set<RobonoWebhookEventName>([
   "transform.completed",
   "transform.failed",
   "diagnostic.push_requested",
+  "pricing.updated",
   "data.export_completed",
   "data.export_failed",
   "data.export_rejected",
@@ -156,6 +159,19 @@ function assertWebhookEvent(
   timestamp(event, "created_at");
 
   switch (name as RobonoWebhookEventName) {
+    case "calling.incoming":
+    case "calling.dismissed": {
+      const recipient = record(event.recipient, "recipient"), call = record(event.call, "call");
+      string(recipient,"child_app_id"); string(recipient,"external_user_id");
+      string(call,"id"); string(call,"connection_id");
+      timestamp(call,"created_at"); timestamp(call,"ring_expires_at");
+      if (call.sequence !== (name === "calling.incoming" ? 1 : 2) ||
+          Date.parse(String(call.ring_expires_at)) <= Date.parse(String(call.created_at))) {
+        throw new RobonoWebhookError("The calling event sequence or expiry is invalid.", "invalid_webhook_event");
+      }
+      if (name === "calling.dismissed") string(call,"reason");
+      return;
+    }
     case "connection.status_changed":
     case "connection.profile_updated":
       string(event, "connection_id");
@@ -404,6 +420,14 @@ function assertWebhookEvent(
       string(event, "push_diagnostic_id");
       string(event, "diagnostic_token");
       string(event, "external_user_id");
+      return;
+    case "pricing.updated":
+      string(event, "catalog_version");
+      timestamp(event, "effective_at");
+      nullableString(event, "previous_catalog_version");
+      string(event, "change_summary");
+      string(event, "pricing_url");
+      string(event, "api_url");
       return;
     case "data.export_completed":
     case "data.export_failed":

@@ -1,5 +1,7 @@
 import type {
   RobonoClientPushPayload,
+  CallingWebhookEvent,
+  CallingPushPayload,
   RobonoTransformPushPayload,
   RobonoWebhookEvent,
 } from "./types.js";
@@ -19,6 +21,9 @@ export function toClientPushPayload(
 ): RobonoClientPushPayload {
   const event_id = event.event_id;
   switch (event.event) {
+    case "calling.incoming":
+    case "calling.dismissed":
+      throw new RobonoWebhookError("Use toCallingPushPayload for calling notifications.", "unsupported_client_push_event");
     case "connection.status_changed":
     case "connection.profile_updated":
       return { event: event.event, event_id, connection_id: event.connection_id };
@@ -85,5 +90,17 @@ export function toClientPushPayload(
         "Data-rights webhooks are server events and must not be forwarded as client push payloads.",
         "unsupported_client_push_event",
       );
+    case "pricing.updated":
+      throw new RobonoWebhookError(
+        "Pricing webhooks are server events and must not be forwarded as client push payloads.",
+        "unsupported_client_push_event",
+      );
   }
+}
+
+/** Route only to the recipient's devices. The calling client rechecks live state. */
+export function toCallingPushPayload(event: CallingWebhookEvent): CallingPushPayload {
+  return { event: event.event, event_id: event.event_id, call_id: event.call.id,
+    connection_id: event.call.connection_id, ring_expires_at: event.call.ring_expires_at,
+    sequence: event.call.sequence };
 }

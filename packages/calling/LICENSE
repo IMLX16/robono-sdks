@@ -1,0 +1,130 @@
+ROBONO SDK LICENSE AGREEMENT
+Version 1.0, July 20, 2026
+
+Copyright (c) 2026 Add to Loop LLC. All rights reserved.
+
+This Robono SDK License Agreement (the "Agreement") is between Add to Loop LLC,
+operating the Robono service ("Robono"), and the person or entity that downloads,
+installs, copies, or uses the Software ("You"). By downloading, installing,
+copying, or using the Software, You accept this Agreement. If You do not accept
+it, do not use the Software.
+
+1. Definitions
+
+"Software" means this Robono software development kit, its documentation, and
+any updates Robono provides under this Agreement.
+
+"Robono Service" means the messaging interoperability, routing, policy,
+conversion, delivery, and related services operated or expressly authorized by
+Robono.
+
+"Application" means a product or service owned or controlled by You that is
+authorized to connect to the Robono Service.
+
+2. Limited License
+
+Subject to this Agreement, Robono grants You a limited, non-exclusive,
+non-transferable, non-sublicensable, revocable license to:
+
+(a) install, copy, and use the Software internally to develop, test, and
+operate an Application that communicates with the Robono Service; and
+
+(b) reproduce and distribute the portions of the Software that are necessarily
+included in Your Application, solely in compiled, minified, bundled, or object
+code form and solely as needed for that Application to communicate with the
+Robono Service.
+
+No right is granted to distribute the Software as a standalone product or SDK.
+
+3. Restrictions
+
+You may not, and may not permit another person to:
+
+(a) sell, rent, lease, sublicense, publish, or redistribute the Software as a
+standalone product, library, SDK, or service;
+
+(b) use the Software or a modified or derivative version of it to develop,
+provide, or support a product or service that competes with the Robono Service;
+
+(c) use the Software to bypass Robono, avoid applicable usage controls or fees,
+or access the Robono Service without authorization;
+
+(d) remove or alter copyright, trademark, attribution, or proprietary notices;
+
+(e) reverse engineer, decompile, or disassemble the Software except to the
+limited extent applicable law expressly prohibits this restriction; or
+
+(f) use the Software in violation of applicable law, the rights of another
+person, or the terms governing access to the Robono Service.
+
+4. Ownership and Reserved Rights
+
+The Software is licensed, not sold. Robono and its licensors retain all right,
+title, and interest in the Software and all related intellectual property.
+Except for the limited rights expressly granted in Section 2, all rights are
+reserved.
+
+No patent license is granted except the minimum license, if any, necessarily
+required to exercise the rights expressly granted in Section 2, and that
+limited patent license applies only while the Software is used with an
+authorized Robono Service.
+
+5. Service Access
+
+This Agreement does not itself grant an account, API credentials, service
+availability, support, or a right to access the Robono Service. Service access
+may be governed by additional terms, plans, limits, and policies. Robono may
+suspend or terminate access to protect users, systems, legal compliance, or the
+integrity of the Robono Service.
+
+6. Updates and Support
+
+Robono is not required to provide maintenance, updates, support, or continued
+availability of any version of the Software unless separately agreed in
+writing.
+
+7. Term and Termination
+
+This Agreement continues until terminated. Your rights terminate automatically
+if You breach this Agreement. On termination, You must stop using the Software
+and delete copies under Your control, except for copies necessarily contained
+in previously distributed Applications. Sections 3, 4, 8, 9, 10, and 11
+survive termination.
+
+8. Disclaimer of Warranties
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS" AND
+"AS AVAILABLE," WITHOUT WARRANTIES OF ANY KIND, EXPRESS, IMPLIED, OR
+STATUTORY, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, TITLE, AND NON-INFRINGEMENT.
+
+9. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, ROBONO WILL NOT BE LIABLE FOR INDIRECT,
+INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOSS
+OF DATA, REVENUE, PROFITS, GOODWILL, OR BUSINESS OPPORTUNITY, ARISING FROM OR
+RELATING TO THE SOFTWARE. ROBONO'S TOTAL LIABILITY RELATING TO THE SOFTWARE
+WILL NOT EXCEED THE GREATER OF ONE HUNDRED U.S. DOLLARS (US $100) OR THE AMOUNT
+YOU PAID ROBONO FOR THE SOFTWARE DURING THE TWELVE MONTHS BEFORE THE EVENT
+GIVING RISE TO THE CLAIM. THESE LIMITATIONS APPLY TO THE MAXIMUM EXTENT
+PERMITTED BY LAW.
+
+10. Governing Law
+
+This Agreement is governed by the laws of the State of Florida, excluding its
+conflict-of-laws rules. The state and federal courts located in Palm Beach
+County, Florida have exclusive jurisdiction, and each party consents to their
+jurisdiction and venue.
+
+11. General
+
+You may not assign this Agreement without Robono's prior written consent.
+Robono may assign this Agreement in connection with a reorganization, transfer
+of intellectual property, financing, merger, acquisition, or sale of all or
+substantially all of the relevant assets. If a provision is unenforceable, it
+will be enforced to the maximum extent permitted and the remaining provisions
+will remain effective. A waiver must be in writing. This Agreement is the
+entire agreement concerning the Software unless You and Robono sign a separate
+written agreement that expressly replaces it.
+
+Questions about this license may be submitted at https://robono.com/contact.

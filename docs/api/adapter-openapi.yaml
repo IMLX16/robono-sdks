@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Robono App Client API
-  version: 1.1.0
+  version: 1.2.0
   description: |
     Contract between an app's authenticated client and its protected backend.
     Mount these routes at /robono/*. The backend authenticates its
@@ -255,6 +255,75 @@ paths:
               examples:
                 invalidRequest:
                   summary: Validation or authorization error
+                  value:
+                    error:
+                      code: operation_not_authorized
+                      message: The signed-in user is not allowed to perform this operation.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        default:
+          $ref: "#/components/responses/Error"
+  /robono/pricing:
+    parameters:
+      - $ref: "#/components/parameters/AcceptLanguage"
+    post:
+      operationId: getAdapterPricing
+      tags:
+        - Billing
+      summary: Return the current or requested machine-readable pricing catalog
+      description: |
+        The protected backend fetches Robono pricing without exposing its
+        Robono API key to the phone or browser. Pass a catalog version from a
+        `pricing.updated` event to retrieve that immutable snapshot.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version:
+                  type: string
+                  pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,79}$
+            examples:
+              current:
+                value: {}
+              exactVersion:
+                value:
+                  version: 2026-09-25.1
+      responses:
+        "200":
+          description: Pricing catalog
+          content:
+            application/json:
+              schema:
+                $ref: ./openapi.yaml#/components/schemas/PricingResponse
+              examples:
+                current:
+                  summary: Current pricing
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000030
+                    pricing:
+                      catalog_version: 2026-08-25.1
+                      effective_at: 2026-08-25T00:00:00Z
+                      published_at: 2026-08-25T00:00:00Z
+                      change_summary: Initial machine-readable publication of the active early-access pricing.
+                      schema_version: 1
+                      currency: USD
+                      pricing_url: https://robono.com/pricing
+                      api_url: https://api.robono.com/v1/pricing
+                      plans: []
+                    upcoming: null
+        4XX:
+          description: Authentication, authorization, validation, or upstream service error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdapterError"
+              examples:
+                notAuthorized:
+                  summary: The signed-in user cannot read pricing
                   value:
                     error:
                       code: operation_not_authorized
@@ -2208,6 +2277,6 @@ components:
           schema:
             $ref: "#/components/schemas/AdapterError"
 x-robono-example-coverage:
-  operations: 25
+  operations: 26
   request_bodies: Every JSON request body includes a typical example.
   responses: Every operation includes successful and error examples.

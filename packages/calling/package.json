@@ -1,0 +1,57 @@
+{
+  "bugs": {
+    "url": "https://robono.com/contact?topic=sdk",
+    "email": "support@robono.com"
+  },
+  "support": "https://robono.com/contact?topic=sdk",
+  "author": {
+    "name": "Add to Loop LLC",
+    "email": "support@robono.com",
+    "url": "https://robono.com"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "name": "@robono/calling",
+  "version": "0.1.0",
+  "description": "One-to-one WebRTC voice calling for connected Robono Bridge networks.",
+  "homepage": "https://robono.com/docs#calling",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IMLX16/robono-sdks.git",
+    "directory": "packages/calling"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./history": {
+      "types": "./dist/history.d.ts",
+      "import": "./dist/history.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "SBOM.spdx.json"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "npm run build && node --test test/client.test.mjs test/package.test.mjs",
+    "test:integration": "node --test test/*.test.mjs",
+    "prepack": "npm run build && node ../../scripts/generate-package-sbom.mjs",
+    "prepublishOnly": "npm test"
+  }
+}

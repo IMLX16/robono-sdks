@@ -36,6 +36,7 @@ import type {
   MessageContent,
   MessageTransformInput,
   ParticipantLanguageResponse,
+  PricingResponse,
   PushDiagnosticResponse,
   ReportPushDiagnosticInput,
   RequestBridgeConnectionInput,
@@ -823,6 +824,24 @@ export class RobonoServer {
 
   async languages(options?: RobonoRequestOptions) {
     return this.request<LanguageResponse>("/languages", {}, options, false);
+  }
+
+  async pricing(
+    input: { version?: string } = {},
+    options?: RobonoRequestOptions,
+  ) {
+    const version = input.version?.trim();
+    const path = version
+      ? `/pricing?version=${encodeURIComponent(version)}`
+      : "/pricing";
+    return this.requestAbsolute<PricingResponse>(
+      `${this.baseUrl}${path}`,
+      undefined,
+      options ?? {},
+      false,
+      false,
+      "GET",
+    );
   }
 
   async health(options: Omit<RobonoRequestOptions, "idempotencyKey"> = {}) {

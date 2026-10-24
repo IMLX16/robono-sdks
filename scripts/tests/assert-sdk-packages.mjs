@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import process from "node:process";
 
 const root = resolve(import.meta.dirname, "../..");
-const packageNames = ["client", "server", "react-native", "web"];
+const packageNames = ["client", "server", "react-native", "web", "calling"];
 const failures = [];
 
 for (const directoryName of packageNames) {

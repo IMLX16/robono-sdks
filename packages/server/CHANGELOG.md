@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.10.0
+
+- Adds typed, verified `calling.incoming` and `calling.dismissed` webhooks.
+- Adds `toCallingPushPayload` for routing call invitations to the recipient’s own devices.
+- Calling events use a separate push helper; existing message delivery is unchanged.
+
+- Adds typed machine-readable pricing discovery and runtime validation for signed `pricing.updated` webhooks.
+- Adds the protected `/robono/pricing` adapter route for browser and mobile clients.
+- Represents post-allowance SMS invitations as zero-markup actual-provider-cost billing instead of a fixed worldwide rate.
+
 ## 0.9.1
 
 - Adds the connected-app account-deletion lifecycle to typed connections, historical messages, and signed webhook events.

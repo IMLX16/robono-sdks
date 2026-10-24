@@ -4,6 +4,7 @@ Official SDKs for connecting networks to the Robono Bridge and linking user acco
 
 | Package | Use |
 | --- | --- |
+| [`@robono/calling`](./packages/calling) | One-to-one WebRTC voice calls and call history |
 | [`@robono/server`](./packages/server) | Server authentication, Bridge operations, signed events, and protected client routes |
 | [`@robono/client`](./packages/client) | Shared headless client state and push handling |
 | [`@robono/react-native`](./packages/react-native) | React Native and Expo integration |
@@ -19,7 +20,7 @@ installation alone does not enable access.
 
 ## Development
 
-Node.js 18 or newer is supported for the Bridge packages. Pull requests and
+Node.js 18 or newer is supported for the messaging packages. Calling SDK development tests require Node.js 22 or newer. Pull requests and
 releases are tested on Node 18, 20, 22, and 24. From this repository:
 
 ```sh

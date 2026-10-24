@@ -11,8 +11,10 @@ Robono's own app and third-party connected apps appear as endpoints in the same 
 ## Install
 
 ```bash
-npm install @robono/server
+npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.1.0/robono-server-0.10.0.tgz
 ```
+
+Version 0.10.0 is distributed through the [calling release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.1.0), with checksums and source.
 
 The package is ESM-only, supports Node.js 18+ and Deno 2.x through npm compatibility, and includes TypeScript declarations and `SBOM.spdx.json`.
 
@@ -106,6 +108,18 @@ message records may include `status_message.localized_message`. Keep the stable
 code for application logic and the technical error message for logs.
 The preference localizes Robono-generated user notices; it does not translate
 chat content or developer diagnostics.
+
+## Pricing changes
+
+Read the effective and next scheduled machine-readable catalogs with
+`await robono.pricing()`. After verifying a signed `pricing.updated` webhook,
+fetch its immutable snapshot with
+`await robono.pricing({ version: event.catalog_version })` and apply it no
+earlier than `event.effective_at`. Cache by catalog version rather than plan
+name. The public recovery endpoint is `GET https://api.robono.com/v1/pricing`.
+Rates identify `fixed_unit` or `actual_provider_cost` billing. SMS invitations
+above the included count pass through aggregate Telnyx cost with no markup;
+they do not expose one fixed worldwide rate.
 
 For delayed webhooks, `code` and `parameters` are authoritative. An included
 translation is only a convenience for the event participant. Localize the same

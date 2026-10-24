@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Robono Bridge API
-  version: 1.4.0
+  version: 1.5.0
   description: |
     Provider-neutral API for connecting users across private networks and every
     endpoint advertised by the Robono directory. Send Robono-Api-Version when
@@ -26,7 +26,7 @@ webhooks:
   robonoEvent:
     post:
       operationId: receiveRobonoWebhook
-      summary: Receive a signed connection, message, receipt, transform, failure, or diagnostic event
+      summary: Receive a signed connection, message, pricing, transform, failure, or diagnostic event
       security: []
       parameters:
         - name: Robono-Webhook-Id
@@ -102,6 +102,19 @@ webhooks:
                   message_kind: text
                   text_body: Hello
                   media: null
+              pricingUpdated:
+                summary: A new pricing catalog was published
+                value:
+                  event: pricing.updated
+                  event_id: evt_01J00000000000000000000030
+                  request_id: req_01J00000000000000000000030
+                  created_at: 2026-08-25T12:00:00Z
+                  catalog_version: 2026-09-25.1
+                  effective_at: 2026-09-25T00:00:00Z
+                  previous_catalog_version: 2026-08-25.1
+                  change_summary: Destination SMS rates updated.
+                  pricing_url: https://robono.com/pricing
+                  api_url: https://api.robono.com/v1/pricing?version=2026-09-25.1
               messageDelivered:
                 summary: Robono-endpoint message delivered
                 value:
@@ -2474,6 +2487,66 @@ paths:
                     request_id: req_01JEXAMPLE0000000000000001
         5XX:
           $ref: "#/components/responses/ServiceError"
+  /pricing:
+    get:
+      operationId: getPricing
+      summary: Get the current and next scheduled machine-readable pricing catalogs
+      description: |
+        This route is public so an integration can retrieve pricing even before
+        production billing is active. Cache by `catalog_version`. When a signed
+        `pricing.updated` webhook arrives, fetch the exact `api_url` from that
+        event before changing any customer-facing estimate.
+      tags:
+        - Billing
+      security: []
+      parameters:
+        - name: version
+          in: query
+          required: false
+          description: Retrieve one immutable historical or scheduled catalog version.
+          schema:
+            type: string
+            pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,79}$
+      responses:
+        "200":
+          description: Current pricing, or the exact requested version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PricingResponse"
+              examples:
+                current:
+                  value:
+                    ok: true
+                    request_id: req_01JEXAMPLE0000000000000030
+                    pricing:
+                      catalog_version: 2026-08-25.1
+                      effective_at: 2026-08-25T00:00:00Z
+                      published_at: 2026-08-25T00:00:00Z
+                      change_summary: Initial machine-readable publication of the active early-access pricing.
+                      schema_version: 1
+                      currency: USD
+                      pricing_url: https://robono.com/pricing
+                      api_url: https://api.robono.com/v1/pricing
+                      plans: []
+                    upcoming: null
+        4XX:
+          description: Requested pricing version is invalid or unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidVersion:
+                  summary: Invalid catalog version
+                  value:
+                    error:
+                      code: pricing_version_invalid
+                      message: Pricing version is invalid.
+                      retryable: false
+                    request_id: req_01JEXAMPLE0000000000000001
+        5XX:
+          $ref: "#/components/responses/ServiceError"
   /message-transforms:
     parameters:
       - $ref: "#/components/parameters/ApiVersion"
@@ -4310,6 +4383,168 @@ components:
             default_language:
               type: string
               const: en
+    PricingMoney:
+      type: object
+      required:
+        - amount_minor
+        - minor_unit
+      properties:
+        amount_minor:
+          type: integer
+          minimum: 0
+        minor_unit:
+          type: integer
+          enum: [2]
+    PricingAllowance:
+      type: object
+      required:
+        - metric
+        - quantity
+        - unit
+      properties:
+        metric:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+        unit:
+          type: string
+    PricingRate:
+      type: object
+      required:
+        - metric
+        - billing_model
+        - unit
+      properties:
+        metric:
+          type: string
+        billing_model:
+          type: string
+          enum:
+            - fixed_unit
+            - actual_provider_cost
+        amount_minor:
+          type: integer
+          minimum: 0
+        minor_unit:
+          type: integer
+          enum: [2]
+        unit:
+          type: string
+        provider:
+          type: string
+        provider_billing_unit:
+          type: string
+        markup_basis_points:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        rounding:
+          type: string
+          enum:
+            - invoice_total_nearest_minor_unit
+        destination_country:
+          type: string
+          pattern: ^[A-Z]{2}$
+      oneOf:
+        - required:
+            - amount_minor
+            - minor_unit
+          properties:
+            billing_model:
+              const: fixed_unit
+        - required:
+            - provider
+            - provider_billing_unit
+            - markup_basis_points
+            - rounding
+          properties:
+            billing_model:
+              const: actual_provider_cost
+    PricingPlan:
+      type: object
+      required:
+        - plan_key
+        - name
+        - description
+        - monthly_price
+        - allowances
+        - overage_rates
+      properties:
+        plan_key:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        monthly_price:
+          $ref: "#/components/schemas/PricingMoney"
+        allowances:
+          type: array
+          items:
+            $ref: "#/components/schemas/PricingAllowance"
+        overage_rates:
+          type: array
+          items:
+            $ref: "#/components/schemas/PricingRate"
+    PricingCatalog:
+      type: object
+      required:
+        - catalog_version
+        - effective_at
+        - published_at
+        - change_summary
+        - schema_version
+        - currency
+        - plans
+      properties:
+        catalog_version:
+          type: string
+        effective_at:
+          type: string
+          format: date-time
+        published_at:
+          type: string
+          format: date-time
+        change_summary:
+          type: string
+        schema_version:
+          const: 1
+        currency:
+          const: USD
+        pricing_url:
+          type: string
+          format: uri
+        api_url:
+          type: string
+          format: uri
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/PricingPlan"
+        notes:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    PricingResponse:
+      type: object
+      required:
+        - ok
+        - request_id
+        - pricing
+        - upcoming
+      properties:
+        ok:
+          const: true
+        request_id:
+          type: string
+        pricing:
+          $ref: "#/components/schemas/PricingCatalog"
+        upcoming:
+          oneOf:
+            - $ref: "#/components/schemas/PricingCatalog"
+            - type: "null"
     ParticipantLanguageRequest:
       type: object
       required:
@@ -4500,6 +4735,7 @@ components:
       properties:
         text:
           type: string
+          minLength: 1
         language:
           type:
             - string
@@ -5285,6 +5521,39 @@ components:
               type: string
             external_user_id:
               type: string
+    PricingUpdatedWebhookEvent:
+      allOf:
+        - $ref: "#/components/schemas/WebhookEventBase"
+        - type: object
+          required:
+            - event
+            - catalog_version
+            - effective_at
+            - previous_catalog_version
+            - change_summary
+            - pricing_url
+            - api_url
+          properties:
+            event:
+              const: pricing.updated
+            catalog_version:
+              type: string
+            effective_at:
+              type: string
+              format: date-time
+            previous_catalog_version:
+              type:
+                - string
+                - "null"
+            change_summary:
+              type: string
+              maxLength: 500
+            pricing_url:
+              type: string
+              format: uri
+            api_url:
+              type: string
+              format: uri
     DataRequestOperation:
       oneOf:
         - type: object
@@ -5466,6 +5735,7 @@ components:
         - $ref: "#/components/schemas/TransformCompletedWebhookEvent"
         - $ref: "#/components/schemas/TransformFailedWebhookEvent"
         - $ref: "#/components/schemas/DiagnosticPushWebhookEvent"
+        - $ref: "#/components/schemas/PricingUpdatedWebhookEvent"
         - $ref: "#/components/schemas/DataRequestWebhookEvent"
     GuardianMessage:
       type: object
@@ -5544,6 +5814,6 @@ components:
           type: string
           format: date-time
 x-robono-example-coverage:
-  operations: 26
+  operations: 27
   request_bodies: Every JSON request body includes a typical example.
   responses: Every operation includes successful and error examples.

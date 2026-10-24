@@ -5,6 +5,7 @@ import type { JsonObject } from "./types.js";
 export type RobonoAuthorizationAction =
   | "networks.list"
   | "languages.list"
+  | "pricing.read"
   | "participant_preferences.update"
   | "user_messages.localize"
   | "network_connections.request"
@@ -50,6 +51,7 @@ export interface RobonoBackendAdapterOptions {
 const authorizationActions: Record<string, RobonoAuthorizationAction> = {
   "/networks": "networks.list",
   "/languages": "languages.list",
+  "/pricing": "pricing.read",
   "/participants/language": "participant_preferences.update",
   "/user-messages/localize": "user_messages.localize",
   "/network-connections": "network_connections.request",
@@ -150,6 +152,15 @@ export function createRobonoBackendAdapter(
       if (path === "/languages") {
         return responseJson(
           await options.robono.languages(requestOptions),
+        );
+      }
+      if (path === "/pricing") {
+        const version = optionalString(body.version);
+        return responseJson(
+          await options.robono.pricing(
+            version ? { version } : {},
+            requestOptions,
+          ),
         );
       }
       if (path === "/participants/language") {

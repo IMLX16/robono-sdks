@@ -654,6 +654,59 @@ export interface LanguageResponse {
   };
 }
 
+export interface PricingMoney extends JsonObject {
+  amount_minor: number;
+  minor_unit: number;
+}
+
+export interface PricingAllowance extends JsonObject {
+  metric: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface PricingRate extends JsonObject {
+  metric: string;
+  billing_model: "fixed_unit" | "actual_provider_cost";
+  unit: string;
+  amount_minor?: number;
+  minor_unit?: number;
+  provider?: string;
+  provider_billing_unit?: string;
+  markup_basis_points?: number;
+  rounding?: "invoice_total_nearest_minor_unit";
+  destination_country?: string;
+}
+
+export interface PricingPlan extends JsonObject {
+  plan_key: string;
+  name: string;
+  description: string;
+  monthly_price: PricingMoney;
+  allowances: PricingAllowance[];
+  overage_rates: PricingRate[];
+}
+
+export interface PricingCatalog extends JsonObject {
+  catalog_version: string;
+  effective_at: string;
+  published_at: string;
+  change_summary: string;
+  schema_version: 1;
+  currency: "USD";
+  pricing_url?: string;
+  api_url?: string;
+  plans: PricingPlan[];
+  notes?: string[];
+}
+
+export interface PricingResponse extends JsonObject {
+  ok: true;
+  request_id: string;
+  pricing: PricingCatalog;
+  upcoming: PricingCatalog | null;
+}
+
 export interface ParticipantLanguageResponse extends JsonObject {
   ok: true;
   request_id: string;
@@ -848,6 +901,8 @@ export interface DataRequestStatusResponse extends JsonObject {
 }
 
 export type RobonoWebhookEventName =
+  | "calling.incoming"
+  | "calling.dismissed"
   | "connection.status_changed"
   | "connection.profile_updated"
   | "message.created"
@@ -865,6 +920,7 @@ export type RobonoWebhookEventName =
   | "transform.completed"
   | "transform.failed"
   | "diagnostic.push_requested"
+  | "pricing.updated"
   | "data.export_completed"
   | "data.export_failed"
   | "data.export_rejected"
@@ -877,6 +933,16 @@ export interface RobonoWebhookEventBase extends JsonObject {
   event_id: string;
   request_id: string;
   created_at: string;
+}
+
+export interface PricingUpdatedWebhookEvent extends RobonoWebhookEventBase {
+  event: "pricing.updated";
+  catalog_version: string;
+  effective_at: string;
+  previous_catalog_version: string | null;
+  change_summary: string;
+  pricing_url: string;
+  api_url: string;
 }
 
 export interface ConnectionWebhookEvent extends RobonoWebhookEventBase {
@@ -1095,7 +1161,30 @@ export interface DataRequestWebhookEvent extends RobonoWebhookEventBase {
   failure_code: string | null;
 }
 
+/** Signed notification for the receiving network; not permission to answer. */
+export interface CallingWebhookEvent extends RobonoWebhookEventBase {
+  event: "calling.incoming" | "calling.dismissed";
+  recipient: { child_app_id: string; external_user_id: string };
+  call: {
+    id: string;
+    connection_id: string;
+    created_at: string;
+    ring_expires_at: string;
+    sequence: 1 | 2;
+    reason?: string;
+  };
+}
+export interface CallingPushPayload {
+  event: "calling.incoming" | "calling.dismissed";
+  event_id: string;
+  call_id: string;
+  connection_id: string;
+  ring_expires_at: string;
+  sequence: 1 | 2;
+}
+
 export type RobonoWebhookEvent =
+  | CallingWebhookEvent
   | ConnectionWebhookEvent
   | MessageCreatedWebhookEvent
   | MessageReceiptWebhookEvent
@@ -1108,6 +1197,7 @@ export type RobonoWebhookEvent =
   | TransformCompletedWebhookEvent
   | TransformFailedWebhookEvent
   | DiagnosticPushWebhookEvent
+  | PricingUpdatedWebhookEvent
   | DataRequestWebhookEvent;
 
 /**

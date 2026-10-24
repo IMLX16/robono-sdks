@@ -18,5 +18,5 @@ export {
 } from "./restrictions.js";
 export type { BridgeDirection } from "./restrictions.js";
 export { verifyRobonoWebhook } from "./webhooks.js";
-export { toClientPushPayload } from "./push.js";
+export { toClientPushPayload, toCallingPushPayload } from "./push.js";
 export type * from "./types.js";

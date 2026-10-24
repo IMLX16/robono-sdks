@@ -276,6 +276,15 @@ function webhookEvents(timestamp) {
       external_user_id: "user-a",
     }, "diagnostic_token"],
     [{
+      ...base("pricing.updated"),
+      catalog_version: "2026-09-25.1",
+      effective_at: "2026-09-25T00:00:00.000Z",
+      previous_catalog_version: "2026-08-25.1",
+      change_summary: "Destination SMS rates updated.",
+      pricing_url: "https://robono.com/pricing",
+      api_url: "https://api.robono.com/v1/pricing?version=2026-09-25.1",
+    }, "catalog_version"],
+    [{
       ...base("data.deletion_completed"),
       data_request_id: "data-request-1",
       request_type: "deletion",
@@ -423,6 +432,41 @@ test("health follows the production GET contract without authentication", async 
   assert.equal(captured.init.headers["content-type"], undefined);
 });
 
+test("pricing reads an immutable version without sending the API key", async () => {
+  let captured;
+  const client = new RobonoServer({
+    apiKey: "rbn_test_example",
+    fetch: async (url, init) => {
+      captured = { url, init };
+      return Response.json({
+        ok: true,
+        request_id: "req_pricing",
+        pricing: {
+          catalog_version: "2026-09-25.1",
+          effective_at: "2026-09-25T00:00:00.000Z",
+          published_at: "2026-08-25T00:00:00.000Z",
+          change_summary: "Updated rates.",
+          schema_version: 1,
+          currency: "USD",
+          plans: [],
+        },
+        upcoming: null,
+      });
+    },
+  });
+
+  const response = await client.pricing({ version: "2026-09-25.1" });
+
+  assert.equal(response.pricing.catalog_version, "2026-09-25.1");
+  assert.equal(
+    captured.url,
+    "https://api.robono.com/v1/pricing?version=2026-09-25.1",
+  );
+  assert.equal(captured.init.method, "GET");
+  assert.equal(captured.init.headers.authorization, undefined);
+  assert.equal(captured.init.headers["content-type"], undefined);
+});
+
 test("backend adapter replaces untrusted user ids with the authenticated child app user", async () => {
   let body;
   let targetUrl;
@@ -545,6 +589,7 @@ test("backend adapter requests authorization for every exposed operation", async
   const expected = new Map([
     ["/networks", "networks.list"],
     ["/languages", "languages.list"],
+    ["/pricing", "pricing.read"],
     ["/participants/language", "participant_preferences.update"],
     ["/user-messages/localize", "user_messages.localize"],
     ["/network-connections", "network_connections.request"],
@@ -1834,6 +1879,14 @@ test("webhook verifier rejects malformed nested contract objects", async () => {
       field: "artifacts.transcript.language",
     },
     {
+      label: "empty transform transcript",
+      event: "transform.completed",
+      mutate(payload) {
+        payload.artifacts.transcript.text = "   ";
+      },
+      field: "artifacts.transcript.text",
+    },
+    {
       label: "generated speech media",
       event: "transform.completed",
       mutate(payload) {
@@ -1923,6 +1976,7 @@ test("OpenAPI documents every public server SDK route", () => {
     "/guardian-messages/list",
     "/guardian-messages/events",
     "/languages",
+    "/pricing",
     "/message-transforms",
     "/speech-transforms",
     "/push-diagnostics/events",
@@ -1940,6 +1994,7 @@ test("adapter OpenAPI documents every protected client route", () => {
   const routes = [
     "/networks",
     "/languages",
+    "/pricing",
     "/network-connections",
     "/network-connections/respond",
     "/network-connections/list",

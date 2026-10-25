@@ -4,7 +4,7 @@
 
 | Package | Platform | Current tested version |
 | --- | --- | --- |
-| `@robono/server` | Node.js, TypeScript, and Deno backends | `0.9.1` |
+| `@robono/server` | Node.js, TypeScript, and Deno backends | `0.12.1` |
 | `@robono/client` | Shared headless client core | `0.6.1` |
 | `@robono/web` | Browser applications | `0.6.1` |
 | `@robono/react-native` | React Native for iOS and Android | `0.6.1` |
@@ -16,8 +16,8 @@ recommended production set.
 Calling uses `@robono/calling` 0.1.2 and `@robono/server` 0.12.1. The optional
 `@robono/calling-react-native` 0.2.1 adds reusable screens, sounds and native adapters.
 The [versioned release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.2.1)
-contains npm-compatible archives and checksums. Registry versions are tracked separately
-in `docs/sdk-registry-versions.json`; change those only after npm publication is verified.
+contains matching archives and checksums. Install the versioned packages through npm.
+Published registry versions are recorded in `docs/sdk-registry-versions.json`.
 Existing release archives remain unchanged. Networks choose whether to adopt each update.
 
 The native adapter accepts Expo 54, 55 and 56 dependency families; use Expo’s installer
@@ -39,13 +39,13 @@ in the developer workspace; SDK upgrades do not change either setting.
 ## Release process
 
 1. Update the package version and changelog.
-2. Run unit tests and the Robono Sandbox end-to-end test.
-3. Inspect `npm pack --dry-run` for every package.
-4. Push one signed `sdk-vYYYY.MM.DD` tag for the tested package set.
-5. GitHub publishes with npm trusted publishing and provenance.
-6. Publish a GitHub Release containing the exact compatibility matrix and changelog links.
+2. Run package, compatibility and affected integration checks.
+3. Build and inspect the package archives, then verify them in a separate consumer.
+4. Publish immutable versions to npm using an authorized maintainer or a configured trusted publisher.
+5. Verify public registry downloads against the tested archives before updating installation instructions.
+6. Publish a GitHub Release with the matching archives, checksums and changelog.
 
-The npm organization must register `.github/workflows/publish-sdks.yml` as a trusted publisher for each package before the publish job is enabled.
+The SDK repository's `.github/workflows/publish.yml` verifies packages and can stage npm releases for maintainer approval. Trusted publishing must be configured in npm for each package; new packages require initial publication before staging is available. Previously published versions and release archives remain available.
 
 ## Push diagnostic webhook
 

@@ -1,0 +1,8 @@
+{
+  "client": "0.6.1",
+  "server": "0.12.1",
+  "react_native": "0.6.1",
+  "web": "0.6.1",
+  "calling": "0.1.2",
+  "calling_react_native": "0.2.1"
+}

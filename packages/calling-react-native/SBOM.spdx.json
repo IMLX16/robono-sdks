@@ -2,10 +2,10 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "@robono/calling-react-native@0.2.0",
-  "documentNamespace": "https://robono.com/sbom/calling-react-native/0.2.0/fdee611c62a281e0e3c4b7a44c8a3d7392c90c00",
+  "name": "@robono/calling-react-native@0.2.1",
+  "documentNamespace": "https://robono.com/sbom/calling-react-native/0.2.1/fdee611c62a281e0e3c4b7a44c8a3d7392c90c00",
   "creationInfo": {
-    "created": "2026-10-25T03:52:29.056Z",
+    "created": "2026-10-25T10:28:57.652Z",
     "creators": [
       "Organization: Robono (support@robono.com)"
     ]
@@ -14,7 +14,7 @@
     {
       "name": "@robono/calling-react-native",
       "SPDXID": "SPDXRef-Package",
-      "versionInfo": "0.2.0",
+      "versionInfo": "0.2.1",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": true,
       "packageVerificationCode": {
@@ -26,7 +26,7 @@
         "LicenseRef-RobonoSDK"
       ],
       "copyrightText": "Copyright (c) 2026 Add to Loop LLC.",
-      "comment": "Host-supplied peer dependencies (not bundled): {\"@robono/calling\":\"^0.1.1\",\"react\":\">=18.2 <20\",\"react-native\":\">=0.76 <1\",\"react-native-svg\":\">=15 <16\",\"react-native-safe-area-context\":\">=5 <6\",\"react-native-webrtc\":\">=124 <125\",\"react-native-incall-manager\":\">=4.2 <5\",\"expo-audio\":\">=56 <57\",\"expo-crypto\":\">=56 <57\",\"expo-notifications\":\">=56 <57\"}"
+      "comment": "Host-supplied peer dependencies (not bundled): {\"@robono/calling\":\"^0.1.1\",\"react\":\">=18.2 <20\",\"react-native\":\">=0.76 <1\",\"react-native-svg\":\">=15 <16\",\"react-native-safe-area-context\":\">=5 <6\",\"react-native-webrtc\":\">=124 <125\",\"react-native-incall-manager\":\">=4.2 <5\",\"expo-audio\":\">=1.1.1 <2 || >=55 <57\",\"expo-crypto\":\">=15.0.9 <16 || >=55 <57\",\"expo-notifications\":\">=0.32.17 <0.33 || >=55 <57\"}"
     }
   ],
   "files": [

@@ -303,6 +303,15 @@
                   "properties": {
                     "voiceAvailable": {
                       "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "ready",
+                        "calling_not_enabled",
+                        "contact_unavailable"
+                      ],
+                      "description": "Optional diagnostic. Calling_not_enabled describes only the caller\u2019s configuration. Contact_unavailable does not reveal the peer\u2019s blocking, permissions, or device state."
                     }
                   },
                   "required": [

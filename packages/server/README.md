@@ -11,10 +11,10 @@ Robono's own app and third-party connected apps appear as endpoints in the same 
 ## Install
 
 ```bash
-npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.2.0/robono-server-0.12.0.tgz
+npm install @robono/server@0.12.1
 ```
 
-Version 0.12.0 is distributed through the [calling release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.2.0), with checksums and source.
+Version 0.12.1 is available on npm and through the [calling release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.2.1), with checksums and source.
 
 The package is ESM-only, supports Node.js 18+ and Deno 2.x through npm compatibility, and includes TypeScript declarations and `SBOM.spdx.json`.
 

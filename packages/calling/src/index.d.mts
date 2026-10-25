@@ -13,7 +13,7 @@ export class RobonoCallingClient {
   refresh(): Promise<boolean>;
   call(connectionId?: string): Promise<void>;
   history(query?: { after?: number; limit?: number; connectionId?: string }): Promise<CallHistoryPage>;
-  availability(connectionId: string): Promise<{ voiceAvailable: boolean }>;
+  availability(connectionId: string): Promise<{ voiceAvailable: boolean; reason?: 'ready' | 'calling_not_enabled' | 'contact_unavailable' }>;
   answer(): Promise<void>;
   hangUp(): Promise<void>;
   hold(): Promise<void>;

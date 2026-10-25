@@ -18,17 +18,37 @@ Installing the engine never installs or opens these screens. Importing this pack
 
 ## Install and configure
 
-Install the versioned `@robono/calling` and `@robono/calling-react-native` packages from the Robono SDK release. The screen package needs React, React Native, `react-native-svg` and `react-native-safe-area-context` 5. The `/native` adapter additionally uses `react-native-webrtc` 124, `react-native-incall-manager` 4, `expo-audio` 56 and `expo-crypto` 56. These native dependencies are optional peers; screens-only users do not need them. Choose dependency versions compatible with your app, and commit the lockfile.
-
-For an Expo application using the native adapter:
+Install the versioned calling engine and the optional mobile package from npm:
 
 ```sh
-npx expo install react-native-svg react-native-safe-area-context expo-audio expo-crypto
+npm install @robono/calling@0.1.2 @robono/calling-react-native@0.2.1
+```
+ The screens need React, React Native, React Native SVG and Safe Area Context 5. The native audio and notification adapters support the following Expo dependency families:
+
+| Your Expo SDK | Expo Audio | Expo Crypto | Expo Notifications | WebRTC config plugin |
+| --- | --- | --- | --- | --- |
+| 54 | 1.1.1 or later 1.x | 15.0.9 or later 15.x | 0.32.17 or later 0.32.x | 13.x |
+| 55 | 55.x | 55.x | 55.x | 14.x |
+| 56 | 56.x | 56.x | 56.x | 15.x |
+
+Keep your app's Expo version. Let Expo select its matching native dependencies:
+
+```sh
+npx expo install react-native-svg react-native-safe-area-context expo-audio expo-crypto expo-notifications
 npm install react-native-webrtc@124.0.8 react-native-incall-manager@4.3.0
-npm install @config-plugins/react-native-webrtc@15.0.2
 ```
 
-Add `@config-plugins/react-native-webrtc`, `expo-audio`, and `@robono/calling-react-native` to your Expo plugins, then make a development or release build. For the supplied notification connection, also install and configure `expo-notifications` 56 using your app’s existing push credentials. Expo Go cannot load the WebRTC native module. A native dependency change needs a new binary; ordinary screen and copy changes do not.
+Install the WebRTC config plugin matching the table, for example `npm install @config-plugins/react-native-webrtc@13` for Expo 54. Commit the lockfile. Do not use `--force` or `--legacy-peer-deps` to hide an incompatible version.
+
+Add these entries to your existing Expo `plugins` list:
+
+```json
+["@config-plugins/react-native-webrtc", "expo-audio", "expo-notifications", "@robono/calling-react-native/app.plugin"]
+```
+
+The package name `@robono/calling-react-native` and the `/app.plugin.js` and `/app.plugin.cjs` aliases also resolve to the same plugin. Existing `/app.plugin` integrations need no changes. Keep your app's existing push credentials. Make one development or release build after adding native dependencies; Expo Go cannot load WebRTC. Ordinary screen and copy changes do not require a native rebuild.
+
+These dependencies are optional peers. Apps using only the screens do not need Expo audio, notifications or WebRTC. Apps using their own calling client can keep their existing audio and notification adapters.
 
 On iPhone, configure `NSMicrophoneUsageDescription` with your app's explanation and the `audio` background mode for ongoing calls. On Android, declare `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, and `INTERNET`; obtain notification permission on Android 13+. For Bluetooth audio on Android 12+, declare and obtain `BLUETOOTH_CONNECT` through your app's permission flow. The optional native runtime supplies Android’s microphone foreground service and its ongoing-call notification. It starts only after microphone permission, while the app is visible, when the user makes or answers a call. Locking the phone after answering keeps that service running. Tapping its notification returns to your app; End releases the call. The service does not restart a call after the app is terminated. On iPhone, the runtime observes audio interruptions and holds an established call when another call takes the microphone; it never installs CallKit. If your app already owns call lifetime, pass your existing adapter instead of starting a second service. Screens-only applications can disable native autolinking for this package in their React Native configuration.
 

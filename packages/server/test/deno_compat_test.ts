@@ -77,3 +77,23 @@ function assertEquals(actual: unknown, expected: unknown) {
     );
   }
 }
+
+Deno.test('webhook verification needs no global Buffer and still rejects forged signatures', async () => {
+  const saved = Object.getOwnPropertyDescriptor(globalThis, 'Buffer');
+  Object.defineProperty(globalThis, 'Buffer', { value: undefined, configurable: true, writable: true });
+  try {
+    const created_at = '2026-10-25T10:00:00.000Z';
+    const body = JSON.stringify({event:'diagnostic.push_requested',event_id:'evt_no_buffer',request_id:'request',created_at,
+      push_diagnostic_id:'diagnostic',diagnostic_token:'token',external_user_id:'user'});
+    const secret='whsec_test';
+    const signature=createHmac('sha256',secret).update(`${created_at}.${body}`).digest('hex');
+    const headers={'Robono-Webhook-Timestamp':created_at,'Robono-Webhook-Signature':`v1=${signature}`};
+    const verified=await verifyRobonoWebhook(body,headers,secret,{now:new Date(created_at)});
+    assertEquals(verified.eventId,'evt_no_buffer');
+    let rejected=false;
+    try {await verifyRobonoWebhook(body.replace('evt_no_buffer','evt_changed'),headers,secret,{now:new Date(created_at)});}catch{rejected=true;}
+    assert(rejected,'Tampered body was accepted');
+  } finally {
+    if(saved)Object.defineProperty(globalThis,'Buffer',saved);else Reflect.deleteProperty(globalThis,'Buffer');
+  }
+});

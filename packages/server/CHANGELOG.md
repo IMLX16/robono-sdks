@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.1
+
+- Webhook signature verification imports Buffer explicitly, supporting Deno and Supabase without a global polyfill. Signature and timestamp validation are unchanged.
+
 ## 0.12.0
 
 - `RobonoCallingBackend.appearance()` retrieves the integration’s versioned screen and sound configuration.

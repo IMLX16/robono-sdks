@@ -14,4 +14,4 @@ function withCallingRuntime(config) {
     return value;
   });
 }
-module.exports = createRunOncePlugin(withCallingRuntime, '@robono/calling-react-native', '0.1.0');
+module.exports = createRunOncePlugin(withCallingRuntime, '@robono/calling-react-native', require('./package.json').version);

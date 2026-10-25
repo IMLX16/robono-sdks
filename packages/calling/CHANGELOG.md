@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- Add an optional availability reason while preserving voiceAvailable and existing call-control behavior.
+
 ## 0.1.1
 
 - Stop unanswered ringing locally at the server deadline even if polling stalls.

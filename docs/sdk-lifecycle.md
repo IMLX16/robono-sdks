@@ -13,16 +13,20 @@ The current API version is `2026-07-25`.
 The four versions in this table are tested together in CI and are the
 recommended production set.
 
-Calling is distributed separately as `@robono/calling` 0.1.0 with
-`@robono/server` 0.10.0 from the
-[versioned calling release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.1.0).
-These are npm-compatible download packages. The registry table above remains
-at the published npm versions until registry publication is confirmed.
-The calling package is headless: native screens, platform audio and push
-integration belong to the host. Messenger's native runtime is not exported.
-See [calling setup](https://robono.com/docs#calling) and the developer Calling
-workspace for integration and acceptance tests. Per-network enablement remains
-separate from installing the SDK.
+Calling uses `@robono/calling` 0.1.2 and `@robono/server` 0.12.1. The optional
+`@robono/calling-react-native` 0.2.1 adds reusable screens, sounds and native adapters.
+The [versioned release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.2.1)
+contains npm-compatible archives and checksums. Registry versions are tracked separately
+in `docs/sdk-registry-versions.json`; change those only after npm publication is verified.
+Existing release archives remain unchanged. Networks choose whether to adopt each update.
+
+The native adapter accepts Expo 54, 55 and 56 dependency families; use Expo’s installer
+and the matching WebRTC config plugin listed in the mobile README. API/type compatibility
+checks cover those families; physical device validation is separate from package checks.
+The engine does not install the screen package. Messenger’s native runtime is not exported.
+See [calling setup](https://robono.com/docs#calling) for integration and acceptance tests.
+Calling access and incoming-call events are explicit per-network choices available together
+in the developer workspace; SDK upgrades do not change either setting.
 
 ## Version promises
 

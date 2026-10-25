@@ -1,5 +1,9 @@
 # Changes
 
+## 0.2.1
+
+- Make Expo plugin discovery and explicit plugin paths resolve consistently. Accept matching Expo 54, 55 and 56 audio/crypto/notification dependency families. Existing interfaces, sounds, notifications and branding are unchanged.
+
 ## 0.2.0
 
 - Saved branding, labels and event sounds shared with the website preview.

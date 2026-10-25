@@ -1,11 +1,11 @@
 # Robono Calling SDK
 
-Add one-to-one voice calls between people who are already connected across Robono Bridge networks. The SDK manages WebRTC negotiation, direct connections, relay fallback, call state and microphone cleanup. Your app keeps its identity and platform notification integration. Use your own interface, or choose the separate optional mobile screen package. The calling engine never requires a Robono interface.
+Add one-to-one voice calls within your app or between people connected across Robono Bridge networks. The SDK manages WebRTC negotiation, direct connections, relay fallback, call state and microphone cleanup. Your app keeps its identity and platform notification integration. Use your own interface, or choose the separate optional mobile screen package. The calling engine never requires a Robono interface.
 
 ## Install
 
 ```sh
-npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.1.1/robono-calling-0.1.1.tgz
+npm install @robono/calling@0.1.2
 ```
 
 This is a versioned npm-compatible package. Commit your package lockfile to retain its integrity checksum. The release includes `SHA256SUMS` and the package includes an SPDX software bill of materials.
@@ -16,7 +16,7 @@ This is a versioned npm-compatible package. Commit your package lockfile to reta
 
 ## Connect your backend
 
-Enable calling for your network and obtain its admission URL through Robono support. Your server authenticates the user, then posts the following to that URL using a network API key with `calling:connect` scope:
+Open Calling in your Robono developer workspace, enable calling for the integration, and copy its admission and service URLs. Your server authenticates the user, then posts the following to that URL using a network API key with `calling:connect` scope:
 
 ```json
 {"operation":"admit","kind":"network","protocolVersion":1,"externalUserId":"YOUR_AUTHENTICATED_USER_ID"}

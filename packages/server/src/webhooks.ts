@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { Buffer } from "node:buffer";
 import { RobonoWebhookError } from "./errors.js";
 import type {
   RobonoWebhookEvent,

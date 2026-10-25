@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.0
+
+- Add backend calling sessions, optional incoming-call webhooks, and revision-protected same-network calling permissions through `RobonoCallingBackend`.
+- Preserve server-only network credentials and validate the configured calling service before exchanging admission tickets.
+
 ## 0.10.0
 
 - Adds typed, verified `calling.incoming` and `calling.dismissed` webhooks.

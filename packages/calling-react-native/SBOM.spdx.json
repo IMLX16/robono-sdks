@@ -1,0 +1,839 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "@robono/calling-react-native@0.1.0",
+  "documentNamespace": "https://robono.com/sbom/calling-react-native/0.1.0/d5e376ce81cb5a20ba5ee14be6f52b94558d7426",
+  "creationInfo": {
+    "created": "2026-10-25T02:53:59.212Z",
+    "creators": [
+      "Organization: Robono (support@robono.com)"
+    ]
+  },
+  "packages": [
+    {
+      "name": "@robono/calling-react-native",
+      "SPDXID": "SPDXRef-Package",
+      "versionInfo": "0.1.0",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": true,
+      "packageVerificationCode": {
+        "packageVerificationCodeValue": "d5e376ce81cb5a20ba5ee14be6f52b94558d7426"
+      },
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseDeclared": "LicenseRef-RobonoSDK",
+      "licenseInfoFromFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC.",
+      "comment": "Host-supplied peer dependencies (not bundled): {\"@robono/calling\":\"^0.1.1\",\"react\":\">=18.2 <20\",\"react-native\":\">=0.76 <1\",\"react-native-svg\":\">=15 <16\",\"react-native-safe-area-context\":\">=5 <6\",\"react-native-webrtc\":\">=124 <125\",\"react-native-incall-manager\":\">=4.2 <5\",\"expo-audio\":\">=56 <57\",\"expo-crypto\":\">=56 <57\",\"expo-notifications\":\">=56 <57\"}"
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./dist/audio.d.mts",
+      "SPDXID": "SPDXRef-File-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "915adcdfc9802a3cdb417fd14b9e80747f0ce4dc6d5100c1b720492bfacdc327"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b89fc77dbd9f5c2468dfd73bf634f3bd95708985"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/audio.mjs",
+      "SPDXID": "SPDXRef-File-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a0a5a205998be3ceb364c7a15ffaf85642a9720221b5ae8ab739368623d37427"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "bda99f9bb02055f803bfd5a99c452cc12ea01e1b"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/controller.d.mts",
+      "SPDXID": "SPDXRef-File-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2d1438257a9c883e49c63541035be83fa38887438413eda437735021cf89ae8f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "702afb1c82ab5cbb56f881722f56839277fb12f9"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/controller.mjs",
+      "SPDXID": "SPDXRef-File-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "79fd2e5513313ed217ec9969ae964ce8474dd5dfbd7d0633be06610b5fca4d25"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cf958944451fe67c37c33d2925f3f4740ce4c370"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/expo-notifications.d.ts",
+      "SPDXID": "SPDXRef-File-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0dcb51f3e9a15307d023fd65aa7e17ae95091a9ec40e81daf8a36d35f549a384"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "af6b108f3a554927f8b07dc3dc867d0da4b864ed"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/expo-notifications.js",
+      "SPDXID": "SPDXRef-File-5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "00e997e8d6d385d914c659e73cf6fa34434c71ab14ebd9ba7674601e6badf4f0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "db202295948b31a376e684b85d3f706ae5709c9c"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/history.d.ts",
+      "SPDXID": "SPDXRef-File-6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "694135000c40283e21319fd3fa10d7951270fc6c30e15c6841fc61324d645fdb"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "771aeb8b29db75e8dec60f63ca54a38712a55049"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/history.js",
+      "SPDXID": "SPDXRef-File-7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "340be08bd1907c159d4dad15bcfcd3b6bda7fdca980dbc7e5a6fe9807c0118d5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4e18a9c59c6903ec834b98b79a99df07477e9556"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/index.d.ts",
+      "SPDXID": "SPDXRef-File-8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8558c1c03139fd02e72c91540ff131f5eef6f78b8a028174c9c30c45b025e5f0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f3bbd8ed5dd4694dcab1bac87f84b5f2e2df48cc"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/index.js",
+      "SPDXID": "SPDXRef-File-9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8ddeebeeed1150474fbefb927719c9c2d1f1a1d3e9ce2f6f913ef2e51538b38f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "872a213b8b6e0cf992fd3e093e975256a2151cb1"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/native.d.ts",
+      "SPDXID": "SPDXRef-File-10",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "869324cc3651b1cf46b65abaf8a8f995e9f51e1154c65dd0e0ac76bf8c4c982a"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8f44724573035f7bbe2b77d38c5c0c62daa29912"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/native.js",
+      "SPDXID": "SPDXRef-File-11",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6bfe309a9b8a50c61eeea7f57e87c4929e0038cb8f7374c84e357cd221fdf087"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d9b4f7ffa3e93b565bdf0fc736f42db412896ca7"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/notification-router.d.ts",
+      "SPDXID": "SPDXRef-File-12",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4f54002ef111f812053f9fc5b43a96709115ab79f43eae258338796d76728fb5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1c336ae838ff54caa463f2cba00bbfcd36ea972f"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/notification-router.js",
+      "SPDXID": "SPDXRef-File-13",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f64a0048be695795c2a45d9c01f38b2d1c2d4d87801b45cb5c7d08d67a6f5f2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "32ae3aa87171fbf65fc712b624cae2c1b2691f24"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/notifications.d.ts",
+      "SPDXID": "SPDXRef-File-14",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "309235ef67d8fd0e160c9b56eb593399ddc227c42645f54151a410f1d327d43c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "478df27433eb804b7bb001d75e9a0fa33be0fddc"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/notifications.js",
+      "SPDXID": "SPDXRef-File-15",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8b4f67650a9ac4c4faf97049b9256d5a4fdc4917aed63e072075e557dc11461e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d6106ee75b7aa3fadb190436071d1b5d85fa5da4"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/runtime.d.ts",
+      "SPDXID": "SPDXRef-File-16",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "20678883524ad8d44ff03a5cdf856b56208c29a3d3ce5f2f201d55741ba8168d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "32aa7d2aac0d08ee319945633f45a8b0cb17182a"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/runtime.js",
+      "SPDXID": "SPDXRef-File-17",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "80d6c92304a21ee43759ec6698d6a79121fc73612ff28fc5b51da5de96172904"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8375e04a00d921b4f225ea9ecb9e10ae0ff96444"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/screens.d.ts",
+      "SPDXID": "SPDXRef-File-18",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "91e246fcfa7084c7f1f46a0c76e4bbd0df505b51875707d1f1f6a1607efe2cca"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0e6dd4680c1b615cb2fe4c96088e4c639f6172bc"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/screens.js",
+      "SPDXID": "SPDXRef-File-19",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3c249b59d6b30da1ba11454a7176812c9e25d78418407c437b9f187ee3f745d2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ad1035b7369d8f412dfeaad149a44231767ca867"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/types.d.ts",
+      "SPDXID": "SPDXRef-File-20",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e22a4a176e0fdbb4b60d34d31eacc807b8a3bd1e23108853be34c8649d83bf0c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9fbe89aa698c0711385532e14fca73b200b5192f"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/types.js",
+      "SPDXID": "SPDXRef-File-21",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b878c11a77128e74c3cf15c93ef2ceddf2aa0b38"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./assets/connecting.wav",
+      "SPDXID": "SPDXRef-File-22",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2676bb252cc7ac28d3a0c0b46bc1a53a2f1db3317663a6f74ccd9bc94a9185cf"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "411b663e94edb41c02863632f6d9698e9fc4e88e"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./assets/ended.wav",
+      "SPDXID": "SPDXRef-File-23",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d610a392d62838a9fe54a60e951afdaceac680af5a51e673d5cf7c5f6f6124b6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f079fffab763a223634ddb48b21a0312226c48a0"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./assets/ringing.wav",
+      "SPDXID": "SPDXRef-File-24",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f818d2cf7dcf1359def9ec3bea6ac893947c14b2bada16f7d6ff8e6fb3b77e95"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a046bd72aba256e4042629a33371644df3970d95"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./examples/CallingHost.tsx",
+      "SPDXID": "SPDXRef-File-25",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1439e9a94d7f40d3de83acfd8c36050f4a9f286877ab33ca9dab657a50f3e312"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a7c886b023dfd91ae04d1759997ea3da3d7ee13e"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./examples/ExpoCallingHost.tsx",
+      "SPDXID": "SPDXRef-File-26",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c98650fb9c0a22bf216e6a8e40f386be7ff88c5d6751e1bfb61b54bf7a0ac667"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1579d74d412d0380ac7048072eab1b17c98fdbfa"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./android/build.gradle",
+      "SPDXID": "SPDXRef-File-27",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d3513f7e848c69e6d5165d54028302f56ad8fb07062ebcbc3a5cc2b31e377a99"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ee04e53a2c6bb0cb9dcb2b2be35f2144c76ad3ed"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./android/src/main/AndroidManifest.xml",
+      "SPDXID": "SPDXRef-File-28",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2fb38a2519a0d4a4ec5ff9cada4fdf85194a0f1633882565b88a8fa078e80034"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d30615d3e8ea54c3c5032a203bf43606b5cd8202"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./android/src/main/java/com/robono/calling/CallingPackage.java",
+      "SPDXID": "SPDXRef-File-29",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b36512956d3f6a48259ecf97be7fd244b778f5be77ba4804cdcee86c7b0a2b4b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "613c9f0a13054566ec7c118de6b84ad1f978f5f3"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./android/src/main/java/com/robono/calling/CallingRuntime.java",
+      "SPDXID": "SPDXRef-File-30",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2d152d38059cbd8950f5869649e8328a20eff9895d872000bb2a39dd61be7e5b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "45c3bbe49a46383f0ce7aa21864dda835182a79a"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./android/src/main/java/com/robono/calling/CallingService.java",
+      "SPDXID": "SPDXRef-File-31",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d9a5b798407ffc58b8983fda7d21cb881cdaa88dc0f806c957920797665ef134"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d3c7623dca8b57b3441306996b69449f9ee9b2c2"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./ios/RobonoCallingRuntime.m",
+      "SPDXID": "SPDXRef-File-32",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1c329601aaef9888d6b08d525f708bb0ac62ce9b3d531e4597cfa10a7fbc2136"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7c80c449d24024d36c55fc71cd3adbc8598a5629"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-5"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-6"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-7"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-8"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-9"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-10"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-11"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-12"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-13"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-14"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-15"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-16"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-17"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-18"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-19"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-20"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-21"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-22"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-23"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-24"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-25"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-26"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-27"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-28"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-30"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-31"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-32"
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-RobonoSDK",
+      "extractedText": "ROBONO SDK LICENSE AGREEMENT\nVersion 1.0, July 20, 2026\n\nCopyright (c) 2026 Add to Loop LLC. All rights reserved.\n\nThis Robono SDK License Agreement (the \"Agreement\") is between Add to Loop LLC,\noperating the Robono service (\"Robono\"), and the person or entity that downloads,\ninstalls, copies, or uses the Software (\"You\"). By downloading, installing,\ncopying, or using the Software, You accept this Agreement. If You do not accept\nit, do not use the Software.\n\n1. Definitions\n\n\"Software\" means this Robono software development kit, its documentation, and\nany updates Robono provides under this Agreement.\n\n\"Robono Service\" means the messaging interoperability, routing, policy,\nconversion, delivery, and related services operated or expressly authorized by\nRobono.\n\n\"Application\" means a product or service owned or controlled by You that is\nauthorized to connect to the Robono Service.\n\n2. Limited License\n\nSubject to this Agreement, Robono grants You a limited, non-exclusive,\nnon-transferable, non-sublicensable, revocable license to:\n\n(a) install, copy, and use the Software internally to develop, test, and\noperate an Application that communicates with the Robono Service; and\n\n(b) reproduce and distribute the portions of the Software that are necessarily\nincluded in Your Application, solely in compiled, minified, bundled, or object\ncode form and solely as needed for that Application to communicate with the\nRobono Service.\n\nNo right is granted to distribute the Software as a standalone product or SDK.\n\n3. Restrictions\n\nYou may not, and may not permit another person to:\n\n(a) sell, rent, lease, sublicense, publish, or redistribute the Software as a\nstandalone product, library, SDK, or service;\n\n(b) use the Software or a modified or derivative version of it to develop,\nprovide, or support a product or service that competes with the Robono Service;\n\n(c) use the Software to bypass Robono, avoid applicable usage controls or fees,\nor access the Robono Service without authorization;\n\n(d) remove or alter copyright, trademark, attribution, or proprietary notices;\n\n(e) reverse engineer, decompile, or disassemble the Software except to the\nlimited extent applicable law expressly prohibits this restriction; or\n\n(f) use the Software in violation of applicable law, the rights of another\nperson, or the terms governing access to the Robono Service.\n\n4. Ownership and Reserved Rights\n\nThe Software is licensed, not sold. Robono and its licensors retain all right,\ntitle, and interest in the Software and all related intellectual property.\nExcept for the limited rights expressly granted in Section 2, all rights are\nreserved.\n\nNo patent license is granted except the minimum license, if any, necessarily\nrequired to exercise the rights expressly granted in Section 2, and that\nlimited patent license applies only while the Software is used with an\nauthorized Robono Service.\n\n5. Service Access\n\nThis Agreement does not itself grant an account, API credentials, service\navailability, support, or a right to access the Robono Service. Service access\nmay be governed by additional terms, plans, limits, and policies. Robono may\nsuspend or terminate access to protect users, systems, legal compliance, or the\nintegrity of the Robono Service.\n\n6. Updates and Support\n\nRobono is not required to provide maintenance, updates, support, or continued\navailability of any version of the Software unless separately agreed in\nwriting.\n\n7. Term and Termination\n\nThis Agreement continues until terminated. Your rights terminate automatically\nif You breach this Agreement. On termination, You must stop using the Software\nand delete copies under Your control, except for copies necessarily contained\nin previously distributed Applications. Sections 3, 4, 8, 9, 10, and 11\nsurvive termination.\n\n8. Disclaimer of Warranties\n\nTO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED \"AS IS\" AND\n\"AS AVAILABLE,\" WITHOUT WARRANTIES OF ANY KIND, EXPRESS, IMPLIED, OR\nSTATUTORY, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR\nPURPOSE, TITLE, AND NON-INFRINGEMENT.\n\n9. Limitation of Liability\n\nTO THE MAXIMUM EXTENT PERMITTED BY LAW, ROBONO WILL NOT BE LIABLE FOR INDIRECT,\nINCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOSS\nOF DATA, REVENUE, PROFITS, GOODWILL, OR BUSINESS OPPORTUNITY, ARISING FROM OR\nRELATING TO THE SOFTWARE. ROBONO'S TOTAL LIABILITY RELATING TO THE SOFTWARE\nWILL NOT EXCEED THE GREATER OF ONE HUNDRED U.S. DOLLARS (US $100) OR THE AMOUNT\nYOU PAID ROBONO FOR THE SOFTWARE DURING THE TWELVE MONTHS BEFORE THE EVENT\nGIVING RISE TO THE CLAIM. THESE LIMITATIONS APPLY TO THE MAXIMUM EXTENT\nPERMITTED BY LAW.\n\n10. Governing Law\n\nThis Agreement is governed by the laws of the State of Florida, excluding its\nconflict-of-laws rules. The state and federal courts located in Palm Beach\nCounty, Florida have exclusive jurisdiction, and each party consents to their\njurisdiction and venue.\n\n11. General\n\nYou may not assign this Agreement without Robono's prior written consent.\nRobono may assign this Agreement in connection with a reorganization, transfer\nof intellectual property, financing, merger, acquisition, or sale of all or\nsubstantially all of the relevant assets. If a provision is unenforceable, it\nwill be enforced to the maximum extent permitted and the remaining provisions\nwill remain effective. A waiver must be in writing. This Agreement is the\nentire agreement concerning the Software unless You and Robono sign a separate\nwritten agreement that expressly replaces it.\n\nQuestions about this license may be submitted at https://robono.com/contact.\n"
+    }
+  ]
+}

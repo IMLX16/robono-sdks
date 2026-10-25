@@ -221,3 +221,34 @@ Include the package version, runtime, safe reproduction steps, and request ID;
 never include credentials or private message content.
 
 See the complete build flow, optional language and privacy operations, platform support, and testing guide at [robono.com/docs](https://robono.com/docs).
+
+## Calling from your backend
+
+`RobonoCallingBackend` is separate from the messaging client and does not install calling screens. Copy the admission and service addresses from **Calling → Calling access** in your project. Keep the network API key on your server; it needs `calling:connect` scope.
+
+```ts
+import { RobonoCallingBackend } from '@robono/server';
+const calling = new RobonoCallingBackend({
+  admissionUrl: process.env.ROBONO_CALLING_ADMISSION_URL!,
+  serviceUrl: process.env.ROBONO_CALLING_SERVICE_URL!,
+  apiKey: process.env.ROBONO_NETWORK_API_KEY!,
+});
+// Authenticate the request with your existing app session first.
+const session = await calling.createSession(authenticatedUser.externalId);
+// Return session only to this user, over HTTPS, with Cache-Control: no-store.
+```
+
+For two existing friends in your own app, synchronize their calling permission from your backend:
+
+```ts
+const relationship = await calling.setRelationship({
+  externalUserIds: [friendship.firstUserId, friendship.secondUserId],
+  allowed: friendship.accepted && friendship.bothAllowCalls && !friendship.blocked,
+  revision: friendship.revision,
+});
+// Save relationship.connectionId on the existing conversation.
+```
+
+Keep a persisted increasing revision per user pair. Synchronize a higher revision with `allowed: false` on blocks, removals, account deletion or lost calling permission. Repeating the same revision and value safely recovers a lost response. An older revision or conflicting value at the same revision returns 409; reconcile against your current database state before retrying. Do not blindly retry a stale permission with a higher revision. Two different networks continue using their accepted `bridge:` reference; Messenger conversations use `app:`. Same-network references begin with `network:`.
+
+`calling.notifications(true)` enables signed incoming/dismissed events on your configured webhook; `false` disables them and no argument reads the setting. The methods make one request per operation rather than retrying immediately on rate limits. Errors expose `status`, `code` and `retryAfterMs`. Network API keys are never sent to the calling media service or mobile clients. A new session does not transfer an active call.

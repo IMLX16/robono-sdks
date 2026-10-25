@@ -5,6 +5,7 @@ Official SDKs for connecting networks to the Robono Bridge and linking user acco
 | Package | Use |
 | --- | --- |
 | [`@robono/calling`](./packages/calling) | One-to-one WebRTC voice calls and call history |
+| [`@robono/calling-react-native`](./packages/calling-react-native) | Optional mobile calling screens, sounds and native audio adapters |
 | [`@robono/server`](./packages/server) | Server authentication, Bridge operations, signed events, and protected client routes |
 | [`@robono/client`](./packages/client) | Shared headless client state and push handling |
 | [`@robono/react-native`](./packages/react-native) | React Native and Expo integration |

@@ -1,0 +1,100 @@
+{
+  "name": "@robono/calling-react-native",
+  "version": "0.1.0",
+  "description": "Optional calling screens, sounds and mobile audio adapters for Robono Bridge.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./native": {
+      "types": "./dist/native.d.ts",
+      "default": "./dist/native.js"
+    },
+    "./notifications": {
+      "types": "./dist/notifications.d.ts",
+      "default": "./dist/notifications.js"
+    },
+    "./notification-router": {
+      "types": "./dist/notification-router.d.ts",
+      "default": "./dist/notification-router.js"
+    },
+    "./expo-notifications": {
+      "types": "./dist/expo-notifications.d.ts",
+      "default": "./dist/expo-notifications.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "default": "./dist/runtime.js"
+    },
+    "./app.plugin": "./app.plugin.cjs",
+    "./assets/*": "./assets/*"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "examples",
+    "ios",
+    "RobonoCallingRuntime.podspec",
+    "react-native.config.js",
+    "app.plugin.cjs",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "SBOM.spdx.json",
+    "android/build.gradle",
+    "android/src/main"
+  ],
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "@types/react": "~19.2.2"
+  },
+  "peerDependencies": {
+    "@robono/calling": "^0.1.1",
+    "react": ">=18.2 <20",
+    "react-native": ">=0.76 <1",
+    "react-native-svg": ">=15 <16",
+    "react-native-safe-area-context": ">=5 <6",
+    "react-native-webrtc": ">=124 <125",
+    "react-native-incall-manager": ">=4.2 <5",
+    "expo-audio": ">=56 <57",
+    "expo-crypto": ">=56 <57",
+    "expo-notifications": ">=56 <57"
+  },
+  "peerDependenciesMeta": {
+    "react-native-webrtc": {
+      "optional": true
+    },
+    "react-native-incall-manager": {
+      "optional": true
+    },
+    "expo-audio": {
+      "optional": true
+    },
+    "expo-crypto": {
+      "optional": true
+    },
+    "expo-notifications": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepack": "npm run build"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://robono.com/docs#calling",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IMLX16/robono-sdks.git",
+    "directory": "packages/calling-react-native"
+  },
+  "bugs": {
+    "url": "https://robono.com/contact?topic=sdk"
+  }
+}

@@ -1,0 +1,8 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.robono.calling'
+    compileSdkVersion rootProject.ext.has('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 36
+    defaultConfig { minSdkVersion 24 }
+}
+dependencies { implementation 'com.facebook.react:react-android' }

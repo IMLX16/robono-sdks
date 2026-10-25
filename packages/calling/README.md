@@ -1,11 +1,11 @@
 # Robono Calling SDK
 
-Add one-to-one voice calls between people who are already connected across Robono Bridge networks. The SDK manages WebRTC negotiation, direct connections, relay fallback, call state and microphone cleanup. Your app supplies its interface, identity and platform audio/notification integration.
+Add one-to-one voice calls between people who are already connected across Robono Bridge networks. The SDK manages WebRTC negotiation, direct connections, relay fallback, call state and microphone cleanup. Your app keeps its identity and platform notification integration. Use your own interface, or choose the separate optional mobile screen package. The calling engine never requires a Robono interface.
 
 ## Install
 
 ```sh
-npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.1.0/robono-calling-0.1.0.tgz
+npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.1.1/robono-calling-0.1.1.tgz
 ```
 
 This is a versioned npm-compatible package. Commit your package lockfile to retain its integrity checksum. The release includes `SHA256SUMS` and the package includes an SPDX software bill of materials.
@@ -64,6 +64,10 @@ Use HTTPS and request microphone permission from the Call or Answer action. Brow
 
 Use the `onChange` snapshot to render ringing, connecting and connected states. Start the timer at `call.connectedAt`, not when Answer is pressed. A preparation state can precede a server call ID; retain the same screen and allow cancellation. `hangUp()` handles cancellation, decline and ending an active call.
 
+## Optional mobile interface
+
+`@robono/calling-react-native` is a separate package for networks that want supplied React Native screens, sounds, controls and audio adapters. It is not a dependency of this engine. Existing WebRTC clients and networks with their own calling UI can continue using the engine or HTTP API without installing it.
+
 ## Native hosts
 
 Supply `getUserMedia`, `createPeerConnection` and, if needed, `createRemoteStream` adapters through the constructor. The microphone adapter receives an optional `{isCurrent}` callback: check it before capture after asynchronous permission or audio-session work. A late returned stream is stopped if the call has already been cancelled.
@@ -77,7 +81,7 @@ Enable network notifications on your admission endpoint with `{"operation":"noti
 Use the matching backend release:
 
 ```sh
-npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.1.0/robono-server-0.10.0.tgz
+npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.1.1/robono-server-0.11.0.tgz
 ```
 
 Verify the raw webhook body with `verifyRobonoWebhook`, then use `toCallingPushPayload` from `@robono/server`. Route only to devices owned by `recipient.external_user_id` in `recipient.child_app_id`. Durably queue verified events before acknowledging them. Deduplicate by `event_id`; retain the highest per-call sequence for at least 24 hours. A dismissal (sequence 2) overrides an invitation (sequence 1), even if events arrive out of order. Never ring past `ring_expires_at`. Dismissal clears ringing; it does not end an answered call.
@@ -115,3 +119,11 @@ The package uses ESM and includes TypeScript declarations. Node.js 22+ runs its 
 ## License and support
 
 Use is governed by the included Robono SDK License Agreement. Contact [Robono support](https://robono.com/contact?topic=sdk).
+
+## Ringing and interruptions
+
+Unanswered calls expire 30 seconds after creation. Stop ringing at `ringRemainingMs` (a duration from the response), or `ringExpiresAt` for older responses. A late Answer is rejected. Do not send End to represent a timeout: that action means user cancellation or decline. The service records `no_answer` independently, and the client also stops a stale ringing screen when polling stalls.
+
+For an established call, `client.hold()` silences local and remote tracks immediately and acknowledges the interruption to the service. A held endpoint can stop polling for up to five minutes; retries do not extend that deadline. The other endpoint keeps its normal signaling lease and may hang up. Show Call on hold when `localHeld` or `remoteHeld` is true. Keep the user's manual mute preference separate from hold.
+
+Call `client.resume(prepareAudio)` only when the OS permits audio to return, or when the person explicitly requests resume. The client first refreshes authorization and call state, then awaits your `prepareAudio` callback, acknowledges resume and restores tracks. The callback must reject if another call still owns audio. A stale response, remote hangup, expired session or ended call cannot restart capture. The optional mobile package supplies this wiring and a Resume call control. No voicemail is involved.

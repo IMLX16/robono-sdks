@@ -1,4 +1,6 @@
 export { RobonoServer } from "./client.js";
+export { RobonoCallingBackend } from './calling.js';
+export type { RobonoCallingBackendOptions, CallingRelationshipInput, CallingRelationshipResult, CallingSession } from './calling.js';
 export { createRobonoBackendAdapter } from "./adapter.js";
 export type {
   RobonoAuthorizationAction,

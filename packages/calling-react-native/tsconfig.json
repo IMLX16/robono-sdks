@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target":"ES2022", "module":"ESNext", "moduleResolution":"bundler", "jsx":"react-jsx",
+    "strict":true, "skipLibCheck":true, "declaration":true, "allowJs":true, "checkJs":false,
+    "outDir":"dist", "rootDir":"src", "lib":["ES2022","DOM"],
+    "paths":{"@robono/calling":["../calling/src/index.d.ts"],"@robono/calling/history":["../calling/src/history.d.mts"]}
+  },
+  "include":["src"]
+}

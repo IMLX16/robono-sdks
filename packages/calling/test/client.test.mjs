@@ -2,6 +2,44 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { RobonoCallingClient, createHttpTransport } from '../src/index.mjs';
 const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
+test('native background and regular polling share an in-flight refresh', async () => {
+  const pending=deferred(); let calls=0;
+  const client=new RobonoCallingClient({request:async()=>{calls++;return pending.promise;}});
+  const a=client.refresh(),b=client.refresh();assert.equal(calls,1);
+  pending.resolve({version:1,voiceAvailable:true,call:null});
+  assert.deepEqual(await Promise.all([a,b]),[true,true]);await client.dispose();
+});
+test('rate limits slow polling, respect Retry-After and cannot be bypassed by refresh', async t => {
+  t.mock.timers.enable({apis:['setTimeout','Date']});
+  const calls=[];let failures=true;
+  const client=new RobonoCallingClient({request:async op=>{if(op!=='state')return {};calls.push(Date.now());if(failures){const e=Error('rate_limited');e.status=429;e.retryAfterMs=3000;throw e;}return {version:1,voiceAvailable:true,call:null};}});
+  try {
+    await client.poll();assert.equal(calls.length,1);
+    t.mock.timers.tick(1000);await client.refresh();assert.equal(calls.length,1);
+    t.mock.timers.tick(2000);await new Promise(r=>setImmediate(r));assert.equal(calls.length,2);
+    t.mock.timers.tick(3000);await new Promise(r=>setImmediate(r));assert.equal(calls.length,3);
+    t.mock.timers.tick(3000);await new Promise(r=>setImmediate(r));assert.equal(calls.length,3);
+    failures=false;t.mock.timers.tick(1000);await new Promise(r=>setImmediate(r));assert.equal(calls.length,4);
+    t.mock.timers.tick(1000);await new Promise(r=>setImmediate(r));assert.equal(calls.length,5);
+  } finally {await client.dispose();}
+});
+test('network failure backs off and disposal cancels the pending retry', async t => {
+  t.mock.timers.enable({apis:['setTimeout','Date']});let calls=0;
+  const client=new RobonoCallingClient({request:async op=>{if(op!=='state')return {};calls++;throw Error('offline');}});
+  await client.poll();t.mock.timers.tick(999);assert.equal(calls,1);
+  t.mock.timers.tick(1);await new Promise(r=>setImmediate(r));assert.equal(calls,2);
+  t.mock.timers.tick(1999);assert.equal(calls,2);await client.dispose();t.mock.timers.tick(60000);assert.equal(calls,2);
+});
+test('transport preserves numeric and date Retry-After headers',async()=>{
+  for(const value of ['5',new Date(Date.now()+10000).toUTCString()]){
+    const request=createHttpTransport({baseUrl:'https://calling.invalid',token:'test',fetcher:async()=>new Response(JSON.stringify({error:'rate_limited'}),{status:429,headers:{'Retry-After':value}})});
+    await assert.rejects(request('state'),e=>e.status===429&&e.retryAfterMs>=5000);
+  }
+});
+test('non-JSON rate-limit responses retain status and backoff',async()=>{
+  const request=createHttpTransport({baseUrl:'https://calling.invalid',token:'test',fetcher:async()=>new Response('Busy',{status:429,headers:{'Retry-After':'10'}})});
+  await assert.rejects(request('state'),error=>error.status===429&&error.retryAfterMs===10000);
+});
 function media() {
   const track = { enabled: true, readyState: 'live', stop() { this.readyState = 'ended'; } };
   return { track, getTracks: () => [track], getAudioTracks: () => [track], getVideoTracks: () => [] };
@@ -221,4 +259,64 @@ test('a late media acknowledgement cannot revive a call after hangup', async () 
   confirmation.resolve({ ...call, state: 'connected', connectedAt: Date.now() });
   await new Promise(r => setImmediate(r));
   assert.equal(client.state.call.state, 'ended'); assert.equal(client.mediaConnectedAt, null);
+});
+
+test('incoming ringing stops at its own deadline even if state requests stall',async t=>{
+  t.mock.timers.enable({apis:['Date','setTimeout']});const requests=[],states=[];
+  const client=new RobonoCallingClient({onChange:s=>states.push(s),request:async op=>{requests.push(op);return {};}});
+  const call={id:'incoming',state:'ringing',controlled:true,role:'callee',version:1,ringRemainingMs:30000};
+  await client.apply(call);t.mock.timers.tick(29999);assert.equal(states.at(-1).call.state,'ringing');
+  t.mock.timers.tick(1);assert.equal(states.at(-1).call.reason,'no_answer');
+  await client.apply({...call,version:2});assert.equal(states.at(-1).call.state,'ended');
+  assert.equal(requests.includes('end'),false,'expiration is not a user decline');await client.dispose();
+});
+test('answering cancels the ring deadline so connected calls do not end at 30 seconds',async t=>{
+  t.mock.timers.enable({apis:['Date','setTimeout']});
+  const client=new RobonoCallingClient({request:async()=>({})});
+  await client.apply({id:'call',state:'ringing',controlled:true,version:1,ringRemainingMs:30000});
+  await client.apply({id:'call',state:'connected',controlled:true,version:2});
+  t.mock.timers.tick(60000);assert.equal(client.state.call.state,'connected');await client.dispose();
+});
+function heldClient() {
+ const local=media(),remote=media(),requests=[];
+ let call={id:'hold',state:'connected',version:1,controlled:true,remoteCandidates:[],localHeld:false,remoteHeld:false};
+ const client=new RobonoCallingClient({request:async(op,p)=>{requests.push([op,p]);
+  if(op==='state')return {version:call.version,call};
+  if(op==='hold')return call={...call,version:call.version+1,localHeld:p.held,holdRevision:p.revision,holdExpiresAt:p.held?Date.now()+300000:null};
+  if(op==='end')return call={...call,state:'ended',version:call.version+1};return {};
+ }});
+ client.state.call=call;client.pc={...peer(),connectionState:'connected'};client.stream=local;client.remoteStream=remote;client.mediaCallId=call.id;
+ return {client,local,remote,requests,setCall:c=>call={...call,...c,version:call.version+1}};
+}
+test('interruption disables both tracks immediately and resume preserves manual mute',async()=>{
+ const f=heldClient();f.client.mute(true);const work=f.client.hold();
+ assert.equal(f.local.track.enabled,false);assert.equal(f.remote.track.enabled,false);await work;
+ let prepared=false;await f.client.resume(async()=>{prepared=true;assert.equal(f.local.track.enabled,false);});
+ assert.equal(prepared,true);assert.equal(f.local.track.enabled,false);assert.equal(f.remote.track.enabled,true);
+ assert.equal(f.client.state.muted,true);await f.client.dispose();
+});
+test('remote hangup during interruption cannot be resumed or activate audio',async()=>{
+ const f=heldClient();await f.client.hold();f.setCall({state:'ended'});let prepared=false;
+ await f.client.resume(async()=>{prepared=true;});assert.equal(prepared,false);assert.equal(f.local.track.readyState,'ended');await f.client.dispose();
+});
+test('hangup during audio recovery prevents late resume and a new interruption supersedes resume',async()=>{
+ for(const stop of ['hangup','interrupt']){
+  const f=heldClient();await f.client.hold();const pending=deferred();
+  const work=f.client.resume(()=>pending.promise);await new Promise(r=>setImmediate(r));
+  if(stop==='hangup')await f.client.hangUp();else await f.client.hold();
+  pending.resolve();await work;assert.equal(f.local.track.enabled,false);
+  assert.equal(f.requests.some(([op,p])=>op==='hold'&&!p.held),false);await f.client.dispose();
+ }
+});
+test('audio activation failure leaves call held and microphone disabled',async()=>{
+ const f=heldClient();await f.client.hold();await assert.rejects(f.client.resume(async()=>{throw Error('audio_still_interrupted');}),/audio_still_interrupted/);
+ assert.equal(f.client.localHeld,true);assert.equal(f.local.track.enabled,false);await f.client.dispose();
+});
+
+test('lost hold responses reconcile on refresh without enabling audio or extending the hold',async()=>{
+ const f=heldClient(),request=f.client.request;let lost=2;
+ f.client.request=async(op,p)=>{const result=await request(op,p);if(op==='hold'&&lost-->0)throw Error('offline');return result;};
+ await assert.rejects(f.client.hold(),/offline/);assert.equal(f.local.track.enabled,false);
+ assert.equal(await f.client.refresh(),true);assert.equal(f.client.pendingHold,null);
+ assert.equal(f.client.localHeld,true);assert.equal(f.local.track.enabled,false);await f.client.dispose();
 });

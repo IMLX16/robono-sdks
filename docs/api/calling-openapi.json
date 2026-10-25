@@ -1471,6 +1471,338 @@
           }
         }
       }
+    },
+    "/hold": {
+      "post": {
+        "operationId": "calling_hold",
+        "summary": "Hold or resume an established call",
+        "security": [
+          {
+            "callingSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "callId": {
+                    "type": "string"
+                  },
+                  "held": {
+                    "type": "boolean"
+                  },
+                  "revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "callId",
+                  "held",
+                  "revision"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Call"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Expired or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Call not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Call state conflict or peer unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Only the controlling device can hold its side. Increment revision for each new intention and reuse the same revision on retry. Older revisions cannot undo newer changes. Holds expire after five minutes; repeated requests do not extend them. Resume rechecks current authorization."
+      }
+    },
+    "/calling-access": {
+      "servers": [
+        {
+          "url": "https://vzoqxavqacydtwypjsrd.supabase.co/functions/v1",
+          "description": "Admission backend. Copy the exact address from Calling access in your workspace; use the isolated backend address for isolated testing."
+        }
+      ],
+      "post": {
+        "operationId": "calling_admission",
+        "summary": "Backend admission, same-network permissions and incoming-call notifications",
+        "description": "Authenticate users in your own backend before requesting admission. The authenticated network owns both user IDs for a relationship; clients cannot register a pair in another network. Calling access is enabled separately in the workspace. For relationship updates, preserve one increasing revision per user pair and synchronize blocks, removal and account deletion.",
+        "security": [
+          {
+            "NetworkApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "operation",
+                      "kind",
+                      "protocolVersion",
+                      "externalUserId"
+                    ],
+                    "properties": {
+                      "operation": {
+                        "type": "string",
+                        "enum": [
+                          "admit"
+                        ]
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "network"
+                        ]
+                      },
+                      "protocolVersion": {
+                        "type": "integer",
+                        "enum": [
+                          1
+                        ]
+                      },
+                      "externalUserId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/CallingRelationshipRequest"
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "operation"
+                    ],
+                    "properties": {
+                      "operation": {
+                        "type": "string",
+                        "enum": [
+                          "notifications"
+                        ]
+                      },
+                      "enabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admission grant, same-network calling permission or notification settings, depending on operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "ticket",
+                        "serviceUrl",
+                        "protocolVersion"
+                      ],
+                      "properties": {
+                        "ticket": {
+                          "type": "string",
+                          "description": "Exchange within 60 seconds."
+                        },
+                        "serviceUrl": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "protocolVersion": {
+                          "type": "integer",
+                          "enum": [
+                            1
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/CallingRelationshipResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CallingNotificationSettings"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Expired or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Call not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "relationship_revision_conflict: reconcile with your latest permission record before retrying.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "revision"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "enum": [
+                        "relationship_revision_conflict"
+                      ]
+                    },
+                    "revision": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Request limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1478,6 +1810,11 @@
       "callingSession": {
         "type": "http",
         "scheme": "bearer"
+      },
+      "NetworkApiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Server-only network API key with calling:connect permission. Never put this key in a mobile or browser client."
       }
     },
     "schemas": {
@@ -1602,6 +1939,25 @@
             "items": {
               "$ref": "#/components/schemas/Candidate"
             }
+          },
+          "localHeld": {
+            "type": "boolean"
+          },
+          "remoteHeld": {
+            "type": "boolean"
+          },
+          "holdRevision": {
+            "type": "integer"
+          },
+          "holdExpiresAt": {
+            "type": "integer",
+            "description": "Local acknowledged hold deadline in Unix milliseconds.",
+            "nullable": true
+          },
+          "ringRemainingMs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Remaining ringing duration in milliseconds. Unanswered calls expire 30 seconds after creation."
           }
         },
         "required": [
@@ -1738,7 +2094,7 @@
               },
               "connection_id": {
                 "type": "string",
-                "description": "app:conversationId or bridge:connectionId."
+                "description": "app:conversationId, bridge:connectionId, or network:relationshipId for two users in one connected app."
               },
               "created_at": {
                 "type": "string",
@@ -1784,6 +2140,63 @@
                 "calling.dismissed"
               ]
             }
+          }
+        }
+      },
+      "CallingRelationshipRequest": {
+        "type": "object",
+        "required": [
+          "operation",
+          "externalUserIds",
+          "allowed",
+          "revision"
+        ],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "relationship"
+            ]
+          },
+          "externalUserIds": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "description": "Backend-only permission for an existing same-network pair. POST to the admission address from the Calling workspace using its network API key. Retry the same revision/value after a lost response; a stale or conflicting revision returns 409. Synchronize blocks and account removal with allowed=false and a higher revision."
+      },
+      "CallingRelationshipResponse": {
+        "type": "object",
+        "required": [
+          "connectionId",
+          "allowed",
+          "revision"
+        ],
+        "properties": {
+          "connectionId": {
+            "type": "string",
+            "pattern": "^network:[0-9a-f-]{36}$"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "integer"
           }
         }
       }

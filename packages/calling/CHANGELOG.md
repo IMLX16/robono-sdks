@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.1
+
+- Stop unanswered ringing locally at the server deadline even if polling stalls.
+- Add ordered, repeatable hold/resume, silenced tracks, a bounded held lease and fresh authorization before resuming.
+- Dismiss locally failed media instead of leaving connected controls visible.
+
+- Back off state polling after rate limits and temporary failures, honoring Retry-After.
+- Preserve HTTP failure status when a proxy returns a non-JSON response.
+- Share concurrent state refreshes so background scheduling and foreground polling cannot apply the same signaling state twice.
+- Keep the calling engine independent of the optional mobile screen package.
+
 ## 0.1.0
 
 - One-to-one WebRTC audio with direct connections and relay fallback.

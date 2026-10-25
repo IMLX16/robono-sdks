@@ -4,6 +4,8 @@ export function createCallAudio(driver) {
   let phase = 'idle', speaker = false, active = false;
   const serial = work => { const next = queue.then(work); latest = next; queue = next.catch(() => {}); return next; };
   const schedule = driver.schedule || ((callback, delay) => { const id = setTimeout(callback, delay); return () => clearTimeout(id); });
+  const choice = (event,fallback='none')=>driver.sound?.(event)??fallback;
+  const play = async (event,fallback,loop=false)=>{const kind=choice(event,fallback);if(kind!=='none')await driver.play(kind,{loop,event});};
   const stop = () => { driver.pause(); timer?.(); timer = undefined; };
   const release = async generation => {
     if (generation !== revision) return;
@@ -23,12 +25,12 @@ export function createCallAudio(driver) {
         if (generation !== revision || disposed) return;
         // The OS owns audio during a local interruption. Never activate the
         // session, route output or play a cue while either participant is held.
-        if (phase === 'held') { stop(); return; }
+        if (phase === 'held') { stop(); if(changed && next.localHeld===false)await play('held','none'); return; }
         if (['idle', 'error', 'loading'].includes(phase)) {
-          if (next.endTone && active) {
-            stop(); await driver.play('ended');
+          if ((next.endTone || next.cue && choice(next.cue)!=='none') && active) {
+            stop(); await play(next.endTone?'ended':next.cue,next.endTone?'ended':'none');
             if (generation !== revision) return;
-            timer = schedule(() => { void serial(() => release(generation)).catch(driver.onError); }, 700);
+            timer = schedule(() => { void serial(() => release(generation)).catch(driver.onError); }, driver.duration?.(next.endTone?'ended':next.cue) ?? 700);
           } else await release(generation);
           return;
         }
@@ -36,8 +38,8 @@ export function createCallAudio(driver) {
         active = true;
         await driver.prepare(phase, speaker);
         if (generation !== revision || disposed) return;
-        if (phase === 'connected') driver.pause();
-        else if (changed || !driver.playing()) await driver.play(phase === 'incoming' ? 'ringing' : 'connecting');
+        if (phase === 'connected') { if(changed){driver.pause();await play(next.cue||'connected','none');} }
+        else if (changed || !driver.playing()) await play(phase,phase==='incoming'?'ringing':'connecting',true);
       });
     },
     async dispose() {

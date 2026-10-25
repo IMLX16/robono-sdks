@@ -2,10 +2,10 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "@robono/calling-react-native@0.1.0",
-  "documentNamespace": "https://robono.com/sbom/calling-react-native/0.1.0/d5e376ce81cb5a20ba5ee14be6f52b94558d7426",
+  "name": "@robono/calling-react-native@0.2.0",
+  "documentNamespace": "https://robono.com/sbom/calling-react-native/0.2.0/fdee611c62a281e0e3c4b7a44c8a3d7392c90c00",
   "creationInfo": {
-    "created": "2026-10-25T02:53:59.212Z",
+    "created": "2026-10-25T03:52:29.056Z",
     "creators": [
       "Organization: Robono (support@robono.com)"
     ]
@@ -14,11 +14,11 @@
     {
       "name": "@robono/calling-react-native",
       "SPDXID": "SPDXRef-Package",
-      "versionInfo": "0.1.0",
+      "versionInfo": "0.2.0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": true,
       "packageVerificationCode": {
-        "packageVerificationCodeValue": "d5e376ce81cb5a20ba5ee14be6f52b94558d7426"
+        "packageVerificationCodeValue": "fdee611c62a281e0e3c4b7a44c8a3d7392c90c00"
       },
       "licenseConcluded": "LicenseRef-RobonoSDK",
       "licenseDeclared": "LicenseRef-RobonoSDK",
@@ -31,8 +31,46 @@
   ],
   "files": [
     {
-      "fileName": "./dist/audio.d.mts",
+      "fileName": "./dist/appearance.d.ts",
       "SPDXID": "SPDXRef-File-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "35e38e9cb61e7361385c4d194d41dda51f42c68fe5171bf27638624a7dab362e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5b0148ea56603e44cd2ba8d2f7187f3dac45c275"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/appearance.js",
+      "SPDXID": "SPDXRef-File-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9d70b1eb4da106b772bb994034e9e8e444e16b5eb142c110baf613c7fa6c36f4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "67a7b02ba68ab17d2e516c21c10f0225e846dbf7"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./dist/audio.d.mts",
+      "SPDXID": "SPDXRef-File-2",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -51,15 +89,15 @@
     },
     {
       "fileName": "./dist/audio.mjs",
-      "SPDXID": "SPDXRef-File-1",
+      "SPDXID": "SPDXRef-File-3",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "a0a5a205998be3ceb364c7a15ffaf85642a9720221b5ae8ab739368623d37427"
+          "checksumValue": "ca4be609934185e60a1ece595b005fa726e0220de28b5e4f72c373bc6bdf4bbf"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "bda99f9bb02055f803bfd5a99c452cc12ea01e1b"
+          "checksumValue": "e0c8b5cebaf35a9ae9e3bb916de607bf1b5ff005"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -70,7 +108,7 @@
     },
     {
       "fileName": "./dist/controller.d.mts",
-      "SPDXID": "SPDXRef-File-2",
+      "SPDXID": "SPDXRef-File-4",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -89,15 +127,15 @@
     },
     {
       "fileName": "./dist/controller.mjs",
-      "SPDXID": "SPDXRef-File-3",
+      "SPDXID": "SPDXRef-File-5",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "79fd2e5513313ed217ec9969ae964ce8474dd5dfbd7d0633be06610b5fca4d25"
+          "checksumValue": "3199df8f2671e85211850abfa8756712dd45edf12d6cce825dcc2c6305496527"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "cf958944451fe67c37c33d2925f3f4740ce4c370"
+          "checksumValue": "f3076ecc9379d0cae18346683e5dd677a5931633"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -108,7 +146,7 @@
     },
     {
       "fileName": "./dist/expo-notifications.d.ts",
-      "SPDXID": "SPDXRef-File-4",
+      "SPDXID": "SPDXRef-File-6",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -127,7 +165,7 @@
     },
     {
       "fileName": "./dist/expo-notifications.js",
-      "SPDXID": "SPDXRef-File-5",
+      "SPDXID": "SPDXRef-File-7",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -146,7 +184,7 @@
     },
     {
       "fileName": "./dist/history.d.ts",
-      "SPDXID": "SPDXRef-File-6",
+      "SPDXID": "SPDXRef-File-8",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -165,7 +203,7 @@
     },
     {
       "fileName": "./dist/history.js",
-      "SPDXID": "SPDXRef-File-7",
+      "SPDXID": "SPDXRef-File-9",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -184,15 +222,15 @@
     },
     {
       "fileName": "./dist/index.d.ts",
-      "SPDXID": "SPDXRef-File-8",
+      "SPDXID": "SPDXRef-File-10",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "8558c1c03139fd02e72c91540ff131f5eef6f78b8a028174c9c30c45b025e5f0"
+          "checksumValue": "9fc1bc238feccde514ba9d88da3b215f10dbbd0399c3e1246ebb81076db13d4a"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "f3bbd8ed5dd4694dcab1bac87f84b5f2e2df48cc"
+          "checksumValue": "face4eba13dfcdd196768c840b98e1b702d63354"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -203,15 +241,15 @@
     },
     {
       "fileName": "./dist/index.js",
-      "SPDXID": "SPDXRef-File-9",
+      "SPDXID": "SPDXRef-File-11",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "8ddeebeeed1150474fbefb927719c9c2d1f1a1d3e9ce2f6f913ef2e51538b38f"
+          "checksumValue": "deece7c880f33819dd31353e1e6af20bf8229c5d5c9f370532c54035d0085b8e"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "872a213b8b6e0cf992fd3e093e975256a2151cb1"
+          "checksumValue": "cbb1bb0771f4edc8dd1417438de12d68c549e21f"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -222,15 +260,15 @@
     },
     {
       "fileName": "./dist/native.d.ts",
-      "SPDXID": "SPDXRef-File-10",
+      "SPDXID": "SPDXRef-File-12",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "869324cc3651b1cf46b65abaf8a8f995e9f51e1154c65dd0e0ac76bf8c4c982a"
+          "checksumValue": "760d8d24b83190e8179b3ad5a5536f39cb8aca8d660beed98fe4beab8c40ec8f"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "8f44724573035f7bbe2b77d38c5c0c62daa29912"
+          "checksumValue": "37b0b3d722ad498a7f7ea6cb19af761643263428"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -241,15 +279,15 @@
     },
     {
       "fileName": "./dist/native.js",
-      "SPDXID": "SPDXRef-File-11",
+      "SPDXID": "SPDXRef-File-13",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "6bfe309a9b8a50c61eeea7f57e87c4929e0038cb8f7374c84e357cd221fdf087"
+          "checksumValue": "988fd8847dc7f2048abb2a28ebfc4233fbc73024b419b56ee40a63c652335e5c"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "d9b4f7ffa3e93b565bdf0fc736f42db412896ca7"
+          "checksumValue": "b2edb0bce9f466e1bd161bf51e669be69f29cb73"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -260,7 +298,7 @@
     },
     {
       "fileName": "./dist/notification-router.d.ts",
-      "SPDXID": "SPDXRef-File-12",
+      "SPDXID": "SPDXRef-File-14",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -279,7 +317,7 @@
     },
     {
       "fileName": "./dist/notification-router.js",
-      "SPDXID": "SPDXRef-File-13",
+      "SPDXID": "SPDXRef-File-15",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -298,7 +336,7 @@
     },
     {
       "fileName": "./dist/notifications.d.ts",
-      "SPDXID": "SPDXRef-File-14",
+      "SPDXID": "SPDXRef-File-16",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -317,7 +355,7 @@
     },
     {
       "fileName": "./dist/notifications.js",
-      "SPDXID": "SPDXRef-File-15",
+      "SPDXID": "SPDXRef-File-17",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -336,7 +374,7 @@
     },
     {
       "fileName": "./dist/runtime.d.ts",
-      "SPDXID": "SPDXRef-File-16",
+      "SPDXID": "SPDXRef-File-18",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -355,7 +393,7 @@
     },
     {
       "fileName": "./dist/runtime.js",
-      "SPDXID": "SPDXRef-File-17",
+      "SPDXID": "SPDXRef-File-19",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -374,15 +412,15 @@
     },
     {
       "fileName": "./dist/screens.d.ts",
-      "SPDXID": "SPDXRef-File-18",
+      "SPDXID": "SPDXRef-File-20",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "91e246fcfa7084c7f1f46a0c76e4bbd0df505b51875707d1f1f6a1607efe2cca"
+          "checksumValue": "0c34604e356ccd3e7f8ab23ee3d01617684934e719e8ab5ccafd66f409ba17b7"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "0e6dd4680c1b615cb2fe4c96088e4c639f6172bc"
+          "checksumValue": "47466a4af2cb785b7f0607c3ebe12fe004f4da2f"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -393,15 +431,15 @@
     },
     {
       "fileName": "./dist/screens.js",
-      "SPDXID": "SPDXRef-File-19",
+      "SPDXID": "SPDXRef-File-21",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "3c249b59d6b30da1ba11454a7176812c9e25d78418407c437b9f187ee3f745d2"
+          "checksumValue": "d964dcf7a30f608c421f04cece8aa59e1af8976ec4be39e60827d08d7a92938c"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "ad1035b7369d8f412dfeaad149a44231767ca867"
+          "checksumValue": "d1ad5d7e8a7846d0cf0afe38c856024b49d00e99"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -412,15 +450,15 @@
     },
     {
       "fileName": "./dist/types.d.ts",
-      "SPDXID": "SPDXRef-File-20",
+      "SPDXID": "SPDXRef-File-22",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "e22a4a176e0fdbb4b60d34d31eacc807b8a3bd1e23108853be34c8649d83bf0c"
+          "checksumValue": "a47edaf9f0f38daa1539102b09d33f0830a1e6f856a01af42db475978c2550e1"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "9fbe89aa698c0711385532e14fca73b200b5192f"
+          "checksumValue": "756ad32ae5db5d95fa0a51f450a2aa4122c2259b"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -431,7 +469,7 @@
     },
     {
       "fileName": "./dist/types.js",
-      "SPDXID": "SPDXRef-File-21",
+      "SPDXID": "SPDXRef-File-23",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -449,8 +487,46 @@
       "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
     },
     {
+      "fileName": "./assets/bell.wav",
+      "SPDXID": "SPDXRef-File-24",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c16904a8b1ea55f576eb658b69b96fe26a095848dc2aeb36b8f4a2b1b8c62654"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2dff8eb80ae7729c748ebed1d710da00f54ca077"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./assets/click.wav",
+      "SPDXID": "SPDXRef-File-25",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "963e2883bb8505b92840be7baf300eb140342abe89a41142136595db28f82666"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0c1072c45a99fadf5d3d285c6ca2a71d4e8e9860"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
       "fileName": "./assets/connecting.wav",
-      "SPDXID": "SPDXRef-File-22",
+      "SPDXID": "SPDXRef-File-26",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -469,7 +545,7 @@
     },
     {
       "fileName": "./assets/ended.wav",
-      "SPDXID": "SPDXRef-File-23",
+      "SPDXID": "SPDXRef-File-27",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -487,8 +563,46 @@
       "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
     },
     {
+      "fileName": "./assets/marimba.wav",
+      "SPDXID": "SPDXRef-File-28",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0beb40138728c4e2698ac67b8955525a98293fc7997812f1131bc0acefe40856"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "56f7d0f367ad16e111e924c26dd8ea021797a48b"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
+      "fileName": "./assets/pulse.wav",
+      "SPDXID": "SPDXRef-File-29",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a874d6bd6d60e22286c02d99cd6068e2c86b462b25f78ea982783faf531c0dd8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a8756857db0364f5bffbd61841477a96d675fd35"
+        }
+      ],
+      "licenseConcluded": "LicenseRef-RobonoSDK",
+      "licenseInfoInFiles": [
+        "LicenseRef-RobonoSDK"
+      ],
+      "copyrightText": "Copyright (c) 2026 Add to Loop LLC."
+    },
+    {
       "fileName": "./assets/ringing.wav",
-      "SPDXID": "SPDXRef-File-24",
+      "SPDXID": "SPDXRef-File-30",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -507,15 +621,15 @@
     },
     {
       "fileName": "./examples/CallingHost.tsx",
-      "SPDXID": "SPDXRef-File-25",
+      "SPDXID": "SPDXRef-File-31",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "1439e9a94d7f40d3de83acfd8c36050f4a9f286877ab33ca9dab657a50f3e312"
+          "checksumValue": "a11f4cc43aeff8974135c71c873d3c2467909b8db62e5848fc31933f8ca1d046"
         },
         {
           "algorithm": "SHA1",
-          "checksumValue": "a7c886b023dfd91ae04d1759997ea3da3d7ee13e"
+          "checksumValue": "d20bc8264bc37127e2ffa6ccb73f3c8bd831f620"
         }
       ],
       "licenseConcluded": "LicenseRef-RobonoSDK",
@@ -526,7 +640,7 @@
     },
     {
       "fileName": "./examples/ExpoCallingHost.tsx",
-      "SPDXID": "SPDXRef-File-26",
+      "SPDXID": "SPDXRef-File-32",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -545,7 +659,7 @@
     },
     {
       "fileName": "./android/build.gradle",
-      "SPDXID": "SPDXRef-File-27",
+      "SPDXID": "SPDXRef-File-33",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -564,7 +678,7 @@
     },
     {
       "fileName": "./android/src/main/AndroidManifest.xml",
-      "SPDXID": "SPDXRef-File-28",
+      "SPDXID": "SPDXRef-File-34",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -583,7 +697,7 @@
     },
     {
       "fileName": "./android/src/main/java/com/robono/calling/CallingPackage.java",
-      "SPDXID": "SPDXRef-File-29",
+      "SPDXID": "SPDXRef-File-35",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -602,7 +716,7 @@
     },
     {
       "fileName": "./android/src/main/java/com/robono/calling/CallingRuntime.java",
-      "SPDXID": "SPDXRef-File-30",
+      "SPDXID": "SPDXRef-File-36",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -621,7 +735,7 @@
     },
     {
       "fileName": "./android/src/main/java/com/robono/calling/CallingService.java",
-      "SPDXID": "SPDXRef-File-31",
+      "SPDXID": "SPDXRef-File-37",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -640,7 +754,7 @@
     },
     {
       "fileName": "./ios/RobonoCallingRuntime.m",
-      "SPDXID": "SPDXRef-File-32",
+      "SPDXID": "SPDXRef-File-38",
       "checksums": [
         {
           "algorithm": "SHA256",
@@ -828,6 +942,36 @@
       "spdxElementId": "SPDXRef-Package",
       "relationshipType": "CONTAINS",
       "relatedSpdxElement": "SPDXRef-File-32"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-33"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-34"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-35"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-36"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-37"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-File-38"
     }
   ],
   "hasExtractedLicensingInfos": [

@@ -1,7 +1,7 @@
 {
   "name": "@robono/calling-react-native",
-  "version": "0.1.0",
-  "description": "Optional calling screens, sounds and mobile audio adapters for Robono Bridge.",
+  "version": "0.2.0",
+  "description": "Optional branded calling screens, sounds and native audio adapters for Robono calling.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -32,7 +32,11 @@
       "default": "./dist/runtime.js"
     },
     "./app.plugin": "./app.plugin.cjs",
-    "./assets/*": "./assets/*"
+    "./assets/*": "./assets/*",
+    "./appearance": {
+      "types": "./dist/appearance.d.ts",
+      "default": "./dist/appearance.js"
+    }
   },
   "files": [
     "dist",

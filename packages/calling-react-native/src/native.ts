@@ -5,9 +5,11 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-aud
 import { randomUUID } from 'expo-crypto';
 import { createCallAudio } from './audio.mjs';
 import type { CallAudio, MediaAdapter, Phase } from './types.js';
+import {callingSounds,type CallingAppearance, type SoundEvent} from './appearance.js';
 import type { CallRuntime } from './runtime.js';
 
 export interface NativeAdapterOptions {
+  appearance?: CallingAppearance;
   /** Restore your app's ordinary playback/recording policy after each call. */
   restoreAudio(): Promise<void>;
   onError(error: Error): void;
@@ -21,6 +23,7 @@ let audioOwner: symbol | null = null;
 export function createNativeCallAdapters(options: NativeAdapterOptions): {media: MediaAdapter; audio: CallAudio} {
   if (Platform.OS !== 'ios' && Platform.OS !== 'android') throw Error('native_platform_required');
   let players: Record<string, AudioPlayer> | undefined;
+  const sounds={...callingSounds,...options.appearance?.sounds};
   const owner = Symbol('calling-audio');
   let current = '', session = '', speaker = false, disposed = false;
   let resumedFocus = false;
@@ -32,6 +35,11 @@ export function createNativeCallAdapters(options: NativeAdapterOptions): {media:
     ringing: createAudioPlayer(require('../assets/ringing.wav'), cueOptions),
     connecting: createAudioPlayer(require('../assets/connecting.wav'), cueOptions),
     ended: createAudioPlayer(require('../assets/ended.wav'), cueOptions),
+    bell: createAudioPlayer(require('../assets/bell.wav'), cueOptions),
+    marimba: createAudioPlayer(require('../assets/marimba.wav'), cueOptions),
+    pulse: createAudioPlayer(require('../assets/pulse.wav'), cueOptions),
+    click: createAudioPlayer(require('../assets/click.wav'), cueOptions),
+
   };
   const pause = () => {
     if (audioOwner === owner) InCallManager.stopRingtone();
@@ -44,6 +52,8 @@ export function createNativeCallAdapters(options: NativeAdapterOptions): {media:
   };
   const audio = createCallAudio({
     schedule: options.runtime?.schedule,
+    sound: (event:SoundEvent)=>sounds[event],
+    duration:(event:SoundEvent)=>['bell','marimba'].includes(sounds[event])?1850:700,
     onError: options.onError,
     pause,
     playing: () => !!current,
@@ -73,12 +83,12 @@ export function createNativeCallAdapters(options: NativeAdapterOptions): {media:
       }
       if (target === 'call') route();
     },
-    async play(kind: string) {
+    async play(kind: string, playback: {loop?:boolean;event?:string}={}) {
       pause(); current = kind;
-      if (kind === 'ringing' && options.ringtone !== 'robono') {
+      if (playback.event==='incoming' && !options.appearance && kind === 'ringing' && options.ringtone !== 'robono') {
         InCallManager.startRingtone('_DEFAULT_', [0, 350, 900], 'ambient', 0); return;
       }
-      const player = load()[kind]; player.loop = kind !== 'ended';
+      const player = load()[kind]; player.loop = !!playback.loop;
       // Fresh local assets start at zero. Seeking before native decoding has
       // loaded can reject; play itself queues safely while the asset loads.
       // Android's isLoaded becomes false at STATE_ENDED, even though the file
@@ -98,7 +108,9 @@ export function createNativeCallAdapters(options: NativeAdapterOptions): {media:
     },
     dispose() { disposed = true; pause(); if (players) Object.values(players).forEach(player => player.remove()); players = undefined; },
   });
+  (audio as CallAudio).robonoAdapter=true;
   const media: MediaAdapter = {
+    robonoAdapter:true,
     createId: randomUUID,
     createPeerConnection: config => new RTCPeerConnection(config as ConstructorParameters<typeof RTCPeerConnection>[0]) as unknown as globalThis.RTCPeerConnection,
     createRemoteStream: track => new MediaStream([track as unknown as import('react-native-webrtc').MediaStreamTrack]) as unknown as globalThis.MediaStream,

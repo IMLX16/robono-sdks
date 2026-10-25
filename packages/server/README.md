@@ -11,10 +11,10 @@ Robono's own app and third-party connected apps appear as endpoints in the same 
 ## Install
 
 ```bash
-npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.1.0/robono-server-0.10.0.tgz
+npm install https://github.com/IMLX16/robono-sdks/releases/download/calling-v0.2.0/robono-server-0.12.0.tgz
 ```
 
-Version 0.10.0 is distributed through the [calling release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.1.0), with checksums and source.
+Version 0.12.0 is distributed through the [calling release](https://github.com/IMLX16/robono-sdks/releases/tag/calling-v0.2.0), with checksums and source.
 
 The package is ESM-only, supports Node.js 18+ and Deno 2.x through npm compatibility, and includes TypeScript declarations and `SBOM.spdx.json`.
 
@@ -226,6 +226,8 @@ See the complete build flow, optional language and privacy operations, platform 
 
 `RobonoCallingBackend` is separate from the messaging client and does not install calling screens. Copy the admission and service addresses from **Calling → Calling access** in your project. Keep the network API key on your server; it needs `calling:connect` scope.
 
+Choose **Standalone calling** when creating an integration to offer calls only between your own users. This does not list your app on the Bridge or require your users to create Robono accounts. Bridge integrations can offer both same-app and cross-app calls.
+
 ```ts
 import { RobonoCallingBackend } from '@robono/server';
 const calling = new RobonoCallingBackend({
@@ -237,6 +239,15 @@ const calling = new RobonoCallingBackend({
 const session = await calling.createSession(authenticatedUser.externalId);
 // Return session only to this user, over HTTPS, with Cache-Control: no-store.
 ```
+
+If you use the optional Robono screens, configure their appearance in the website's **Calling** workspace. Fetch the saved design on your backend and include it with the session:
+
+```ts
+const design = await calling.appearance();
+return { ...session, appearance: design.appearance, appearanceRevision: design.revision };
+```
+
+Apps with their own screens can omit this step. The design contains presentation data only. Refresh it between calls; keep one revision during an active call.
 
 For two existing friends in your own app, synchronize their calling permission from your backend:
 

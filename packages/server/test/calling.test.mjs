@@ -22,3 +22,8 @@ test('rate limits surface their delay without fast retries and reject malformed 
  assert.throws(()=>backend.setRelationship({externalUserIds:['alex','alex'],allowed:true,revision:1}));assert.equal(count,1);
  for(const admissionUrl of ['http://example.com','https://user:secret@example.com','https://example.com?token=secret'])assert.throws(()=>new RobonoCallingBackend({...options,admissionUrl}));
 });
+test('appearance uses only backend authentication and returns the saved revision',async()=>{
+ const design={appearance:{schemaVersion:1,appName:'Cedar'},revision:4};let count=0;
+ const backend=new RobonoCallingBackend({...options,fetch:async(url,init)=>{count++;assert.equal(url,options.admissionUrl);assert.equal(init.headers.authorization,'Bearer server-secret');assert.deepEqual(JSON.parse(init.body),{operation:'appearance'});return Response.json(design);}});
+ assert.deepEqual(await backend.appearance(),design);assert.equal(count,1);
+});

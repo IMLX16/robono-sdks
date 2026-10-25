@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.0
+
+- `RobonoCallingBackend.appearance()` retrieves the integration’s versioned screen and sound configuration.
+
 ## 0.11.0
 
 - Add backend calling sessions, optional incoming-call webhooks, and revision-protected same-network calling permissions through `RobonoCallingBackend`.

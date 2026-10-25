@@ -1,6 +1,6 @@
 # Robono mobile calling
 
-Optional React Native screens, sounds and audio adapters for one-to-one Robono Bridge calls. Each person stays in the app they use. This package has no network-specific accounts, branding or navigation.
+Optional React Native screens, sounds and audio adapters for one-to-one voice calls within your app or across Robono Bridge. Each person stays in the app they use. Supply your own accounts and navigation, and choose your branding in the Calling workspace.
 
 Choose the pieces you want:
 
@@ -113,3 +113,22 @@ The UI does not impose a network topology. The engine accepts the authorized Bri
 Use the developer workspace to verify the Bridge connection, then test the chosen interface and native integration on physical iPhone and Android devices. Check two-way speech, speaker before and after connection, mute, Bluetooth, interruptions, cancellation during permission prompts, notification taps on a cold start, account switching and background operation. Verify existing messages, voice recordings and calls still work.
 
 [Calling guide](https://robono.com/docs#calling) · [Calling API](https://robono.com/api-reference?spec=calling) · [Support](https://robono.com/contact?topic=sdk)
+
+## Saved branding and sounds
+
+Screens are optional for standalone calling and Bridge integrations. In the website's Calling workspace, choose an integration, set its name, logo, colors and text, preview screens, audition sounds, and save. The backend helper `appearance()` returns `{appearance, revision}`; deliver these alongside the authenticated user's short-lived calling session as `appearance` and `appearanceRevision`.
+
+```tsx
+const appearance = validateCallingAppearance(session.appearance);
+const adapters = createNativeCallAdapters({appearance, runtime, restoreAudio, onError});
+const controller = createCallingController({request, ...adapters,
+  appearanceRevision: session.appearanceRevision});
+// Mount once at your application root:
+<CallingOverlay controller={controller} appearance={appearance} />
+```
+
+The included CallingHost accepts these optional session fields. Use the same validated configuration for the screen and native adapter. Keep it stable during a call. A custom screen can use the headless engine without importing this package.
+
+Incoming, outgoing and connecting cues repeat. Other selected cues play once; defaults keep decline and unanswered calls silent. Local audio interruptions always silence cues. The host app's notification configuration and OS govern background notification sounds; changing an in-app sound does not override that configuration. Supplied WAV assets are available from `/assets/*` for your notification integration.
+
+The controller reports platform, package versions, configuration revision and optional components through the authenticated calling session. These client-declared inventory records contain no contact or message data and do not set charges. Service usage counts a same-app call once, separates cross-app directions, and records held and connected time independently.

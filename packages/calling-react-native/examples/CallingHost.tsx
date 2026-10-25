@@ -3,14 +3,14 @@ import { AppState, Modal, Pressable, StatusBar, Text, View } from 'react-native'
 import { setAudioModeAsync } from 'expo-audio';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createHttpTransport } from '@robono/calling';
-import { CallingScreen, createCallingController, type CallingController, type CallingState, type Contact } from '@robono/calling-react-native';
+import { CallingScreen, callingInk, createCallingController, validateCallingAppearance, type CallingAppearance, type CallingController, type CallingState, type Contact } from '@robono/calling-react-native';
 import { createNativeCallAdapters } from '@robono/calling-react-native/native';
 import { createNativeCallRuntime, type CallRuntime } from '@robono/calling-react-native/runtime';
 
 export interface CallingHostProps {
   accountId: string;
   /** Your authenticated backend returns a session for THIS signed-in account. */
-  getSession(): Promise<{serviceUrl: string; token: string; expiresAt: number}>;
+  getSession(): Promise<{serviceUrl: string; token: string; expiresAt: number; appearance?:unknown; appearanceRevision?:number}>;
   /** Supply the HTTPS service origin configured for your integration. */
   serviceOrigin: string;
   connectionId: string;
@@ -35,6 +35,7 @@ export function CallingHost(props: CallingHostProps) {
 }
 function AccountCallingHost(props: CallingHostProps & {cleanup: React.MutableRefObject<Promise<void>>}) {
   const [controller, setController] = useState<CallingController | null>(null);
+  const [appearance,setAppearance] = useState<CallingAppearance|undefined>();
   const [available, setAvailable] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -78,24 +79,27 @@ function AccountCallingHost(props: CallingHostProps & {cleanup: React.MutableRef
         const service = new URL(session.serviceUrl);
         if (service.protocol !== 'https:' || service.origin !== props.serviceOrigin || service.username || service.password || service.search || service.hash) throw Error('Unexpected calling service');
         if (!session.token || !Number.isFinite(session.expiresAt) || session.expiresAt - Date.now() < 60000) throw Error('Calling session expired');
+        const design=session.appearance===undefined?undefined:validateCallingAppearance(session.appearance);
+        setAppearance(design);
         runtime = props.createRuntime?.() || createNativeCallRuntime({
           notificationTitle:'Voice call', notificationText:'Call in progress', channelName:'Ongoing calls', endLabel:'End call',
           onError:() => { if (!cancelled) setError('The call was interrupted.'); },
         });
         const adapters = createNativeCallAdapters({
-          runtime,
+          runtime, appearance:design,
           ringtone:'robono', onError:() => { if (!cancelled) setError('Call audio is unavailable.'); },
           restoreAudio:() => setAudioModeAsync({allowsRecording:false,playsInSilentMode:true,
             interruptionMode:'duckOthers',shouldPlayInBackground:false,shouldRouteThroughEarpiece:false}),
         });
         instance = createCallingController({request:createHttpTransport({baseUrl:session.serviceUrl,token:session.token}),
-          ...adapters, resolveContact:props.resolveContact,
+          ...adapters, appearanceRevision:session.appearanceRevision, resolveContact:props.resolveContact,
           onError:() => { if (!cancelled) setError('The call could not connect. Please try again.'); }});
         instance.setForeground(AppState.currentState === 'active');
         runtime.attach(instance);
         unsubscribe = instance.subscribe(renewWhenIdle);
         setController(instance);
         await instance.listen();
+        instance.reportComponents?.(['screens']);
         if (cancelled || renewing) return;
         setBooting(false);
         // Renew only while idle. A new session cannot take over an active call.
@@ -191,7 +195,7 @@ function AccountCallingHost(props: CallingHostProps & {cleanup: React.MutableRef
       <Text>Call {props.contact.name}</Text>
     </Pressable>
     <Modal visible={visible} presentationStyle="fullScreen" animationType="none" onRequestClose={close}>
-      {visible && <SafeAreaProvider><StatusBar barStyle="light-content"/><CallingScreen state={screen}
+      {visible && <SafeAreaProvider><StatusBar barStyle={callingInk(appearance?.theme.background||'#080808')==='#000000'?'dark-content':'light-content'}/><CallingScreen state={screen} appearance={appearance}
         onResume={() => { void controller?.resume().catch(() => {}); }}
         onAnswer={() => { void controller?.answer().catch(() => {}); }} onHangUp={close} onClose={close}
         onMute={value => controller?.mute(value)} onSpeaker={value => controller?.setSpeaker(value)}/></SafeAreaProvider>}

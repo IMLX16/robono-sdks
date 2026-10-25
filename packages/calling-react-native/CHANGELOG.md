@@ -1,5 +1,11 @@
 # Changes
 
+## 0.2.0
+
+- Saved branding, labels and event sounds shared with the website preview.
+- Optional component inventory; standalone and Bridge calling use the same interface.
+- Existing audio-session ownership and interruption behavior retained.
+
 ## 0.1.0
 
 - Optional incoming, outgoing, connecting and connected screens with theme and label overrides.

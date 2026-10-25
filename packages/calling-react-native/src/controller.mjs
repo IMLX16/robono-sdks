@@ -12,11 +12,11 @@ export function createController({ createClient, request, media, audio, resolveC
   let state = { phase: 'idle', call: null, contact: null, speaker: false, muted: false, error: null, canMute: false, canSpeaker: false, connectedAt: null };
   const publish = patch => { state = { ...state, ...patch }; for (const listener of listeners) listener(); };
   const report = error => { if (!disposed) { publish({ error: error.message || 'call_failed' }); onError(error); } };
-  const sound = (phase, tone = false) => {
-    const key = `${phase}:${foreground}:${state.speaker}`;
+  const sound = (phase, tone = false, cue = undefined) => {
+    const key = `${phase}:${foreground}:${state.speaker}:${!!state.localHeld}`;
     if (key === audioKey && !tone) return;
     audioKey = key;
-    Promise.resolve(audio.update({ phase, speaker: state.speaker, foreground, endTone: tone })).catch(report);
+    Promise.resolve(audio.update({ phase, speaker: state.speaker, foreground, endTone: tone, cue, localHeld:state.localHeld })).catch(report);
   };
   const update = next => {
     if (disposed) return;
@@ -35,6 +35,8 @@ export function createController({ createClient, request, media, audio, resolveC
     if (phase === 'connected') connectedId = call.id;
     const contact = active ? resolveContact(call.connectionId) || startingContact : startingContact;
     const newIncoming = active && call.role === 'callee' && state.call?.id !== call.id;
+    const previousPhase = state.phase;
+    const cue = phase==='connected'&&previousPhase==='held'?'resumed':phase==='idle'&&call?.state==='ended'&&state.call?.id===call.id?(call.reason==='declined'?'declined':['no_answer','cancelled'].includes(call.reason)?'unanswered':undefined):undefined;
     publish({ phase, call: active && !terminalError ? call : null, contact, muted: next.muted,
       ...(newIncoming ? {speaker: false} : {}),
       error: next.error, localHeld: !!next.localHeld,
@@ -42,7 +44,7 @@ export function createController({ createClient, request, media, audio, resolveC
       connectedAt: ['connected', 'held'].includes(phase) ? call.connectedAt ?? null : null,
       canMute: phase === 'connected' && !next.preparing,
       canSpeaker: ['outgoing', 'connecting', 'connected'].includes(phase) });
-    sound(phase, endTone);
+    sound(phase, endTone, cue);
     if (phase === 'idle' && !action) startingContact = null;
   };
   const client = createClient({ request, ...media, forceRelay, onChange: update });
@@ -77,9 +79,10 @@ export function createController({ createClient, request, media, audio, resolveC
     },
     async hangUp({playEndTone = true} = {}) {
       ++epoch; action = null; opening = null; clearTimeout(openingTimer);
+      const cue = state.phase==='incoming'?'declined':undefined;
       const tone = connectedId !== null && !state.localHeld; connectedId = null;
       publish({ phase: 'idle', call: null, canSpeaker: false, canMute: false, connectedAt: null });
-      sound('idle', tone && playEndTone);
+      sound('idle', tone && playEndTone, playEndTone?cue:undefined);
       await client.hangUp();
     },
     async interrupt() {

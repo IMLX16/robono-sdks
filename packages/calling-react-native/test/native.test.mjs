@@ -29,6 +29,7 @@ async function native(platform, {permission='granted', capture, runtime=false, f
   };
   for(const [name,body] of Object.entries(modules)) source=source.replace(`from '${name}'`,`from '${url(body)}'`);
   source=source.replace("'./audio.mjs'",JSON.stringify(new URL('../dist/audio.mjs',import.meta.url).href));
+  source=source.replace("'./appearance.js'",JSON.stringify(new URL('../dist/appearance.js',import.meta.url).href));
   // Metro resolves WAV assets to resource IDs. Fake only that platform boundary.
   source='const require=()=>1;\n'+source;
   const {createNativeCallAdapters}=await import(url(source));

@@ -8,17 +8,20 @@ export interface CallingState {
   localHeld?: boolean;
 }
 export interface CallAudio {
-  update(state: { phase: Phase; speaker: boolean; foreground: boolean; endTone: boolean }): Promise<void> | void;
+  robonoAdapter?: boolean;
+  update(state: { phase: Phase; speaker: boolean; foreground: boolean; endTone: boolean; cue?: string; localHeld?: boolean }): Promise<void> | void;
   dispose(): Promise<void> | void;
   resume?(): Promise<void>;
 }
-export type MediaAdapter = Required<Pick<ConstructorParameters<typeof RobonoCallingClient>[0], 'getUserMedia' | 'createPeerConnection' | 'createRemoteStream' | 'createId'>>;
+export type MediaAdapter = Required<Pick<ConstructorParameters<typeof RobonoCallingClient>[0], 'getUserMedia' | 'createPeerConnection' | 'createRemoteStream' | 'createId'>> & {robonoAdapter?: boolean};
 export interface CallingOptions {
+  appearanceRevision?: number;
   request: Request; media: MediaAdapter; audio: CallAudio; forceRelay?: boolean;
   resolveContact?: (connectionId: string) => Contact | null;
   onError?: (error: Error) => void;
 }
 export interface CallingController {
+  reportComponents?(components:string[]): void;
   readonly client: RobonoCallingClient;
   getSnapshot(): CallingState;
   subscribe(listener: () => void): () => void;

@@ -1602,7 +1602,7 @@
       ],
       "post": {
         "operationId": "calling_admission",
-        "summary": "Backend admission, same-network permissions and incoming-call notifications",
+        "summary": "Backend admission, same-app permissions, appearance and incoming-call notifications",
         "description": "Authenticate users in your own backend before requesting admission. The authenticated network owns both user IDs for a relationship; clients cannot register a pair in another network. Calling access is enabled separately in the workspace. For relationship updates, preserve one increasing revision per user pair and synchronize blocks, removal and account deletion.",
         "security": [
           {
@@ -1668,6 +1668,20 @@
                         "type": "boolean"
                       }
                     }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "operation"
+                    ],
+                    "properties": {
+                      "operation": {
+                        "type": "string",
+                        "enum": [
+                          "appearance"
+                        ]
+                      }
+                    }
                   }
                 ]
               }
@@ -1710,6 +1724,23 @@
                     },
                     {
                       "$ref": "#/components/schemas/CallingNotificationSettings"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "revision",
+                        "appearance"
+                      ],
+                      "properties": {
+                        "revision": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "appearance": {
+                          "type": "object",
+                          "description": "Validated version 1 CallingAppearance: appName, logoUrl, theme, labels and per-event sounds. See the calling appearance guide."
+                        }
+                      }
                     }
                   ]
                 }
@@ -1800,6 +1831,74 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/client-info": {
+      "post": {
+        "operationId": "calling_client_info",
+        "summary": "Report client-declared SDK components",
+        "description": "Optional inventory, never a billing meter. Send after session setup and when mounting optional screens; do not send per poll. No user names or content.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "platform",
+                  "engineVersion",
+                  "components"
+                ],
+                "properties": {
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "ios",
+                      "android",
+                      "web",
+                      "other"
+                    ]
+                  },
+                  "engineVersion": {
+                    "type": "string"
+                  },
+                  "mobileVersion": {
+                    "type": "string"
+                  },
+                  "appearanceRevision": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "components": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "controller",
+                        "screens",
+                        "native-audio",
+                        "native-media"
+                      ]
+                    },
+                    "uniqueItems": true,
+                    "maxItems": 4
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventory recorded"
+          },
+          "401": {
+            "description": "Session expired"
+          },
+          "429": {
+            "description": "Rate limited. Retry with backoff."
           }
         }
       }

@@ -70,6 +70,10 @@ export class RobonoCallingBackend {
       input.externalUserIds[0]===input.externalUserIds[1]||typeof input.allowed!=='boolean'||!Number.isSafeInteger(input.revision)||input.revision<1) throw new Error('Invalid calling relationship.');
     return this.post(this.admissionUrl,{...input,operation:'relationship'});
   }
+  /** Presentation data only. Deliver this alongside the short-lived session to your app. */
+  appearance(): Promise<{appearance:Record<string,unknown>;revision:number}> {
+    return this.post(this.admissionUrl,{operation:'appearance'});
+  }
   notifications(enabled?: boolean): Promise<{enabled:boolean;events:string[]}> {
     return this.post(this.admissionUrl,{operation:'notifications',...(enabled===undefined?{}:{enabled})});
   }
